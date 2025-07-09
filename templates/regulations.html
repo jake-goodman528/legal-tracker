@@ -21,15 +21,6 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <!-- Quick test links -->
-                    <div class="mb-3">
-                        <small class="text-muted">Quick filters: 
-                            <a href="{{ url_for('regulations', jurisdiction='National') }}" class="text-info">National</a> | 
-                            <a href="{{ url_for('regulations', jurisdiction='State') }}" class="text-info">State</a> | 
-                            <a href="{{ url_for('regulations', jurisdiction='Local') }}" class="text-info">Local</a> | 
-                            <a href="{{ url_for('regulations') }}" class="text-info">All</a>
-                        </small>
-                    </div>
                     <form method="GET" action="{{ url_for('regulations') }}" class="row g-3" id="filterForm">
                         <div class="col-md-3">
                             <label for="jurisdiction" class="form-label">Jurisdiction Level</label>
@@ -146,33 +137,6 @@
 </div>
 {% endblock %}
 
-{% block scripts %}
-<script>
-function submitFilter() {
-    const form = document.getElementById('filterForm');
-    const jurisdiction = document.getElementById('jurisdiction').value;
-    const location = document.getElementById('location').value;
-    const search = document.getElementById('search').value;
-    
-    // Build the URL with parameters
-    let url = '/regulations?';
-    const params = [];
-    
-    if (jurisdiction) {
-        params.push('jurisdiction=' + encodeURIComponent(jurisdiction));
-    }
-    if (location) {
-        params.push('location=' + encodeURIComponent(location));
-    }
-    if (search) {
-        params.push('search=' + encodeURIComponent(search));
-    }
-    
-    url += params.join('&');
-    window.location.href = url;
-    return false; // Prevent default form submission
-}
-</script>
-{% endblock %}
+
 
 

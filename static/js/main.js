@@ -79,17 +79,41 @@ function initializeSearch() {
     const jurisdictionSelect = document.getElementById('jurisdiction');
     const locationSelect = document.getElementById('location');
     
+    // Make submitFilter function globally available
+    window.submitFilter = function() {
+        const jurisdiction = document.getElementById('jurisdiction').value;
+        const location = document.getElementById('location').value;
+        const search = document.getElementById('search').value;
+        
+        // Build the URL with parameters
+        let url = '/regulations?';
+        const params = [];
+        
+        if (jurisdiction) {
+            params.push('jurisdiction=' + encodeURIComponent(jurisdiction));
+        }
+        if (location) {
+            params.push('location=' + encodeURIComponent(location));
+        }
+        if (search) {
+            params.push('search=' + encodeURIComponent(search));
+        }
+        
+        url += params.join('&');
+        window.location.href = url;
+    };
+    
     if (jurisdictionSelect) {
         jurisdictionSelect.addEventListener('change', function() {
-            // Optional: auto-submit on dropdown change
-            // this.closest('form').submit();
+            // Auto-filter when jurisdiction changes
+            submitFilter();
         });
     }
     
     if (locationSelect) {
         locationSelect.addEventListener('change', function() {
-            // Optional: auto-submit on dropdown change
-            // this.closest('form').submit();
+            // Auto-filter when location changes
+            submitFilter();
         });
     }
 }
