@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}Industry Updates - Short-Term Rental Compliance{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-newspaper me-2"></i>
+                Industry Updates
+            </h1>
+            <p class="lead mb-4">
+                Stay informed about regulatory changes, upcoming modifications, and proposed legislation 
+                affecting short-term rental operations.
+            </p>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="GET" action="{{ url_for('updates') }}" class="row g-3">
+                        <div class="col-md-4">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-select" id="status" name="status">
+                                <option value="">All Statuses</option>
+                                {% for status in statuses %}
+                                <option value="{{ status }}" {% if current_status == status %}selected{% endif %}>
+                                    {{ status }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="jurisdiction" class="form-label">Jurisdiction</label>
+                            <select class="form-select" id="jurisdiction" name="jurisdiction">
+                                <option value="">All Jurisdictions</option>
+                                {% for jurisdiction in jurisdictions %}
+                                <option value="{{ jurisdiction }}" {% if current_jurisdiction == jurisdiction %}selected{% endif %}>
+                                    {{ jurisdiction }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-filter"></i> Filter Updates
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Updates Timeline -->
+    <div class="row">
+        <div class="col-12">
+            {% if updates %}
+            <div class="timeline">
+                {% for update in updates %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-9">
+                                <div class="d-flex align-items-center mb-2">
+                                    <h5 class="card-title mb-0 me-3">{{ update.title }}</h5>
+                                    <span class="badge 
+                                        {% if update.status == 'Recent' %}bg-success
+                                        {% elif update.status == 'Upcoming' %}bg-warning
+                                        {% else %}bg-info{% endif %} me-2">
+                                        {{ update.status }}
+                                    </span>
+                                </div>
+                                <p class="card-text">{{ update.description }}</p>
+                                <div class="text-muted small">
+                                    <i class="fas fa-map-marker-alt me-1"></i>
+                                    Affects: <strong>{{ update.jurisdiction_affected }}</strong>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-md-end">
+                                <div class="update-date">
+                                    <i class="fas fa-calendar-alt me-1"></i>
+                                    {{ update.update_date.strftime('%B %d, %Y') }}
+                                </div>
+                                {% if update.status == 'Recent' %}
+                                <small class="text-success">
+                                    <i class="fas fa-check-circle me-1"></i>
+                                    Effective
+                                </small>
+                                {% elif update.status == 'Upcoming' %}
+                                <small class="text-warning">
+                                    <i class="fas fa-clock me-1"></i>
+                                    Coming Soon
+                                </small>
+                                {% else %}
+                                <small class="text-info">
+                                    <i class="fas fa-lightbulb me-1"></i>
+                                    Under Review
+                                </small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-newspaper fa-3x text-muted mb-3"></i>
+                <h4>No updates found</h4>
+                <p class="text-muted">Try adjusting your filters to see more updates.</p>
+                <a href="{{ url_for('updates') }}" class="btn btn-outline-primary">Clear Filters</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Status Legend
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <span class="badge bg-success me-2">Recent</span>
+                            Changes that have already taken effect
+                        </div>
+                        <div class="col-md-4">
+                            <span class="badge bg-warning me-2">Upcoming</span>
+                            Changes scheduled to take effect soon
+                        </div>
+                        <div class="col-md-4">
+                            <span class="badge bg-info me-2">Proposed</span>
+                            Changes under consideration or review
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Short-Term Rental Compliance{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-tachometer-alt me-2"></i>
+                Admin Dashboard
+            </h1>
+            <p class="lead mb-4">Manage regulations, updates, and system settings.</p>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-book fa-2x text-primary mb-2"></i>
+                    <h3 class="card-title">{{ stats.total_regulations }}</h3>
+                    <p class="card-text">Total Regulations</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-newspaper fa-2x text-info mb-2"></i>
+                    <h3 class="card-title">{{ stats.total_updates }}</h3>
+                    <p class="card-text">Total Updates</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                    <h3 class="card-title">{{ stats.recent_updates }}</h3>
+                    <p class="card-text">Recent Updates</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                    <h3 class="card-title">{{ stats.upcoming_updates }}</h3>
+                    <p class="card-text">Upcoming Updates</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-book me-2"></i>
+                        Regulation Management
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Add, edit, and manage regulatory requirements across all jurisdictions.</p>
+                    <div class="d-flex gap-2">
+                        <a href="{{ url_for('admin_manage_regulations') }}" class="btn btn-primary">
+                            <i class="fas fa-list me-1"></i> View All
+                        </a>
+                        <a href="{{ url_for('admin_new_regulation') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-plus me-1"></i> Add New
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-newspaper me-2"></i>
+                        Update Management
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Track and publish industry updates, regulatory changes, and news.</p>
+                    <div class="d-flex gap-2">
+                        <a href="{{ url_for('admin_manage_updates') }}" class="btn btn-info">
+                            <i class="fas fa-list me-1"></i> View All
+                        </a>
+                        <a href="{{ url_for('admin_new_update') }}" class="btn btn-outline-info">
+                            <i class="fas fa-plus me-1"></i> Add New
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Status Breakdown -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>
+                        Update Status Breakdown
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-success me-2">{{ stats.recent_updates }}</span>
+                                <span>Recent Updates</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-warning me-2">{{ stats.upcoming_updates }}</span>
+                                <span>Upcoming Updates</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-info me-2">{{ stats.proposed_updates }}</span>
+                                <span>Proposed Updates</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

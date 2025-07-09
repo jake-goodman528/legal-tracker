@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Short-Term Rental Compliance{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="display-4 fw-bold mb-4">Short-Term Rental Legal & Compliance Toolkit</h1>
+                <p class="lead mb-4">
+                    Stay compliant with federal, state, and local regulations governing short-term rentals.
+                    Track regulatory requirements, monitor industry updates, and ensure your properties meet all legal obligations.
+                </p>
+                <div class="d-flex gap-3">
+                    <a href="{{ url_for('regulations') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-book me-2"></i>View Regulations
+                    </a>
+                    <a href="{{ url_for('updates') }}" class="btn btn-outline-secondary btn-lg">
+                        <i class="fas fa-newspaper me-2"></i>Industry Updates
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-shield-alt fa-4x text-primary mb-3"></i>
+                        <h5>Comprehensive Coverage</h5>
+                        <p class="card-text">
+                            Federal, state, and local regulations all in one place for Florida's major markets.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-map-marker-alt fa-2x text-info me-3"></i>
+                        <h5 class="card-title mb-0">Multi-Jurisdiction Coverage</h5>
+                    </div>
+                    <p class="card-text">
+                        Track regulations across national, state, and local levels for Tampa, St. Petersburg, 
+                        Clearwater, Sarasota, and statewide Florida requirements.
+                    </p>
+                    <a href="{{ url_for('regulations') }}" class="btn btn-outline-info">Explore Regulations</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-bell fa-2x text-warning me-3"></i>
+                        <h5 class="card-title mb-0">Real-Time Updates</h5>
+                    </div>
+                    <p class="card-text">
+                        Stay informed about recent regulatory changes, upcoming modifications, 
+                        and proposed legislation that may affect your operations.
+                    </p>
+                    <a href="{{ url_for('updates') }}" class="btn btn-outline-warning">View Updates</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-search fa-2x text-success me-3"></i>
+                        <h5 class="card-title mb-0">Advanced Filtering</h5>
+                    </div>
+                    <p class="card-text">
+                        Quickly find relevant regulations using our powerful search and filtering system.
+                        Filter by jurisdiction, location, or search specific requirements.
+                    </p>
+                    <a href="{{ url_for('regulations') }}?jurisdiction=Local" class="btn btn-outline-success">Search Now</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto text-center">
+            <h2 class="mb-4">Key Compliance Areas</h2>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-home fa-lg text-primary me-3"></i>
+                        <div>
+                            <strong>Zoning & Permits</strong>
+                            <p class="mb-0 small text-muted">Business licenses, zoning compliance, permits</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-calculator fa-lg text-primary me-3"></i>
+                        <div>
+                            <strong>Tax Obligations</strong>
+                            <p class="mb-0 small text-muted">Sales tax, tourist development tax, reporting</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-universal-access fa-lg text-primary me-3"></i>
+                        <div>
+                            <strong>Accessibility</strong>
+                            <p class="mb-0 small text-muted">ADA compliance, accessibility standards</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-handshake fa-lg text-primary me-3"></i>
+                        <div>
+                            <strong>Fair Housing</strong>
+                            <p class="mb-0 small text-muted">Non-discrimination, equal access policies</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

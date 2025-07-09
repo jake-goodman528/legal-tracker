@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Regulations - Short-Term Rental Compliance{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-book me-2"></i>
+                Regulatory Requirements
+            </h1>
+            <p class="lead mb-4">
+                Comprehensive database of short-term rental regulations across federal, state, and local jurisdictions.
+            </p>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="GET" action="{{ url_for('regulations') }}" class="row g-3">
+                        <div class="col-md-3">
+                            <label for="jurisdiction" class="form-label">Jurisdiction Level</label>
+                            <select class="form-select" id="jurisdiction" name="jurisdiction">
+                                <option value="">All Levels</option>
+                                {% for jurisdiction in jurisdictions %}
+                                <option value="{{ jurisdiction }}" {% if current_jurisdiction == jurisdiction %}selected{% endif %}>
+                                    {{ jurisdiction }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="location" class="form-label">Location</label>
+                            <select class="form-select" id="location" name="location">
+                                <option value="">All Locations</option>
+                                {% for location in locations %}
+                                <option value="{{ location }}" {% if current_location == location %}selected{% endif %}>
+                                    {{ location }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="search" class="form-label">Search</label>
+                            <input type="text" class="form-control" id="search" name="search" 
+                                   placeholder="Search regulations..." value="{{ current_search }}">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search"></i> Filter
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results -->
+    <div class="row">
+        <div class="col-12">
+            {% if regulations %}
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>
+                        Regulations ({{ regulations|length }} found)
+                    </h5>
+                    <small class="text-muted">Click on any regulation to view full details</small>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Level</th>
+                                    <th>Location</th>
+                                    <th>Regulation Title</th>
+                                    <th>Last Updated</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for regulation in regulations %}
+                                <tr>
+                                    <td>
+                                        <span class="badge 
+                                            {% if regulation.jurisdiction_level == 'National' %}bg-danger
+                                            {% elif regulation.jurisdiction_level == 'State' %}bg-warning
+                                            {% else %}bg-info{% endif %}">
+                                            {{ regulation.jurisdiction_level }}
+                                        </span>
+                                    </td>
+                                    <td>{{ regulation.location }}</td>
+                                    <td>
+                                        <strong>{{ regulation.title }}</strong>
+                                    </td>
+                                    <td>{{ regulation.last_updated.strftime('%B %d, %Y') }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" 
+                                                onclick="showRegulationDetails({{ regulation.id }})">
+                                            <i class="fas fa-eye"></i> View
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr id="details-{{ regulation.id }}" class="regulation-details d-none">
+                                    <td colspan="5">
+                                        <div class="p-3 bg-dark">
+                                            <h6><i class="fas fa-info-circle me-2"></i>Key Requirements:</h6>
+                                            <p class="mb-0">{{ regulation.key_requirements }}</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h4>No regulations found</h4>
+                <p class="text-muted">Try adjusting your search criteria or filters.</p>
+                <a href="{{ url_for('regulations') }}" class="btn btn-outline-primary">Clear Filters</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

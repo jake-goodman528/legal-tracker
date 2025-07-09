@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Regulations - Admin{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>
+                    <i class="fas fa-book me-2"></i>
+                    Manage Regulations
+                </h1>
+                <a href="{{ url_for('admin_new_regulation') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i> Add New Regulation
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% if regulations.items %}
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">All Regulations</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Level</th>
+                            <th>Location</th>
+                            <th>Title</th>
+                            <th>Last Updated</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for regulation in regulations.items %}
+                        <tr>
+                            <td>
+                                <span class="badge 
+                                    {% if regulation.jurisdiction_level == 'National' %}bg-danger
+                                    {% elif regulation.jurisdiction_level == 'State' %}bg-warning
+                                    {% else %}bg-info{% endif %}">
+                                    {{ regulation.jurisdiction_level }}
+                                </span>
+                            </td>
+                            <td>{{ regulation.location }}</td>
+                            <td>
+                                <strong>{{ regulation.title }}</strong>
+                                <br>
+                                <small class="text-muted">
+                                    {{ regulation.key_requirements[:100] }}{% if regulation.key_requirements|length > 100 %}...{% endif %}
+                                </small>
+                            </td>
+                            <td>{{ regulation.last_updated.strftime('%Y-%m-%d') }}</td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{ url_for('admin_edit_regulation', id=regulation.id) }}" 
+                                       class="btn btn-outline-primary">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-outline-danger" 
+                                            onclick="deleteRegulation({{ regulation.id }}, '{{ regulation.title }}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Pagination -->
+        {% if regulations.pages > 1 %}
+        <div class="card-footer">
+            <nav aria-label="Regulations pagination">
+                <ul class="pagination justify-content-center mb-0">
+                    {% if regulations.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin_manage_regulations', page=regulations.prev_num) }}">Previous</a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for page_num in regulations.iter_pages() %}
+                        {% if page_num %}
+                            {% if page_num != regulations.page %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('admin_manage_regulations', page=page_num) }}">{{ page_num }}</a>
+                            </li>
+                            {% else %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                            {% endif %}
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if regulations.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin_manage_regulations', page=regulations.next_num) }}">Next</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-book fa-3x text-muted mb-3"></i>
+        <h4>No regulations found</h4>
+        <p class="text-muted">Start by adding your first regulation.</p>
+        <a href="{{ url_for('admin_new_regulation') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i> Add First Regulation
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this regulation?</p>
+                <p><strong id="deleteRegulationTitle"></strong></p>
+                <p class="text-danger">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="POST" class="d-inline">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function deleteRegulation(id, title) {
+    document.getElementById('deleteRegulationTitle').textContent = title;
+    document.getElementById('deleteForm').action = `/admin/regulations/${id}/delete`;
+    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+}
+</script>
+{% endblock %}
