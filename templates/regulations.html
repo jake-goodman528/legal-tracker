@@ -21,7 +21,16 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <form method="GET" action="{{ url_for('regulations') }}" class="row g-3" onsubmit="debugForm(this)">
+                    <!-- Quick test links -->
+                    <div class="mb-3">
+                        <small class="text-muted">Quick filters: 
+                            <a href="{{ url_for('regulations', jurisdiction='National') }}" class="text-info">National</a> | 
+                            <a href="{{ url_for('regulations', jurisdiction='State') }}" class="text-info">State</a> | 
+                            <a href="{{ url_for('regulations', jurisdiction='Local') }}" class="text-info">Local</a> | 
+                            <a href="{{ url_for('regulations') }}" class="text-info">All</a>
+                        </small>
+                    </div>
+                    <form method="GET" action="{{ url_for('regulations') }}" class="row g-3">
                         <div class="col-md-3">
                             <label for="jurisdiction" class="form-label">Jurisdiction Level</label>
                             <select class="form-select" id="jurisdiction" name="jurisdiction">
@@ -137,26 +146,4 @@
 </div>
 {% endblock %}
 
-{% block scripts %}
-<script>
-function debugForm(form) {
-    console.log('Form submission debug:');
-    const formData = new FormData(form);
-    for (let [key, value] of formData.entries()) {
-        console.log(`${key}: "${value}"`);
-    }
-    
-    // Also check select values directly
-    const jurisdiction = document.getElementById('jurisdiction').value;
-    const location = document.getElementById('location').value;
-    const search = document.getElementById('search').value;
-    
-    console.log('Direct values:');
-    console.log(`jurisdiction: "${jurisdiction}"`);
-    console.log(`location: "${location}"`);
-    console.log(`search: "${search}"`);
-    
-    return true; // Allow form submission to continue
-}
-</script>
-{% endblock %}
+

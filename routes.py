@@ -18,28 +18,20 @@ def index():
 @app.route('/regulations')
 def regulations():
     # Get filter parameters
-    jurisdiction_filter = request.args.get('jurisdiction', '')
-    location_filter = request.args.get('location', '')
-    search_query = request.args.get('search', '')
-    
-    # Debug logging
-    logging.debug(f"Jurisdiction filter: '{jurisdiction_filter}'")
-    logging.debug(f"Location filter: '{location_filter}'")
-    logging.debug(f"Search query: '{search_query}'")
+    jurisdiction_filter = request.args.get('jurisdiction', '').strip()
+    location_filter = request.args.get('location', '').strip()
+    search_query = request.args.get('search', '').strip()
     
     # Build query
     query = Regulation.query
     
-    if jurisdiction_filter and jurisdiction_filter.strip():
-        logging.debug(f"Applying jurisdiction filter: {jurisdiction_filter}")
+    if jurisdiction_filter:
         query = query.filter(Regulation.jurisdiction_level == jurisdiction_filter)
     
-    if location_filter and location_filter.strip():
-        logging.debug(f"Applying location filter: {location_filter}")
+    if location_filter:
         query = query.filter(Regulation.location.ilike(f'%{location_filter}%'))
     
-    if search_query and search_query.strip():
-        logging.debug(f"Applying search query: {search_query}")
+    if search_query:
         query = query.filter(
             db.or_(
                 Regulation.title.ilike(f'%{search_query}%'),
@@ -48,10 +40,6 @@ def regulations():
         )
     
     regulations = query.order_by(Regulation.jurisdiction_level, Regulation.location).all()
-    
-    logging.debug(f"Found {len(regulations)} regulations after filtering")
-    for reg in regulations:
-        logging.debug(f"  - {reg.jurisdiction_level}: {reg.location} - {reg.title}")
     
     # Get unique values for filters
     all_jurisdictions = db.session.query(Regulation.jurisdiction_level).distinct().all()
