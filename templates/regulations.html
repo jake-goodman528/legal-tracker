@@ -21,7 +21,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <form method="GET" action="{{ url_for('regulations') }}" class="row g-3">
+                    <form method="GET" action="{{ url_for('regulations') }}" class="row g-3" onsubmit="debugForm(this)">
                         <div class="col-md-3">
                             <label for="jurisdiction" class="form-label">Jurisdiction Level</label>
                             <select class="form-select" id="jurisdiction" name="jurisdiction">
@@ -135,4 +135,28 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function debugForm(form) {
+    console.log('Form submission debug:');
+    const formData = new FormData(form);
+    for (let [key, value] of formData.entries()) {
+        console.log(`${key}: "${value}"`);
+    }
+    
+    // Also check select values directly
+    const jurisdiction = document.getElementById('jurisdiction').value;
+    const location = document.getElementById('location').value;
+    const search = document.getElementById('search').value;
+    
+    console.log('Direct values:');
+    console.log(`jurisdiction: "${jurisdiction}"`);
+    console.log(`location: "${location}"`);
+    console.log(`search: "${search}"`);
+    
+    return true; // Allow form submission to continue
+}
+</script>
 {% endblock %}
