@@ -155,5 +155,12 @@ function deleteUpdate(id, title) {
     document.getElementById('deleteUpdateForm').action = `/admin/updates/${id}/delete`;
     new bootstrap.Modal(document.getElementById('deleteModal')).show();
 }
+
+// Add loading state to delete button
+document.getElementById('deleteUpdateForm').addEventListener('submit', function(e) {
+    const submitBtn = this.querySelector('button[type="submit"]');
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Deleting...';
+    submitBtn.disabled = true;
+});
 </script>
 {% endblock %}

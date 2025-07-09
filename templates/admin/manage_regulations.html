@@ -155,5 +155,12 @@ function deleteRegulation(id, title) {
     document.getElementById('deleteRegulationForm').action = `/admin/regulations/${id}/delete`;
     new bootstrap.Modal(document.getElementById('deleteModal')).show();
 }
+
+// Add loading state to delete button
+document.getElementById('deleteRegulationForm').addEventListener('submit', function(e) {
+    const submitBtn = this.querySelector('button[type="submit"]');
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Deleting...';
+    submitBtn.disabled = true;
+});
 </script>
 {% endblock %}
