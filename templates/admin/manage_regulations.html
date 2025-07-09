@@ -140,7 +140,8 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form id="deleteForm" method="POST" class="d-inline">
+                <form id="deleteRegulationForm" method="POST" class="d-inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <button type="submit" class="btn btn-danger">Delete</button>
                 </form>
             </div>
@@ -151,7 +152,7 @@
 <script>
 function deleteRegulation(id, title) {
     document.getElementById('deleteRegulationTitle').textContent = title;
-    document.getElementById('deleteForm').action = `/admin/regulations/${id}/delete`;
+    document.getElementById('deleteRegulationForm').action = `/admin/regulations/${id}/delete`;
     new bootstrap.Modal(document.getElementById('deleteModal')).show();
 }
 </script>
