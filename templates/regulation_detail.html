@@ -1,0 +1,967 @@
+{% extends "base.html" %}
+
+{% block title %}{{ regulation.location }} - Regulatory Details | Kaystreet Management{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <!-- Professional Header -->
+    <div class="regulation-detail-header mb-4">
+        <!-- Breadcrumb Navigation -->
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="detail-breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{{ url_for('main.index') }}" class="breadcrumb-link">
+                        <i class="fas fa-home me-1"></i>Home
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{{ url_for('main.regulations') }}" class="breadcrumb-link">
+                        <i class="fas fa-database me-1"></i>Regulations
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-file-text me-1"></i>{{ regulation.location }} Details
+                </li>
+            </ol>
+        </nav>
+        
+        <!-- Page Title and Actions -->
+        <div class="d-flex justify-content-between align-items-start mb-3">
+            <div class="flex-grow-1">
+                <h1 class="detail-page-title">{{ regulation.location }} - Regulatory Details</h1>
+                <div class="regulation-meta">
+                    <span class="jurisdiction-badge 
+                        {% if regulation.jurisdiction_level == 'National' %}jurisdiction-national
+                        {% elif regulation.jurisdiction_level == 'State' %}jurisdiction-state
+                        {% else %}jurisdiction-local{% endif %}">
+                        {{ regulation.jurisdiction_level }} Level
+                    </span>
+                    <span class="category-tag 
+                        {% if regulation.category == 'Legal' %}tag-legal
+                        {% elif regulation.category == 'Licensing' %}tag-licensing
+                        {% elif regulation.category == 'Taxes' %}tag-taxes
+                        {% elif regulation.category == 'Zoning' %}tag-zoning
+                        {% elif regulation.category == 'Occupancy' %}tag-occupancy
+                        {% elif regulation.category == 'Registration' %}tag-registration
+                        {% elif regulation.category == 'Discrimination' %}tag-discrimination
+                        {% else %}tag-default{% endif %}">
+                        {{ regulation.category }}
+                    </span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <a href="{{ url_for('main.regulations') }}" class="btn btn-outline-primary me-2">
+                    <i class="fas fa-arrow-left me-1"></i> Back to Database
+                </a>
+                <button class="btn btn-primary" onclick="window.print()">
+                    <i class="fas fa-print me-1"></i> Print
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Regulation Title Section -->
+            <div class="regulation-title-section mb-4">
+                <h2 class="regulation-title">{{ regulation.title }}</h2>
+                <p class="regulation-subtitle">{{ regulation.key_requirements }}</p>
+            </div>
+
+            <!-- Overview Section -->
+            <div class="regulation-overview-section mb-4">
+                <h3 class="section-title">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Overview
+                </h3>
+                <div class="overview-content">
+                    {% if detailed_content.overview %}
+                        <p class="overview-text">{{ detailed_content.overview }}</p>
+                    {% else %}
+                        <p class="overview-text">This regulation governs short-term rental operations in {{ regulation.location }}, establishing key requirements for compliance with local laws and regulations. Property owners and managers must understand and implement these requirements to operate legally within this jurisdiction.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Detailed Requirements Section -->
+            <div class="regulation-requirements-section mb-4">
+                <h3 class="section-title">
+                    <i class="fas fa-list-check me-2"></i>
+                    Detailed Requirements
+                </h3>
+                <div class="requirements-content">
+                    {% if detailed_content.requirements %}
+                        <ul class="requirements-list">
+                            {% for req in detailed_content.requirements %}
+                            <li class="requirement-item">{{ req }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <ul class="requirements-list">
+                            <li class="requirement-item">Property registration and licensing requirements</li>
+                            <li class="requirement-item">Occupancy limits and safety standards compliance</li>
+                            <li class="requirement-item">Tax obligations and reporting requirements</li>
+                            <li class="requirement-item">Zoning compliance and permitted use verification</li>
+                            <li class="requirement-item">Insurance and liability coverage requirements</li>
+                            <li class="requirement-item">Guest screening and documentation procedures</li>
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Implementation Process Section -->
+            <div class="regulation-process-section mb-4">
+                <h3 class="section-title">
+                    <i class="fas fa-cogs me-2"></i>
+                    Implementation Process
+                </h3>
+                <div class="process-content">
+                    {% if detailed_content.process_details %}
+                        <ol class="process-steps">
+                            {% for step in detailed_content.process_details %}
+                            <li class="process-step">{{ step }}</li>
+                            {% endfor %}
+                        </ol>
+                    {% else %}
+                        <ol class="process-steps">
+                            <li class="process-step">Review all applicable regulations and requirements for your jurisdiction</li>
+                            <li class="process-step">Complete necessary registration and licensing applications</li>
+                            <li class="process-step">Ensure property meets all safety and zoning requirements</li>
+                            <li class="process-step">Implement required insurance coverage and liability protections</li>
+                            <li class="process-step">Establish tax collection and reporting procedures</li>
+                            <li class="process-step">Create guest screening and documentation processes</li>
+                            <li class="process-step">Maintain ongoing compliance monitoring and reporting</li>
+                        </ol>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Compliance Checklist Section -->
+            <div class="regulation-checklist-section mb-4">
+                <h3 class="section-title">
+                    <i class="fas fa-check-square me-2"></i>
+                    Compliance Checklist
+                </h3>
+                <div class="checklist-content">
+                    <div class="checklist-category">
+                        <h4 class="checklist-category-title">Legal & Licensing</h4>
+                        <ul class="checklist-items">
+                            <li class="checklist-item">Property registration completed</li>
+                            <li class="checklist-item">Business license obtained</li>
+                            <li class="checklist-item">Short-term rental permit secured</li>
+                            <li class="checklist-item">Required inspections passed</li>
+                        </ul>
+                    </div>
+                    <div class="checklist-category">
+                        <h4 class="checklist-category-title">Safety & Operations</h4>
+                        <ul class="checklist-items">
+                            <li class="checklist-item">Fire safety equipment installed</li>
+                            <li class="checklist-item">Occupancy limits established</li>
+                            <li class="checklist-item">Emergency procedures documented</li>
+                            <li class="checklist-item">Guest communication protocols in place</li>
+                        </ul>
+                    </div>
+                    <div class="checklist-category">
+                        <h4 class="checklist-category-title">Financial & Tax</h4>
+                        <ul class="checklist-items">
+                            <li class="checklist-item">Tax registration completed</li>
+                            <li class="checklist-item">Collection procedures established</li>
+                            <li class="checklist-item">Reporting schedule implemented</li>
+                            <li class="checklist-item">Record-keeping system in place</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Official Sources Section -->
+            <div class="regulation-sources-section mb-4">
+                <h3 class="section-title">
+                    <i class="fas fa-external-link-alt me-2"></i>
+                    Official Government Sources
+                </h3>
+                <div class="sources-content">
+                    {% if detailed_content.official_links %}
+                        {% for link in detailed_content.official_links %}
+                        <a href="{{ link }}" class="official-source-link" target="_blank" rel="noopener noreferrer">
+                            <div class="source-icon">
+                                <i class="fas fa-link"></i>
+                            </div>
+                            <div class="source-text">{{ link }}</div>
+                            <div class="external-icon">
+                                <i class="fas fa-external-link-alt"></i>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    {% else %}
+                        <div class="sources-placeholder">
+                            <p>Official government sources and documentation links will be added as they become available. Please check back regularly for updates.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Professional Sidebar -->
+        <div class="col-lg-4">
+            <!-- Last Updated & Status -->
+            <div class="sidebar-card mb-4">
+                <div class="sidebar-card-header">
+                    <h4 class="sidebar-title">
+                        <i class="fas fa-clock me-2"></i>
+                        Last Updated
+                    </h4>
+                </div>
+                <div class="sidebar-card-body">
+                    <div class="update-info">
+                        <div class="update-date">{{ regulation.last_updated.strftime('%B %d, %Y') }}</div>
+                        <div class="update-status">
+                            <span class="status-indicator status-current"></span>
+                            Current & Active
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category & Jurisdiction -->
+            <div class="sidebar-card mb-4">
+                <div class="sidebar-card-header">
+                    <h4 class="sidebar-title">
+                        <i class="fas fa-tag me-2"></i>
+                        Classification
+                    </h4>
+                </div>
+                <div class="sidebar-card-body">
+                    <div class="classification-info">
+                        <div class="classification-item">
+                            <span class="classification-label">Category:</span>
+                            <span class="category-tag 
+                                {% if regulation.category == 'Legal' %}tag-legal
+                                {% elif regulation.category == 'Licensing' %}tag-licensing
+                                {% elif regulation.category == 'Taxes' %}tag-taxes
+                                {% elif regulation.category == 'Zoning' %}tag-zoning
+                                {% elif regulation.category == 'Occupancy' %}tag-occupancy
+                                {% elif regulation.category == 'Registration' %}tag-registration
+                                {% elif regulation.category == 'Discrimination' %}tag-discrimination
+                                {% else %}tag-default{% endif %}">
+                                {{ regulation.category }}
+                            </span>
+                        </div>
+                        <div class="classification-item">
+                            <span class="classification-label">Level:</span>
+                            <span class="jurisdiction-badge 
+                                {% if regulation.jurisdiction_level == 'National' %}jurisdiction-national
+                                {% elif regulation.jurisdiction_level == 'State' %}jurisdiction-state
+                                {% else %}jurisdiction-local{% endif %}">
+                                {{ regulation.jurisdiction_level }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="sidebar-card mb-4">
+                <div class="sidebar-card-header">
+                    <h4 class="sidebar-title">
+                        <i class="fas fa-phone me-2"></i>
+                        Local Authority Contact
+                    </h4>
+                </div>
+                <div class="sidebar-card-body">
+                    {% if detailed_content.contact_info %}
+                        {% if detailed_content.contact_info.agency %}
+                        <div class="contact-item">
+                            <div class="contact-label">
+                                <i class="fas fa-building me-2"></i>
+                                Agency
+                            </div>
+                            <div class="contact-value">{{ detailed_content.contact_info.agency }}</div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if detailed_content.contact_info.phone %}
+                        <div class="contact-item">
+                            <div class="contact-label">
+                                <i class="fas fa-phone me-2"></i>
+                                Phone
+                            </div>
+                            <div class="contact-value">
+                                <a href="tel:{{ detailed_content.contact_info.phone }}" class="contact-link">
+                                    {{ detailed_content.contact_info.phone }}
+                                </a>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if detailed_content.contact_info.email %}
+                        <div class="contact-item">
+                            <div class="contact-label">
+                                <i class="fas fa-envelope me-2"></i>
+                                Email
+                            </div>
+                            <div class="contact-value">
+                                <a href="mailto:{{ detailed_content.contact_info.email }}" class="contact-link">
+                                    {{ detailed_content.contact_info.email }}
+                                </a>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if detailed_content.contact_info.website %}
+                        <div class="contact-item">
+                            <div class="contact-label">
+                                <i class="fas fa-globe me-2"></i>
+                                Website
+                            </div>
+                            <div class="contact-value">
+                                <a href="{{ detailed_content.contact_info.website }}" target="_blank" rel="noopener noreferrer" class="contact-link">
+                                    Official Website
+                                    <i class="fas fa-external-link-alt ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="contact-placeholder">
+                            <p>Contact information for local authorities will be updated as available. Please check official government websites for current contact details.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Related Regulations -->
+            {% if related_regulations %}
+            <div class="sidebar-card mb-4">
+                <div class="sidebar-card-header">
+                    <h4 class="sidebar-title">
+                        <i class="fas fa-link me-2"></i>
+                        Related Regulations
+                    </h4>
+                </div>
+                <div class="sidebar-card-body">
+                    <div class="related-regulations">
+                        {% for related in related_regulations %}
+                        <div class="related-item">
+                            <div class="related-meta">
+                                <span class="category-tag 
+                                    {% if related.category == 'Legal' %}tag-legal
+                                    {% elif related.category == 'Licensing' %}tag-licensing
+                                    {% elif related.category == 'Taxes' %}tag-taxes
+                                    {% elif related.category == 'Zoning' %}tag-zoning
+                                    {% elif related.category == 'Occupancy' %}tag-occupancy
+                                    {% elif related.category == 'Registration' %}tag-registration
+                                    {% elif related.category == 'Discrimination' %}tag-discrimination
+                                    {% else %}tag-default{% endif %}">
+                                    {{ related.category }}
+                                </span>
+                                <span class="jurisdiction-badge 
+                                    {% if related.jurisdiction_level == 'National' %}jurisdiction-national
+                                    {% elif related.jurisdiction_level == 'State' %}jurisdiction-state
+                                    {% else %}jurisdiction-local{% endif %}">
+                                    {{ related.jurisdiction_level }}
+                                </span>
+                            </div>
+                            <h6 class="related-title">{{ related.title }}</h6>
+                            <p class="related-location">
+                                <i class="fas fa-map-marker-alt me-1"></i>{{ related.location }}
+                            </p>
+                            <a href="{{ url_for('main.regulation_detail', id=related.id) }}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-eye me-1"></i> View Details
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Download & Print Options -->
+            <div class="sidebar-card">
+                <div class="sidebar-card-header">
+                    <h4 class="sidebar-title">
+                        <i class="fas fa-download me-2"></i>
+                        Download & Print
+                    </h4>
+                </div>
+                <div class="sidebar-card-body">
+                    <div class="download-options">
+                        <button class="btn btn-primary w-100 mb-2" onclick="window.print()">
+                            <i class="fas fa-print me-2"></i>
+                            Print This Page
+                        </button>
+                        <button class="btn btn-outline-primary w-100 mb-2" onclick="downloadPDF()">
+                            <i class="fas fa-file-pdf me-2"></i>
+                            Download PDF
+                        </button>
+                        <button class="btn btn-outline-secondary w-100" onclick="shareRegulation()">
+                            <i class="fas fa-share me-2"></i>
+                            Share Regulation
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Professional Regulation Detail Page Styles */
+
+/* Header Styles */
+.regulation-detail-header {
+    margin-bottom: 2rem;
+}
+
+.detail-breadcrumb {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-family: 'Yantramanav', sans-serif;
+    font-size: 0.9rem;
+}
+
+.detail-breadcrumb .breadcrumb-item {
+    display: flex;
+    align-items: center;
+}
+
+.detail-breadcrumb .breadcrumb-item:not(:last-child)::after {
+    content: ">";
+    margin: 0 0.5rem;
+    color: #6B7280;
+}
+
+.detail-breadcrumb .breadcrumb-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.detail-breadcrumb .breadcrumb-link:hover {
+    color: var(--accent-color);
+}
+
+.detail-breadcrumb .breadcrumb-item.active {
+    color: #6B7280;
+}
+
+.detail-page-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.regulation-meta {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.header-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+/* Main Content Styles */
+.regulation-title-section {
+    margin-bottom: 2rem;
+}
+
+.regulation-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.75rem;
+}
+
+.regulation-subtitle {
+    font-family: 'Yantramanav', sans-serif;
+    font-size: 1.1rem;
+    color: #4B5563;
+    line-height: 1.6;
+    margin-bottom: 0;
+}
+
+/* Section Styles */
+.section-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.section-title i {
+    color: var(--accent-color);
+}
+
+/* Overview Section */
+.regulation-overview-section {
+    background: #F8F9FA;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid var(--accent-color);
+}
+
+.overview-text {
+    font-family: 'Yantramanav', sans-serif;
+    font-size: 1rem;
+    color: #374151;
+    line-height: 1.7;
+    margin-bottom: 0;
+}
+
+/* Requirements Section */
+.regulation-requirements-section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #E5E7EB;
+    border-left: 4px solid var(--accent-color);
+}
+
+.requirements-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.requirement-item {
+    position: relative;
+    padding: 0.75rem 0 0.75rem 2rem;
+    font-family: 'Yantramanav', sans-serif;
+    font-size: 1rem;
+    color: #374151;
+    line-height: 1.6;
+    border-bottom: 1px solid #F3F4F6;
+}
+
+.requirement-item:last-child {
+    border-bottom: none;
+}
+
+.requirement-item::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    top: 0.75rem;
+    color: var(--accent-color);
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+/* Process Section */
+.regulation-process-section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #E5E7EB;
+    border-left: 4px solid var(--accent-color);
+}
+
+.process-steps {
+    padding-left: 1.5rem;
+    margin: 0;
+}
+
+.process-step {
+    font-family: 'Yantramanav', sans-serif;
+    font-size: 1rem;
+    color: #374151;
+    line-height: 1.6;
+    margin-bottom: 0.75rem;
+}
+
+.process-step:last-child {
+    margin-bottom: 0;
+}
+
+/* Checklist Section */
+.regulation-checklist-section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #E5E7EB;
+    border-left: 4px solid var(--accent-color);
+}
+
+.checklist-category {
+    margin-bottom: 1.5rem;
+}
+
+.checklist-category:last-child {
+    margin-bottom: 0;
+}
+
+.checklist-category-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.75rem;
+}
+
+.checklist-items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.checklist-item {
+    position: relative;
+    padding: 0.5rem 0 0.5rem 2rem;
+    font-family: 'Yantramanav', sans-serif;
+    font-size: 0.95rem;
+    color: #4B5563;
+    line-height: 1.5;
+}
+
+.checklist-item::before {
+    content: "☐";
+    position: absolute;
+    left: 0;
+    top: 0.5rem;
+    color: var(--accent-color);
+    font-size: 1rem;
+}
+
+/* Sources Section */
+.regulation-sources-section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #E5E7EB;
+    border-left: 4px solid var(--accent-color);
+}
+
+.official-source-link {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background: #F9FAFB;
+    border: 1px solid #E5E7EB;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #374151;
+    margin-bottom: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.official-source-link:hover {
+    background: #F3F4F6;
+    border-color: var(--accent-color);
+    color: var(--primary-color);
+    transform: translateY(-1px);
+}
+
+.official-source-link:last-child {
+    margin-bottom: 0;
+}
+
+.source-icon {
+    margin-right: 0.75rem;
+    color: var(--accent-color);
+    font-size: 1.1rem;
+}
+
+.source-text {
+    flex: 1;
+    font-family: 'Yantramanav', sans-serif;
+    font-size: 0.95rem;
+}
+
+.external-icon {
+    margin-left: 0.75rem;
+    color: #9CA3AF;
+    font-size: 0.8rem;
+}
+
+.sources-placeholder {
+    padding: 1rem;
+    background: #F9FAFB;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.sources-placeholder p {
+    font-family: 'Yantramanav', sans-serif;
+    color: #6B7280;
+    margin: 0;
+}
+
+/* Sidebar Styles */
+.sidebar-card {
+    background: white;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    border-left: 4px solid var(--accent-color);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+}
+
+.sidebar-card:hover {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-card-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #E5E7EB;
+    background: #F9FAFB;
+}
+
+.sidebar-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar-title i {
+    color: var(--accent-color);
+}
+
+.sidebar-card-body {
+    padding: 1.5rem;
+}
+
+/* Update Info */
+.update-info {
+    text-align: center;
+}
+
+.update-date {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.update-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-family: 'Yantramanav', sans-serif;
+    font-size: 0.9rem;
+    color: #059669;
+}
+
+.status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #10B981;
+}
+
+/* Classification Info */
+.classification-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.classification-item:last-child {
+    margin-bottom: 0;
+}
+
+.classification-label {
+    font-family: 'Yantramanav', sans-serif;
+    font-size: 0.9rem;
+    color: #6B7280;
+    font-weight: 500;
+}
+
+/* Contact Items */
+.contact-item {
+    margin-bottom: 1rem;
+}
+
+.contact-item:last-child {
+    margin-bottom: 0;
+}
+
+.contact-label {
+    font-family: 'Yantramanav', sans-serif;
+    font-size: 0.85rem;
+    color: #6B7280;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+}
+
+.contact-label i {
+    color: var(--accent-color);
+}
+
+.contact-value {
+    font-family: 'Yantramanav', sans-serif;
+    font-size: 0.95rem;
+    color: #374151;
+}
+
+.contact-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.contact-link:hover {
+    color: var(--accent-color);
+}
+
+.contact-placeholder {
+    padding: 1rem;
+    background: #F9FAFB;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.contact-placeholder p {
+    font-family: 'Yantramanav', sans-serif;
+    color: #6B7280;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+/* Related Regulations */
+.related-item {
+    padding: 1rem;
+    background: #F9FAFB;
+    border: 1px solid #E5E7EB;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+}
+
+.related-item:last-child {
+    margin-bottom: 0;
+}
+
+.related-meta {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.related-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.related-location {
+    font-family: 'Yantramanav', sans-serif;
+    font-size: 0.85rem;
+    color: #6B7280;
+    margin-bottom: 0.75rem;
+}
+
+/* Download Options */
+.download-options .btn {
+    font-family: 'Yantramanav', sans-serif;
+    font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .detail-page-title {
+        font-size: 1.5rem;
+    }
+    
+    .regulation-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .header-actions {
+        flex-direction: column;
+        width: 100%;
+        gap: 0.5rem;
+    }
+    
+    .header-actions .btn {
+        width: 100%;
+    }
+    
+    .regulation-overview-section,
+    .regulation-requirements-section,
+    .regulation-process-section,
+    .regulation-checklist-section,
+    .regulation-sources-section {
+        padding: 1rem;
+    }
+    
+    .sidebar-card-body {
+        padding: 1rem;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .header-actions,
+    .sidebar-card {
+        display: none !important;
+    }
+    
+    .regulation-detail-header {
+        margin-bottom: 1rem;
+    }
+    
+    .detail-page-title {
+        font-size: 1.5rem;
+    }
+}
+</style>
+
+<script>
+function downloadPDF() {
+    // This would implement PDF download functionality
+    alert('PDF download functionality would be implemented here');
+}
+
+function shareRegulation() {
+    if (navigator.share) {
+        navigator.share({
+            title: '{{ regulation.title }}',
+            text: 'Check out this regulation: {{ regulation.title }}',
+            url: window.location.href
+        });
+    } else {
+        // Fallback to copying URL to clipboard
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            alert('Regulation URL copied to clipboard!');
+        });
+    }
+}
+
+// Enhanced print styles
+document.addEventListener('DOMContentLoaded', function() {
+    // Add print-specific styling when printing
+    window.addEventListener('beforeprint', function() {
+        document.body.classList.add('printing');
+    });
+    
+    window.addEventListener('afterprint', function() {
+        document.body.classList.remove('printing');
+    });
+});
+</script>
+{% endblock %} 

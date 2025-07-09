@@ -1,30 +1,209 @@
 {% extends "base.html" %}
 
-{% block title %}Industry Updates - Short-Term Rental Compliance{% endblock %}
+{% block title %}Industry Updates{% endblock %}
 
 {% block content %}
 <div class="container my-4">
-    <div class="row">
-        <div class="col-12">
-            <h1 class="mb-4">
-                <i class="fas fa-newspaper me-2"></i>
-                Industry Updates
-            </h1>
-            <p class="lead mb-4">
-                Stay informed about regulatory changes, upcoming modifications, and proposed legislation 
-                affecting short-term rental operations.
-            </p>
+    <!-- Simplified Header -->
+    <div class="text-center mb-4">
+        <h1 class="mb-2">
+            <i class="fas fa-newspaper me-2"></i>
+            Industry Updates
+        </h1>
+        <p class="text-muted">
+            Stay informed about regulatory changes and legislation affecting short-term rentals
+        </p>
+    </div>
+
+    <!-- Simplified Search and Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <!-- Main Search -->
+                <div class="col-lg-8">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" id="searchInput" class="form-control form-control-lg" 
+                               placeholder="Search updates by title, description, or tags..." 
+                               value="{{ current_search or '' }}">
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="col-lg-4">
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-primary" onclick="showAdvancedFilters()">
+                            <i class="fas fa-sliders-h"></i> Filters
+                        </button>
+                        <button class="btn btn-outline-secondary" id="clearFiltersBtn">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+
         </div>
     </div>
 
-    <!-- Filters -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <form method="GET" action="{{ url_for('updates') }}" class="row g-3">
-                        <div class="col-md-4">
-                            <label for="status" class="form-label">Status</label>
+    <!-- Results Summary -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <span class="text-muted">
+                Showing {{ updates|length }} update{% if updates|length != 1 %}s{% endif %}
+                {% if current_search or current_status or current_category or current_impact or current_jurisdiction %}
+                (filtered)
+                {% endif %}
+            </span>
+        </div>
+
+    </div>
+
+    <!-- Updates List -->
+    {% if updates %}
+    <div id="updatesContainer">
+        {% for update in updates %}
+        <div class="update-item card mb-3" data-update-id="{{ update.id }}">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-10">
+                        <!-- Title and Badges -->
+                        <div class="d-flex align-items-center mb-2">
+                            <h5 class="card-title mb-0 me-3">{{ update.title }}</h5>
+                            
+                            <!-- Status Badge -->
+                            <span class="badge me-2
+                                {% if update.status == 'Recent' %}bg-success
+                                {% elif update.status == 'Upcoming' %}bg-warning text-dark
+                                {% else %}bg-info{% endif %}">
+                                {{ update.status }}
+                            </span>
+                            
+                            <!-- Impact Level -->
+                            <span class="badge impact-{{ update.impact_level.lower() }}">
+                                {{ update.impact_level }} Impact
+                            </span>
+                            
+                            <!-- Action Required Indicator -->
+                            {% if update.action_required %}
+                            <span class="badge bg-warning text-dark ms-1">
+                                <i class="fas fa-exclamation-circle"></i> Action Required
+                            </span>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Description -->
+                        <p class="card-text mb-2">{{ update.description }}</p>
+                        
+                        <!-- Action Required Details -->
+                        {% if update.action_required and update.action_description %}
+                        <div class="alert alert-warning alert-sm mb-2">
+                            <strong><i class="fas fa-tasks me-1"></i>Action Required:</strong> 
+                            {{ update.action_description }}
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Metadata -->
+                        <div class="row text-muted small">
+                            <div class="col-md-6">
+                                <div class="mb-1">
+                                    <i class="fas fa-map-marker-alt me-1"></i>
+                                    <strong>{{ update.jurisdiction_affected }}</strong>
+                                </div>
+                                {% if update.property_types != 'Both' %}
+                                <div class="mb-1">
+                                    <i class="fas fa-building me-1"></i>
+                                    Property Type: <strong>{{ update.property_types }}</strong>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                {% if update.effective_date %}
+                                <div class="mb-1">
+                                    <i class="fas fa-calendar-check me-1"></i>
+                                    Effective: <strong>{{ update.effective_date.strftime('%B %d, %Y') }}</strong>
+                                </div>
+                                {% endif %}
+                                {% if update.deadline_date %}
+                                <div class="mb-1 text-danger">
+                                    <i class="fas fa-clock me-1"></i>
+                                    Deadline: <strong>{{ update.deadline_date.strftime('%B %d, %Y') }}</strong>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Tags -->
+                        {% if update.get_tags_list() %}
+                        <div class="mt-2">
+                            {% for tag in update.get_tags_list() %}
+                            <span class="badge bg-light text-dark me-1">{{ tag }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Right Column - Date and Actions -->
+                    <div class="col-md-2 text-end">
+                        <div class="update-date mb-2 text-muted small">
+                            <i class="fas fa-calendar-alt me-1"></i>
+                            {{ update.update_date.strftime('%m/%d/%Y') }}
+                        </div>
+                        
+                        <!-- Priority Badge -->
+                        <div class="mb-3">
+                            {% if update.priority == 1 %}
+                            <span class="badge bg-danger">High Priority</span>
+                            {% elif update.priority == 2 %}
+                            <span class="badge bg-warning text-dark">Medium Priority</span>
+                            {% else %}
+                            <span class="badge bg-success">Low Priority</span>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div class="d-flex flex-column gap-1">
+                            {% if update.source_url %}
+                            <a href="{{ update.source_url }}" target="_blank" class="btn btn-sm btn-outline-secondary" title="View Source">
+                                <i class="fas fa-external-link-alt"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-newspaper fa-3x text-muted mb-3"></i>
+        <h4>No updates found</h4>
+        <p class="text-muted">Try adjusting your search or filters to see more updates.</p>
+        <button class="btn btn-outline-primary" onclick="clearFilters()">Clear Filters</button>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Simplified Advanced Filters Modal -->
+<div class="modal fade" id="advancedFiltersModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="background-color: white; color: #333;">
+            <div class="modal-header" style="background-color: #f8f9fa; border-bottom: 1px solid #dee2e6;">
+                <h5 class="modal-title" style="color: var(--primary-color);">
+                    <i class="fas fa-sliders-h"></i> Advanced Filters
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="background-color: white;">
+                <form method="GET" action="{{ url_for('main.updates') }}" id="filterForm">
+                    <input type="hidden" name="search" id="searchField" value="{{ current_search or '' }}">
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="status" class="form-label" style="color: var(--text-primary);">Status</label>
                             <select class="form-select" id="status" name="status">
                                 <option value="">All Statuses</option>
                                 {% for status in statuses %}
@@ -34,8 +213,33 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="col-md-4">
-                            <label for="jurisdiction" class="form-label">Jurisdiction</label>
+                        
+                        <div class="col-md-6">
+                            <label for="category" class="form-label" style="color: var(--text-primary);">Category</label>
+                            <select class="form-select" id="category" name="category">
+                                <option value="">All Categories</option>
+                                {% for category in categories %}
+                                <option value="{{ category }}" {% if current_category == category %}selected{% endif %}>
+                                    {{ category }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="impact" class="form-label" style="color: var(--text-primary);">Impact Level</label>
+                            <select class="form-select" id="impact" name="impact">
+                                <option value="">All Levels</option>
+                                {% for impact in impact_levels %}
+                                <option value="{{ impact }}" {% if current_impact == impact %}selected{% endif %}>
+                                    {{ impact }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="jurisdiction" class="form-label" style="color: var(--text-primary);">Jurisdiction</label>
                             <select class="form-select" id="jurisdiction" name="jurisdiction">
                                 <option value="">All Jurisdictions</option>
                                 {% for jurisdiction in jurisdictions %}
@@ -45,109 +249,147 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label">&nbsp;</label>
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-filter"></i> Filter Updates
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Updates Timeline -->
-    <div class="row">
-        <div class="col-12">
-            {% if updates %}
-            <div class="timeline">
-                {% for update in updates %}
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-9">
-                                <div class="d-flex align-items-center mb-2">
-                                    <h5 class="card-title mb-0 me-3">{{ update.title }}</h5>
-                                    <span class="badge 
-                                        {% if update.status == 'Recent' %}bg-success
-                                        {% elif update.status == 'Upcoming' %}bg-warning
-                                        {% else %}bg-info{% endif %} me-2">
-                                        {{ update.status }}
-                                    </span>
-                                </div>
-                                <p class="card-text">{{ update.description }}</p>
-                                <div class="text-muted small">
-                                    <i class="fas fa-map-marker-alt me-1"></i>
-                                    Affects: <strong>{{ update.jurisdiction_affected }}</strong>
-                                </div>
-                            </div>
-                            <div class="col-md-3 text-md-end">
-                                <div class="update-date">
-                                    <i class="fas fa-calendar-alt me-1"></i>
-                                    {{ update.update_date.strftime('%B %d, %Y') }}
-                                </div>
-                                {% if update.status == 'Recent' %}
-                                <small class="text-success">
-                                    <i class="fas fa-check-circle me-1"></i>
-                                    Effective
-                                </small>
-                                {% elif update.status == 'Upcoming' %}
-                                <small class="text-warning">
-                                    <i class="fas fa-clock me-1"></i>
-                                    Coming Soon
-                                </small>
-                                {% else %}
-                                <small class="text-info">
-                                    <i class="fas fa-lightbulb me-1"></i>
-                                    Under Review
-                                </small>
-                                {% endif %}
-                            </div>
-                        </div>
                     </div>
-                </div>
-                {% endfor %}
+                </form>
             </div>
-            {% else %}
-            <div class="text-center py-5">
-                <i class="fas fa-newspaper fa-3x text-muted mb-3"></i>
-                <h4>No updates found</h4>
-                <p class="text-muted">Try adjusting your filters to see more updates.</p>
-                <a href="{{ url_for('updates') }}" class="btn btn-outline-primary">Clear Filters</a>
-            </div>
-            {% endif %}
-        </div>
-    </div>
-
-    <!-- Legend -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <h6 class="card-title">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Status Legend
-                    </h6>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <span class="badge bg-success me-2">Recent</span>
-                            Changes that have already taken effect
-                        </div>
-                        <div class="col-md-4">
-                            <span class="badge bg-warning me-2">Upcoming</span>
-                            Changes scheduled to take effect soon
-                        </div>
-                        <div class="col-md-4">
-                            <span class="badge bg-info me-2">Proposed</span>
-                            Changes under consideration or review
-                        </div>
-                    </div>
-                </div>
+            <div class="modal-footer" style="background-color: #f8f9fa; border-top: 1px solid #dee2e6;">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="clearAdvancedFilters()">Clear All</button>
+                <button type="button" class="btn btn-primary" onclick="applyAdvancedFilters()">Apply Filters</button>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Help Modal -->
+<div class="modal fade" id="helpModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background-color: white; color: #333;">
+            <div class="modal-header" style="background-color: #f8f9fa; border-bottom: 1px solid #dee2e6;">
+                <h5 class="modal-title" style="color: var(--primary-color);">
+                    <i class="fas fa-question-circle"></i> Understanding Updates
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="background-color: white;">
+                <div class="mb-3">
+                    <h6 style="color: var(--primary-color);"><i class="fas fa-search"></i> Search</h6>
+                    <p class="small" style="color: #666;">Search by title, description, or tags to find relevant updates.</p>
+                </div>
+                <div class="mb-3">
+                    <h6 style="color: var(--primary-color);"><i class="fas fa-exclamation-triangle"></i> Impact Levels</h6>
+                    <p class="small" style="color: #666;">
+                        <span class="badge bg-danger text-white me-1">High</span> Significant operational changes<br>
+                        <span class="badge bg-warning text-dark me-1">Medium</span> Moderate impact on operations<br>
+                        <span class="badge bg-success text-white me-1">Low</span> Minor changes to monitor
+                    </p>
+                </div>
+
+                <div class="mb-3">
+                    <h6 style="color: var(--primary-color);"><i class="fas fa-clock"></i> Action Required</h6>
+                    <p class="small" style="color: #666;">Updates marked with this badge require immediate attention or action.</p>
+                </div>
+            </div>
+            <div class="modal-footer" style="background-color: #f8f9fa; border-top: 1px solid #dee2e6;">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got it</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Help Button -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1000;">
+    <button class="btn btn-primary rounded-circle" data-bs-toggle="modal" data-bs-target="#helpModal" title="Help">
+        <i class="fas fa-question"></i>
+    </button>
+</div>
+
+<script>
+// Updates page functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    const filterForm = document.getElementById('filterForm');
+    const searchField = document.getElementById('searchField');
+    
+    if (searchInput && filterForm && searchField) {
+        // Search on Enter key
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.which === 13 || e.keyCode === 13) {
+                performSearch();
+            }
+        });
+        
+        // Debounced search on input
+        let searchTimeout;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(function() {
+                performSearch();
+            }, 500);
+        });
+    }
+    
+    // Clear button functionality
+    const clearBtn = document.getElementById('clearFiltersBtn');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            clearFilters();
+        });
+    }
+});
+
+function performSearch() {
+    const searchInput = document.getElementById('searchInput');
+    const searchField = document.getElementById('searchField');
+    const filterForm = document.getElementById('filterForm');
+    
+    if (searchInput && searchField && filterForm) {
+        searchField.value = searchInput.value;
+        filterForm.submit();
+    }
+}
+
+function showAdvancedFilters() {
+    const modal = document.getElementById('advancedFiltersModal');
+    if (modal) {
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+    }
+}
+
+function applyAdvancedFilters() {
+    const searchInput = document.getElementById('searchInput');
+    const searchField = document.getElementById('searchField');
+    const filterForm = document.getElementById('filterForm');
+    
+    if (searchInput && searchField && filterForm) {
+        searchField.value = searchInput.value;
+        filterForm.submit();
+    }
+}
+
+function clearAdvancedFilters() {
+    const filterForm = document.getElementById('filterForm');
+    const searchInput = document.getElementById('searchInput');
+    
+    if (filterForm) {
+        filterForm.reset();
+    }
+    if (searchInput) {
+        searchInput.value = '';
+    }
+}
+
+function clearFilters() {
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.value = '';
+    }
+    
+    // Clear all filters and redirect to clean page
+    window.location.href = "{{ url_for('main.updates') }}";
+}
+</script>
 {% endblock %}

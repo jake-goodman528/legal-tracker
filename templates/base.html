@@ -1,68 +1,84 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
+<html lang="en" data-bs-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Short-Term Rental Compliance{% endblock %}</title>
-    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Yantramanav:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="{{ url_for('index') }}">
-                <i class="fas fa-balance-scale me-2"></i>
-                STR Compliance Toolkit
+    <!-- Kaystreet Management Professional Header -->
+    <nav class="navbar navbar-expand-lg kaystreet-header sticky-top">
+        <div class="container-fluid">
+            <!-- Kaystreet Management Logo -->
+            <a class="navbar-brand kaystreet-brand" href="{{ url_for('main.index') }}">
+                <img src="{{ url_for('static', filename='images/kaystreet-logo-navy.png') }}" alt="Kaystreet Management" class="kaystreet-logo-img">
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            
+            <!-- Mobile Menu Toggle -->
+            <button class="navbar-toggler kaystreet-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#kaystreetNav" aria-controls="kaystreetNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
+            
+            <!-- Navigation Menu -->
+            <div class="collapse navbar-collapse" id="kaystreetNav">
+                <!-- Center Navigation -->
+                <ul class="navbar-nav kaystreet-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+                        <a class="nav-link kaystreet-nav-link" href="{{ url_for('main.index') }}">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('regulations') }}">Regulations</a>
+                        <a class="nav-link kaystreet-nav-link" href="{{ url_for('main.regulations') }}">Regulations</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('updates') }}">Industry Updates</a>
+                        <a class="nav-link kaystreet-nav-link" href="{{ url_for('main.updates') }}">Industry Updates</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link kaystreet-nav-link" href="https://kaystreetmanagement.com" target="_blank">Services</a>
                     </li>
                 </ul>
-                <ul class="navbar-nav">
-                    {% if session.admin_id %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-cog"></i> Admin
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('admin_manage_regulations') }}">Manage Regulations</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('admin_manage_updates') }}">Manage Updates</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ url_for('admin_logout') }}">Logout</a></li>
-                        </ul>
-                    </li>
-                    {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('admin_login') }}">Admin Login</a>
-                    </li>
-                    {% endif %}
-                </ul>
+                
+                <!-- Call-to-Action Button -->
+                <div class="kaystreet-cta">
+                    <a href="https://kaystreetmanagement.com/contact" target="_blank" class="btn kaystreet-consultation-btn">
+                        Schedule a Consultation
+                    </a>
+                </div>
             </div>
         </div>
     </nav>
 
-    <!-- Flash Messages -->
+    <!-- Breadcrumb Navigation -->
+    {% block breadcrumb %}{% endblock %}
+
+    <!-- Enhanced Flash Messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <div class="container mt-3">
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show alert-enhanced" role="alert">
+                        <div class="d-flex align-items-center">
+                            <div class="alert-icon me-3">
+                                {% if category == 'success' %}
+                                    <i class="fas fa-check-circle"></i>
+                                {% elif category == 'error' or category == 'danger' %}
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                {% elif category == 'warning' %}
+                                    <i class="fas fa-exclamation-circle"></i>
+                                {% else %}
+                                    <i class="fas fa-info-circle"></i>
+                                {% endif %}
+                            </div>
+                            <div class="alert-content flex-grow-1">
+                                {{ message }}
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 {% endfor %}
             </div>
@@ -70,23 +86,122 @@
     {% endwith %}
 
     <!-- Main Content -->
-    <main>
+    <main class="main-content">
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer -->
-    <footer class="footer mt-5 py-4">
+    <!-- Kaystreet Management Footer -->
+    <footer class="kaystreet-footer">
         <div class="container">
             <div class="row">
-                <div class="col-md-8">
-                    <p class="mb-0">&copy; 2024 Short-Term Rental Compliance Toolkit. Professional legal compliance tracking.</p>
+                <!-- Column 1: Contact Information -->
+                <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+                    <h4 class="footer-heading">Kaystreet Management</h4>
+                    <div class="footer-content">
+                        <p class="footer-address">
+                            1218 E Kay St, Tampa, FL 33602 Unit #4<br>
+                            <a href="mailto:jgoodman@kaystreetmanagement.com" class="footer-link">jgoodman@kaystreetmanagement.com</a><br>
+                            <a href="tel:+14147585936" class="footer-link">+ 1 (414)-758-5936</a>
+                        </p>
+                    </div>
                 </div>
-                <div class="col-md-4 text-md-end">
-                    <small class="text-muted">Last updated: July 2024</small>
+
+                <!-- Column 2: Our Services -->
+                <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+                    <h4 class="footer-heading">Our Services</h4>
+                    <div class="footer-content">
+                        <ul class="footer-links-list">
+                            <li><a href="https://kaystreetmanagement.com/services" target="_blank" class="footer-link">Full-Service STR Management</a></li>
+                            <li><a href="https://kaystreetmanagement.com/services" target="_blank" class="footer-link">Dynamic Pricing & Revenue Management</a></li>
+                            <li><a href="https://kaystreetmanagement.com/services" target="_blank" class="footer-link">Guest Communication & Review Management</a></li>
+                            <li><a href="https://kaystreetmanagement.com/services" target="_blank" class="footer-link">Listing Optimization & Channel Management</a></li>
+                            <li><a href="https://kaystreetmanagement.com/services" target="_blank" class="footer-link">Tech Stack Integration & Automation</a></li>
+                            <li><a href="https://kaystreetmanagement.com/services" target="_blank" class="footer-link">Financial & Asset Management</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Column 3: Information -->
+                <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+                    <h4 class="footer-heading">Information</h4>
+                    <div class="footer-content">
+                        <ul class="footer-links-list">
+                            <li><a href="https://kaystreetmanagement.com/" target="_blank" class="footer-link">Home</a></li>
+                            <li><a href="https://kaystreetmanagement.com/about" target="_blank" class="footer-link">About</a></li>
+                            <li><a href="https://kaystreetmanagement.com/services" target="_blank" class="footer-link">Services</a></li>
+                            <li><a href="https://kaystreetmanagement.com/tools" target="_blank" class="footer-link">Tools</a></li>
+                            <li><a href="https://kaystreetmanagement.com/contact" target="_blank" class="footer-link">Contact</a></li>
+                            <li><a href="https://kaystreetmanagement.com/blog" target="_blank" class="footer-link">Blog</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Column 4: Quick Links -->
+                <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+                    <h4 class="footer-heading">Quick Links</h4>
+                    <div class="footer-content">
+                        <ul class="footer-links-list">
+                            <li><a href="https://kaystreetmanagement.com/contact" target="_blank" class="footer-link">Schedule a Consultation</a></li>
+                            <li><a href="https://kaystreetmanagement.com/tools" target="_blank" class="footer-link">STR Profitability Calculator</a></li>
+                            <li><a href="https://kaystreetmanagement.com/tools" target="_blank" class="footer-link">Pricing Strategy Guide</a></li>
+                            <li><a href="https://kaystreetmanagement.com/privacy-policy" target="_blank" class="footer-link">Privacy Policy</a></li>
+                            <li><a href="https://kaystreetmanagement.com/terms-of-service" target="_blank" class="footer-link">Terms of Service</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer Bottom -->
+        <div class="footer-bottom">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="footer-copyright">Kaystreet Management © 2025. All rights reserved.</p>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <!-- Admin Section -->
+                        {% if session.admin_id %}
+                        <div class="dropdown dropup">
+                            <a class="footer-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user-shield me-1"></i>Admin Panel
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{{ url_for('main.admin_dashboard') }}">
+                                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('main.admin_manage_regulations') }}">
+                                    <i class="fas fa-list-check me-2"></i>Manage Regulations
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('main.admin_manage_updates') }}">
+                                    <i class="fas fa-bell me-2"></i>Manage Updates
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="{{ url_for('main.admin_logout') }}">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Sign Out
+                                </a></li>
+                            </ul>
+                        </div>
+                        {% else %}
+                        <a href="{{ url_for('main.admin_login') }}" class="footer-link">
+                            <i class="fas fa-user-shield me-1"></i>Admin Login
+                        </a>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
     </footer>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <div class="loading-text mt-3">Loading...</div>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>

@@ -1,59 +1,334 @@
 {% extends "base.html" %}
 
-{% block title %}Admin Login - Short-Term Rental Compliance{% endblock %}
+{% block title %}Admin Login - Kaystreet Management{% endblock %}
 
 {% block content %}
-<div class="container my-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-4">
-            <div class="card">
-                <div class="card-body">
-                    <div class="text-center mb-4">
-                        <i class="fas fa-lock fa-3x text-primary mb-3"></i>
-                        <h4 class="card-title">Admin Access</h4>
-                        <p class="text-muted">Please login to access the admin panel</p>
+<div class="admin-login-container">
+    <div class="admin-login-card">
+        <div class="login-header">
+            <!-- Kaystreet Logo -->
+            <div class="login-logo">
+                <div class="login-logo-icon">
+                    <span>K</span>
+                </div>
+                <div class="login-logo-text">KAYSTREET MANAGEMENT</div>
+            </div>
+            
+            <!-- Admin Access Title -->
+            <div class="login-title-section">
+                <div class="login-icon">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <h2 class="login-title">Admin Access</h2>
+                <p class="login-subtitle">Please login to access the admin dashboard</p>
+            </div>
+        </div>
+        
+        <div class="login-form-section">
+            <form method="POST" class="admin-login-form">
+                {{ form.hidden_tag() }}
+                
+                <div class="form-group">
+                    {{ form.username.label(class="admin-form-label") }}
+                    <div class="admin-input-wrapper">
+                        <i class="fas fa-user admin-input-icon"></i>
+                        {{ form.username(class="admin-form-input", placeholder="Enter username") }}
                     </div>
-                    
-                    <form method="POST">
-                        {{ form.hidden_tag() }}
-                        
-                        <div class="mb-3">
-                            {{ form.username.label(class="form-label") }}
-                            {{ form.username(class="form-control") }}
-                            {% if form.username.errors %}
-                                <div class="text-danger small">
-                                    {% for error in form.username.errors %}
-                                        <div>{{ error }}</div>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
+                    {% if form.username.errors %}
+                        <div class="admin-form-error">
+                            {% for error in form.username.errors %}
+                                <div><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
+                            {% endfor %}
                         </div>
-                        
-                        <div class="mb-3">
-                            {{ form.password.label(class="form-label") }}
-                            {{ form.password(class="form-control") }}
-                            {% if form.password.errors %}
-                                <div class="text-danger small">
-                                    {% for error in form.password.errors %}
-                                        <div>{{ error }}</div>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="d-grid">
-                            {{ form.submit(class="btn btn-primary") }}
-                        </div>
-                    </form>
-                    
-                    <div class="text-center mt-3">
-                        <small class="text-muted">
-                            Default: admin / admin123
-                        </small>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    {{ form.password.label(class="admin-form-label") }}
+                    <div class="admin-input-wrapper">
+                        <i class="fas fa-lock admin-input-icon"></i>
+                        {{ form.password(class="admin-form-input", placeholder="Enter password") }}
                     </div>
+                    {% if form.password.errors %}
+                        <div class="admin-form-error">
+                            {% for error in form.password.errors %}
+                                <div><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    {{ form.submit(class="admin-login-btn") }}
+                </div>
+            </form>
+            
+            <div class="login-footer">
+                <div class="login-help">
+                    <small>
+                        <i class="fas fa-info-circle me-1"></i>
+                        Default credentials: <strong>admin</strong> / <strong>admin123</strong>
+                    </small>
+                </div>
+                <div class="login-back">
+                    <a href="{{ url_for('main.index') }}" class="back-to-site-link">
+                        <i class="fas fa-arrow-left me-1"></i>
+                        Back to Main Site
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+/* Admin Login Styles */
+.admin-login-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #001659 0%, #0A2472 50%, #001659 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    position: relative;
+}
+
+.admin-login-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,<svg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'><g fill='none' fill-rule='evenodd'><g fill='%2312C3E0' fill-opacity='0.05'><polygon points='30 0 60 30 30 60 0 30'/></g></svg>") repeat;
+    pointer-events: none;
+}
+
+.admin-login-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 420px;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+}
+
+.login-header {
+    background: linear-gradient(135deg, #001659, #0A2472);
+    padding: 2rem;
+    text-align: center;
+    color: white;
+}
+
+.login-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+}
+
+.login-logo-icon {
+    width: 50px;
+    height: 50px;
+    background: white;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid #10B981;
+}
+
+.login-logo-icon span {
+    color: #001659;
+    font-weight: bold;
+    font-size: 1.5rem;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.login-logo-text {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+}
+
+.login-title-section {
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    padding-top: 2rem;
+}
+
+.login-icon {
+    width: 60px;
+    height: 60px;
+    background: rgba(18, 195, 224, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem auto;
+}
+
+.login-icon i {
+    font-size: 1.5rem;
+    color: #12C3E0;
+}
+
+.login-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+}
+
+.login-subtitle {
+    font-family: 'Yantramanav', sans-serif;
+    color: #B8C5D6;
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.login-form-section {
+    padding: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.admin-form-label {
+    font-family: 'Yantramanav', sans-serif;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    display: block;
+    font-size: 0.9rem;
+}
+
+.admin-input-wrapper {
+    position: relative;
+}
+
+.admin-input-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9CA3AF;
+    z-index: 2;
+}
+
+.admin-form-input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.75rem;
+    border: 2px solid #E5E7EB;
+    border-radius: 8px;
+    font-family: 'Yantramanav', sans-serif;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #F9FAFB;
+}
+
+.admin-form-input:focus {
+    outline: none;
+    border-color: #12C3E0;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(18, 195, 224, 0.1);
+}
+
+.admin-form-input:focus + .admin-input-icon {
+    color: #12C3E0;
+}
+
+.admin-form-error {
+    margin-top: 0.5rem;
+    color: #EF4444;
+    font-size: 0.85rem;
+    font-family: 'Yantramanav', sans-serif;
+}
+
+.admin-login-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #12C3E0, #0FA8C0);
+    color: white;
+    border: none;
+    padding: 0.875rem 1.5rem;
+    border-radius: 8px;
+    font-family: 'Yantramanav', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.admin-login-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(18, 195, 224, 0.3);
+}
+
+.admin-login-btn:active {
+    transform: translateY(0);
+}
+
+.login-footer {
+    border-top: 1px solid #F3F4F6;
+    padding-top: 1.5rem;
+    text-align: center;
+}
+
+.login-help {
+    margin-bottom: 1rem;
+    font-family: 'Yantramanav', sans-serif;
+    color: #6B7280;
+}
+
+.login-help strong {
+    color: #374151;
+}
+
+.back-to-site-link {
+    color: #12C3E0;
+    text-decoration: none;
+    font-family: 'Yantramanav', sans-serif;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: color 0.3s ease;
+}
+
+.back-to-site-link:hover {
+    color: #0FA8C0;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    .admin-login-container {
+        padding: 1rem;
+    }
+    
+    .login-header {
+        padding: 1.5rem;
+    }
+    
+    .login-form-section {
+        padding: 1.5rem;
+    }
+    
+    .login-logo {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .login-logo-text {
+        font-size: 0.9rem;
+    }
+    
+    .login-title {
+        font-size: 1.25rem;
+    }
+}
+</style>
 {% endblock %}

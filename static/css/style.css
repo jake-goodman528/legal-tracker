@@ -1,231 +1,2760 @@
-/* Custom styles for STR Compliance Toolkit */
+/* Enhanced STR Compliance Toolkit - Professional Design System */
 
 :root {
-    --primary-color: #2c3e50;
-    --secondary-color: #34495e;
-    --accent-color: #3498db;
-    --success-color: #27ae60;
-    --warning-color: #f39c12;
-    --danger-color: #e74c3c;
-    --info-color: #17a2b8;
-    --light-bg: #f8f9fa;
-    --dark-bg: #212529;
+    /* Kaystreet Management Brand Colors */
+    --primary-color: #001659;           /* Deep Navy Blue */
+    --secondary-color: #12C3E0;         /* Bright Cyan/Turquoise */
+    --accent-color: #12C3E0;            /* Bright Cyan/Turquoise */
+    --cyan-hover: #0FA8C7;              /* Darker cyan for hover effects */
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+    --info-color: #12C3E0;
+    
+    /* Enhanced Category Colors */
+    --tag-legal: #dc2626;           /* Legal & Compliance (Red) */
+    --tag-licensing: #ea580c;       /* Licensing & Permits (Orange) */
+    --tag-taxes: #2563eb;           /* Taxation (Blue) */
+    --tag-zoning: #7c3aed;          /* Zoning & Land Use (Purple) */
+    --tag-occupancy: #92400e;       /* Occupancy & Safety (Brown) */
+    --tag-registration: #059669;    /* Registration & Documentation (Green) */
+    --tag-discrimination: #991b1b;  /* Fair Housing & Discrimination (Dark Red) */
+    --tag-default: #64748b;
+    
+    /* Jurisdiction Badge Colors */
+    --jurisdiction-national: #dc2626;
+    --jurisdiction-state: #ea580c;
+    --jurisdiction-local: #2563eb;
+    
+    /* UI Colors */
+    --light-bg: #F8F9FA;               /* Light gray for sections */
+    --white-bg: #FFFFFF;               /* White for cards and main background */
+    --dark-bg: #001659;                /* Navy blue for dark sections */
+    --border-color: #e2e8f0;
+    --text-primary: #001659;           /* Navy blue for primary text */
+    --text-secondary: #333333;         /* Dark gray for body text */
+    --text-muted: #666666;             /* Medium gray for small text */
+    --cyan-border: #12C3E0;            /* Cyan for signature left borders */
+    --ksm-green: #10b981;              /* Green accent for KSM logo border */
+    
+    /* Shadows and Effects */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
     --border-radius: 8px;
-    --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    --border-radius-lg: 12px;
+    
+    /* Transitions */
+    --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-long: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Base Styles */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Yantramanav', Arial, sans-serif;
+    font-weight: 400;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    background-color: var(--white-bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Typography Hierarchy */
+h1, .h1 {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+h2, .h2 {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.3;
+}
+
+h3, .h3 {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.4;
+}
+
+h4, .h4 {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.4;
+}
+
+h5, .h5 {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.4;
+}
+
+h6, .h6 {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.4;
+}
+
+/* Body and Small Text */
+p, .body-text {
+    font-family: 'Yantramanav', Arial, sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--text-secondary);
     line-height: 1.6;
 }
 
-/* Navigation */
-.navbar {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    box-shadow: var(--shadow);
+small, .small-text {
+    font-family: 'Yantramanav', Arial, sans-serif;
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    line-height: 1.5;
 }
 
-.navbar-brand {
-    font-weight: bold;
-    font-size: 1.25rem;
+/* Kaystreet Management Professional Header */
+.kaystreet-header {
+    background: var(--primary-color);
+    height: 80px;
+    padding: 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Hero Section */
-.hero-section {
-    background: linear-gradient(135deg, rgba(44, 62, 80, 0.9), rgba(52, 73, 94, 0.9));
+.kaystreet-header .navbar {
+    height: 100%;
+}
+
+.kaystreet-header .navbar-collapse {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Kaystreet Management Logo */
+.kaystreet-brand {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: white !important;
+    margin-right: 2rem;
+}
+
+.kaystreet-brand:hover {
+    color: white !important;
+    text-decoration: none;
+}
+
+.kaystreet-logo-img {
+    height: 50px;
+    width: auto;
+    max-width: 250px;
+    object-fit: contain;
+    transition: var(--transition);
+}
+
+.kaystreet-logo-img:hover {
+    transform: scale(1.02);
+}
+
+/* Center Navigation */
+.kaystreet-nav {
+    gap: 2rem;
+    justify-content: center;
+    flex: 1;
+}
+
+.kaystreet-nav-link {
+    font-family: 'Yantramanav', Arial, sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    color: white !important;
+    text-decoration: none;
+    padding: 0.5rem 0 !important;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.kaystreet-nav-link:hover {
+    color: white !important;
+}
+
+.kaystreet-nav-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 50%;
+    background-color: var(--secondary-color);
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+}
+
+.kaystreet-nav-link:hover::after {
+    width: 100%;
+}
+
+.kaystreet-nav-link.active::after {
+    width: 100%;
+}
+
+/* Admin Dropdown */
+.kaystreet-dropdown {
+    background: white;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    margin-top: 0.5rem;
+}
+
+.kaystreet-dropdown .dropdown-item {
+    font-family: 'Yantramanav', Arial, sans-serif;
+    color: var(--text-secondary);
+    padding: 0.75rem 1rem;
+    transition: var(--transition);
+}
+
+.kaystreet-dropdown .dropdown-item:hover {
+    background-color: var(--light-bg);
+    color: var(--primary-color);
+}
+
+/* Call-to-Action Button */
+.kaystreet-cta {
+    margin-left: 1rem;
+}
+
+.kaystreet-consultation-btn {
+    background: var(--secondary-color);
     color: white;
-    padding: 4rem 0;
+    font-family: 'Yantramanav', Arial, sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.kaystreet-consultation-btn:hover {
+    background: var(--cyan-hover);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(18, 195, 224, 0.3);
+    text-decoration: none;
+}
+
+/* Mobile Navigation */
+.kaystreet-toggler {
+    border: none;
+    padding: 0.25rem 0.5rem;
+}
+
+.kaystreet-toggler:focus {
+    box-shadow: none;
+}
+
+.kaystreet-toggler .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.85%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* Mobile Responsive Design */
+@media (max-width: 991.98px) {
+    .kaystreet-header {
+        height: 70px;
+    }
+    
+    .kaystreet-logo-img {
+        height: 45px;
+        max-width: 200px;
+    }
+    
+    .kaystreet-nav {
+        background: var(--primary-color);
+        padding: 1rem 0;
+        margin-top: 1rem;
+        border-radius: 8px;
+        gap: 0;
+    }
+    
+    .kaystreet-nav-link {
+        padding: 0.75rem 1rem !important;
+        font-size: 1.1rem;
+        min-height: 44px; /* Touch-friendly minimum */
+        display: flex;
+        align-items: center;
+    }
+    
+    .kaystreet-nav-link::after {
+        display: none;
+    }
+    
+    .kaystreet-nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+    }
+    
+    .kaystreet-cta {
+        margin: 1rem 0 0 0;
+        padding: 0 1rem;
+    }
+    
+    .kaystreet-consultation-btn {
+        width: 100%;
+        text-align: center;
+        min-height: 44px; /* Touch-friendly minimum */
+    }
+}
+
+@media (max-width: 576px) {
+    .kaystreet-brand {
+        margin-right: 1rem;
+    }
+    
+    .kaystreet-logo-img {
+        height: 40px;
+        max-width: 150px;
+    }
+}
+
+
+
+/* Breadcrumb Navigation */
+.breadcrumb-container {
+    background-color: var(--light-bg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.breadcrumb {
+    background: none;
+    padding: 0;
+    margin: 0;
+}
+
+.breadcrumb-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.breadcrumb-link:hover {
+    color: var(--primary-color);
+}
+
+.breadcrumb-item.active {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* Enhanced Alerts */
+.alert-enhanced {
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 1rem 1.25rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.alert-icon {
+    font-size: 1.1rem;
+}
+
+.alert-content {
+    font-weight: 500;
+}
+
+/* Database Header Styling */
+.database-header {
+    text-align: center;
     margin-bottom: 2rem;
 }
 
-.hero-section h1 {
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+.database-title {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 2.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    line-height: 1.2;
 }
 
-/* Cards */
-.card {
-    border: none;
-    border-radius: var(--border-radius);
+.usage-guide {
+    max-width: 900px;
+    margin: 0 auto;
     box-shadow: var(--shadow);
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    border-radius: var(--border-radius-lg);
+    border-left: 4px solid var(--cyan-border);
+    overflow: hidden;
+}
+
+.usage-guide .card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 1rem 1.5rem;
+}
+
+.usage-list {
+    font-size: 0.95rem;
+    line-height: 1.8;
+    margin-bottom: 0;
+}
+
+.usage-list li {
+    margin-bottom: 0.75rem;
+    padding-left: 0.5rem;
+}
+
+.usage-list strong {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* Enhanced Database Controls */
+.database-controls {
+    background: var(--white-bg);
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--cyan-border);
+    box-shadow: var(--shadow-sm);
+    border-radius: var(--border-radius-lg);
+}
+
+.view-toggle .btn {
+    border-radius: 6px;
+    margin-right: 2px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    transition: var(--transition);
+}
+
+.view-toggle .btn:last-child {
+    margin-right: 0;
+}
+
+.view-toggle .btn.active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-action {
+    font-size: 0.875rem;
+    border-radius: 6px;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    margin-left: 0.5rem;
+    transition: var(--transition);
+}
+
+.btn-action:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Enhanced Form Controls */
+.form-label {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+}
+
+.form-select-enhanced,
+.form-control-enhanced {
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    transition: var(--transition);
+    background-color: white;
+}
+
+.form-select-enhanced:focus,
+.form-control-enhanced:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgb(37 99 235 / 0.1);
+    outline: none;
+}
+
+.input-group-text {
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.btn-filter {
+    background: var(--secondary-color);
+    border: none;
+    color: white;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    transition: var(--transition);
+}
+
+.btn-filter:hover {
+    background: var(--cyan-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+    color: white;
+}
+
+/* Enhanced Button Styling */
+.btn-success, .btn-edit {
+    background: linear-gradient(135deg, var(--success-color), #059669);
+    border: none;
+    color: white;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.btn-success:hover, .btn-edit:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+    color: white;
+}
+
+.btn-danger, .btn-delete {
+    background: linear-gradient(135deg, var(--danger-color), #dc2626);
+    border: none;
+    color: white;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.btn-danger:hover, .btn-delete:hover {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+    color: white;
+}
+
+.btn-primary {
+    background: var(--secondary-color);
+    border: none;
+    color: white;
+    font-weight: 500;
+    border-radius: 6px;
+    transition: var(--transition);
+}
+
+.btn-primary:hover {
+    background: var(--cyan-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+    color: white;
+}
+
+/* Secondary Button Styling */
+.btn-outline-secondary {
+    border: 1px solid var(--secondary-color);
+    color: var(--secondary-color);
+    background: transparent;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.btn-outline-secondary:hover {
+    background: var(--secondary-color);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+}
+
+/* Enhanced Notion-style Table */
+.notion-table {
+    border: none;
+    border-left: 4px solid var(--cyan-border);
+    background: var(--white-bg);
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+}
+
+.notion-table thead th {
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    border: none;
+    border-bottom: 2px solid var(--border-color);
+    color: var(--text-primary);
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    white-space: nowrap;
+}
+
+.notion-table thead th.sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: var(--transition);
+}
+
+.notion-table thead th.sortable:hover {
+    background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+    color: var(--primary-color);
+}
+
+.sort-icon {
+    opacity: 0.5;
+    transition: var(--transition);
+}
+
+.sortable:hover .sort-icon {
+    opacity: 1;
+}
+
+.notion-table tbody tr {
+    border: none;
+    border-bottom: 1px solid #f1f3f4;
+    transition: var(--transition);
+}
+
+.notion-table tbody tr:hover {
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.notion-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.notion-table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+    border: none;
+    font-size: 0.875rem;
+}
+
+.notion-table.table-compact tbody td {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+}
+
+/* Table Column Styles */
+.location-col { width: 15%; }
+.title-col { width: 25%; }
+.requirements-col { width: 30%; }
+.updated-col { width: 12%; }
+.category-col { width: 10%; }
+.details-col { width: 8%; }
+
+.location-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.location-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.regulation-title {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    transition: var(--transition);
+}
+
+.regulation-row:hover .regulation-title {
+    color: var(--primary-color);
+}
+
+.requirements-preview {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.update-date {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Regulations Page Styling */
+.regulations-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.regulations-title {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.regulations-subtitle {
+    font-family: 'Yantramanav', Arial, sans-serif;
+    font-size: 1.125rem;
+    color: #666666;
+    line-height: 1.6;
+    max-width: 800px;
+    margin: 0 auto 2rem;
+}
+
+/* Database Instructions Section */
+.database-instructions {
+    margin-bottom: 2rem;
+}
+
+.instructions-card {
+    background: #F8F9FA;
+    border: 1px solid #E5E7EB;
+    border-left: 4px solid var(--secondary-color);
+    border-radius: 8px;
+    padding: 2rem;
+}
+
+.instructions-header {
+    margin-bottom: 1.5rem;
+}
+
+.instructions-title {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0;
+}
+
+.instruction-step {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+}
+
+.instruction-step:last-child {
+    margin-bottom: 0;
+}
+
+.step-number {
+    background: var(--secondary-color);
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-right: 1rem;
+    flex-shrink: 0;
+}
+
+.step-content h5 {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.25rem;
+}
+
+.step-content p {
+    font-family: 'Yantramanav', Arial, sans-serif;
+    font-size: 0.875rem;
+    color: #666666;
+    line-height: 1.5;
+    margin-bottom: 0;
+}
+
+.important-note {
+    text-align: center;
+}
+
+.important-note p {
+    font-family: 'Yantramanav', Arial, sans-serif;
+    font-size: 0.875rem;
+    color: #666666;
+    font-style: italic;
+    margin-bottom: 0;
+}
+
+/* Professional Filter Section */
+.regulations-filter-section {
+    margin-bottom: 2rem;
+}
+
+.filter-card {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-left: 4px solid var(--secondary-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+}
+
+.filter-label {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.filter-label i {
+    color: var(--secondary-color);
+    margin-right: 0.5rem;
+}
+
+.regulations-search-input {
+    font-family: 'Yantramanav', Arial, sans-serif;
+    font-size: 1rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid #E5E7EB;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.regulations-search-input:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 0.2rem rgba(18, 195, 224, 0.25);
+}
+
+.regulations-filter-select {
+    font-family: 'Yantramanav', Arial, sans-serif;
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #E5E7EB;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.regulations-filter-select:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 0.2rem rgba(18, 195, 224, 0.25);
+}
+
+.filter-summary-label {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #666666;
+}
+
+.clear-filters-btn {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 0.875rem;
+    color: var(--secondary-color);
+    text-decoration: none;
+}
+
+.clear-filters-btn:hover {
+    color: var(--cyan-hover);
+}
+
+/* Updated Category Tags with Kaystreet Colors */
+.category-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    color: white;
+    white-space: nowrap;
+    transition: var(--transition);
+}
+
+.category-tag:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Kaystreet Category Colors */
+.tag-legal { background: var(--primary-color); } /* Navy */
+.tag-licensing { background: var(--secondary-color); } /* Cyan */
+.tag-taxes { background: #3B82F6; } /* Blue */
+.tag-zoning { background: #8B5CF6; } /* Purple */
+.tag-occupancy { background: #F59E0B; } /* Orange */
+.tag-registration { background: #10B981; } /* Green */
+.tag-discrimination { background: var(--primary-color); } /* Navy */
+.tag-default { background: #475569; } /* Slate */
+
+/* Professional Table Styling */
+.regulations-table {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.regulations-table thead {
+    background: #D1D5DB;
+}
+
+.regulations-table thead th {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--primary-color) !important;
+    padding: 1rem;
+    border: none;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.regulations-table tbody tr {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid #F3F4F6;
+}
+
+.regulations-table tbody tr:hover {
+    background: #F8F9FA;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.regulations-table tbody td {
+    font-family: 'Yantramanav', Arial, sans-serif;
+    font-size: 0.875rem;
+    color: var(--text-secondary) !important;
+    padding: 1rem;
+    border: none;
+}
+
+.regulations-table .location-cell {
+    color: var(--text-secondary) !important;
+    font-weight: 500;
+}
+
+.regulations-table .title-cell a {
+    color: var(--primary-color) !important;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.regulations-table .title-cell a:hover {
+    color: var(--secondary-color) !important;
+    text-decoration: underline;
+}
+
+.regulations-table .date-cell {
+    color: var(--text-muted) !important;
+    font-size: 0.8125rem;
+    vertical-align: middle;
+}
+
+.regulations-table .btn-primary {
+    background: var(--secondary-color);
+    border-color: var(--secondary-color);
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.375rem 0.75rem;
+}
+
+.regulations-table .btn-primary:hover {
+    background: var(--cyan-hover);
+    border-color: var(--cyan-hover);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .regulations-title {
+        font-size: 2rem;
+    }
+    
+    .regulations-subtitle {
+        font-size: 1rem;
+    }
+    
+    .instructions-card {
+        padding: 1.5rem;
+    }
+    
+    .instruction-step {
+        flex-direction: column;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+    
+    .step-number {
+        margin-right: 0;
+        margin-bottom: 0.5rem;
+    }
+    
+    .filter-card {
+        padding: 1rem;
+    }
+}
+
+/* Enhanced Jurisdiction Badges */
+.jurisdiction-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    color: white;
+    white-space: nowrap;
+    margin-bottom: 4px;
+    transition: var(--transition);
+}
+
+.jurisdiction-national { background: linear-gradient(135deg, var(--jurisdiction-national), #b91c1c); }
+.jurisdiction-state { background: linear-gradient(135deg, var(--jurisdiction-state), #dc2626); }
+.jurisdiction-local { background: linear-gradient(135deg, var(--jurisdiction-local), #1d4ed8); }
+
+/* Enhanced Details Button */
+.details-btn {
+    background: var(--secondary-color);
+    border: none;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    transition: var(--transition);
+    color: white;
+}
+
+.details-btn:hover {
+    background: var(--cyan-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+    color: white;
+}
+
+/* View Content */
+.view-content {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.view-content.active {
+    display: block;
+    opacity: 1;
+}
+
+/* Kaystreet Management Regulations Grid */
+.regulation-gallery {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 1rem;
+}
+
+.gallery-card {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-left: 4px solid var(--secondary-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+    transition: all 0.3s ease;
+    height: 100%;
+    overflow: hidden;
+}
+
+.gallery-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    border-left-color: var(--cyan-hover);
+}
+
+.gallery-card .card-header {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin-bottom: 1rem;
+}
+
+.gallery-card .card-title {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.75rem;
+    line-height: 1.3;
+}
+
+.gallery-card .location-text {
+    font-family: 'Yantramanav', Arial, sans-serif;
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+}
+
+.gallery-card .requirements-text {
+    font-family: 'Yantramanav', Arial, sans-serif;
+    font-size: 1rem;
+    color: #666666;
+    line-height: 1.6;
+}
+
+/* Responsive Grid Layout */
+@media (max-width: 1024px) {
+    .regulation-gallery {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .regulation-gallery {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .gallery-card {
+        padding: 20px;
+    }
+}
+
+/* Enhanced Board View */
+.regulation-board {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.board-column {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.board-column:hover {
+    box-shadow: var(--shadow);
+    transform: translateY(-2px);
+}
+
+.column-header {
+    background: linear-gradient(135deg, var(--light-bg), white);
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.column-content {
+    padding: 1.25rem;
+    max-height: 600px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) transparent;
+}
+
+.column-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.column-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.column-content::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 3px;
+}
+
+.board-card {
+    margin-bottom: 1rem;
+}
+
+.board-card:last-child {
+    margin-bottom: 0;
+}
+
+.board-card .card {
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+}
+
+.board-card .card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+    border-color: var(--primary-color);
+}
+
+.board-card .card-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+    line-height: 1.3;
+}
+
+.board-card .location-text {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+/* Empty State */
+.empty-state .card {
+    border: 2px dashed var(--border-color);
+    background: linear-gradient(135deg, #fafbfc, #f8fafc);
+    border-radius: var(--border-radius-lg);
+}
+
+.empty-state .card-body {
+    padding: 3rem 2rem;
+}
+
+.empty-state-icon {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+/* Kaystreet Management Footer */
+.kaystreet-footer {
+    background-color: #001659;
+    color: #FFFFFF;
+    font-family: 'Yantramanav', sans-serif;
+    padding: 60px 0 0 0;
+    margin-top: auto;
+}
+
+.kaystreet-footer .container {
+    padding-left: 40px;
+    padding-right: 40px;
+}
+
+.footer-heading {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #FFFFFF;
+    font-size: 1.25rem;
+}
+
+.footer-content {
+    line-height: 1.6;
+}
+
+.footer-address {
+    margin-bottom: 0;
+    color: #FFFFFF;
+}
+
+.footer-links-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-links-list li {
+    margin-bottom: 8px;
+}
+
+.footer-links-list li:last-child {
+    margin-bottom: 0;
+}
+
+.kaystreet-footer .footer-link {
+    color: #FFFFFF;
+    text-decoration: none;
+    transition: color 0.3s ease;
+    display: inline-block;
+    line-height: 1.5;
+}
+
+.kaystreet-footer .footer-link:hover {
+    color: #12C3E0;
+    text-decoration: none;
+}
+
+.footer-bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    margin-top: 40px;
+    padding: 20px 0;
+}
+
+.footer-copyright {
+    text-align: center;
+    font-size: 0.875rem;
+    color: #FFFFFF;
+    margin: 0;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .kaystreet-footer {
+        padding: 40px 0 0 0;
+    }
+    
+    .kaystreet-footer .container {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+    
+    .footer-heading {
+        font-size: 1.125rem;
+        margin-bottom: 15px;
+    }
+    
+    .footer-links-list li {
+        margin-bottom: 10px;
+    }
+    
+    .kaystreet-footer .footer-link {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        padding: 8px 0;
+    }
+    
+    .footer-bottom {
+        margin-top: 30px;
+        padding: 15px 0;
+    }
+}
+
+/* Loading Overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    backdrop-filter: blur(5px);
+}
+
+.loading-overlay.show {
+    display: flex;
+}
+
+.loading-spinner {
+    text-align: center;
+}
+
+.loading-text {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Kaystreet Management Signature Card Design */
+.card {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-left: 4px solid var(--secondary-color); /* Signature cyan left border */
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+    transition: all 0.3s ease;
+    overflow: hidden;
 }
 
 .card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    border-left-color: var(--cyan-hover); /* Brightened cyan on hover */
 }
 
-.card-header {
-    background: linear-gradient(135deg, var(--light-bg), #ffffff);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+/* Card Content Typography */
+.card-title {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 1.25rem;
     font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.75rem;
+    line-height: 1.3;
 }
 
-/* Tables */
-.table {
-    border-radius: var(--border-radius);
-    overflow: hidden;
-}
-
-.table-hover tbody tr:hover {
-    background-color: rgba(0, 123, 255, 0.05);
-}
-
-.regulation-details {
-    transition: all 0.3s ease;
-}
-
-.regulation-details.show {
-    display: table-row !important;
-}
-
-/* Badges */
-.badge {
-    font-size: 0.75em;
-    padding: 0.5em 0.75em;
-    border-radius: 6px;
-}
-
-/* Buttons */
-.btn {
-    border-radius: 6px;
-    font-weight: 500;
-    transition: all 0.2s ease;
-}
-
-.btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-/* Timeline */
-.timeline .card {
-    border-left: 4px solid var(--accent-color);
+.card-text {
+    font-family: 'Yantramanav', Arial, sans-serif;
+    font-size: 1rem;
+    color: #666666;
+    line-height: 1.6;
     margin-bottom: 1rem;
 }
 
-.timeline .card-body {
+.card-body {
+    padding: 0; /* Remove default Bootstrap padding since we set padding on .card */
+}
+
+.card-header {
+    background: linear-gradient(135deg, var(--light-bg), white);
+    border-bottom: 1px solid var(--border-color);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Form Validation */
+.was-validated .form-control:valid,
+.was-validated .form-select:valid {
+    border-color: var(--success-color);
+    box-shadow: 0 0 0 3px rgb(16 185 129 / 0.1);
+}
+
+.was-validated .form-control:invalid,
+.was-validated .form-select:invalid {
+    border-color: var(--danger-color);
+    box-shadow: 0 0 0 3px rgb(239 68 68 / 0.1);
+}
+
+/* Advanced Search and Filtering Styles */
+
+/* Search Box with Suggestions */
+.search-box-container {
     position: relative;
 }
 
-.update-date {
+.search-input {
+    padding-right: 40px;
+    transition: all 0.3s ease;
+    border: 2px solid var(--border-color);
+}
+
+.search-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    transform: translateY(-1px);
+}
+
+.search-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: 4px;
+}
+
+.suggestions-list {
+    padding: 0.5rem 0;
+}
+
+.suggestion-category {
+    margin-bottom: 0.5rem;
+}
+
+.suggestion-category-header {
+    padding: 0.25rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    background-color: var(--light-bg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.suggestion-item {
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+}
+
+.suggestion-item:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.search-spinner {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--primary-color);
+}
+
+/* Quick Filter Buttons */
+.quick-filters {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.quick-filter-btn {
+    border-radius: 20px;
+    font-size: 0.875rem;
+    padding: 0.375rem 1rem;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.quick-filter-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-color: var(--primary-color);
+}
+
+/* Enhanced Filter Section */
+.search-filter-section .card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.filter-summary {
+    padding: 0.75rem;
+    background: rgba(13, 110, 253, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(13, 110, 253, 0.1);
+}
+
+.filter-summary .badge {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+}
+
+/* Advanced Search Modal */
+.modal-xl .modal-dialog {
+    max-width: 1200px;
+}
+
+.modal-content {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #0056b3 100%);
+    color: white;
+    border-radius: 16px 16px 0 0;
+    padding: 1.5rem;
+}
+
+.modal-header .btn-close {
+    filter: invert(1);
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+.filter-checkboxes {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.75rem;
+    background: #f8f9fa;
+}
+
+.filter-checkboxes .form-check {
+    margin-bottom: 0.5rem;
+    padding: 0.25rem 0;
+}
+
+.filter-checkboxes .form-check:last-child {
+    margin-bottom: 0;
+}
+
+.filter-checkboxes .form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.filter-checkboxes .form-check-label {
+    cursor: pointer;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+}
+
+/* Enhanced Compliance and Category Badges */
+.badge {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 6px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.compliance-badge {
+    font-weight: 600;
+    padding: 0.5rem 0.75rem;
+}
+
+/* Jurisdiction Badges */
+.jurisdiction-badge {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: inline-block;
+}
+
+.jurisdiction-national {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+}
+
+.jurisdiction-state {
+    background: linear-gradient(135deg, #fd7e14 0%, #e55d0f 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(253, 126, 20, 0.3);
+}
+
+.jurisdiction-local {
+    background: linear-gradient(135deg, #20c997 0%, #1ba085 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(32, 201, 151, 0.3);
+}
+
+/* Enhanced Category Badges */
+.category-badge {
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+    text-transform: capitalize;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.category-legal {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+}
+
+.category-licensing {
+    background: linear-gradient(135deg, #fd7e14 0%, #e55d0f 100%);
+    color: white;
+}
+
+.category-taxes, .category-taxation {
+    background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+    color: white;
+}
+
+.category-zoning {
+    background: linear-gradient(135deg, #6f42c1 0%, #5a2d91 100%);
+    color: white;
+}
+
+.category-occupancy {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    color: white;
+}
+
+.category-registration {
+    background: linear-gradient(135deg, #198754 0%, #146c43 100%);
+    color: white;
+}
+
+.category-discrimination, .category-fair-housing {
+    background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);
+    color: white;
+}
+
+/* Loading States */
+.search-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.95);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+}
+
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* No Results State */
+.no-results {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 16px;
+    border: 2px dashed #dee2e6;
+    margin: 2rem 0;
+}
+
+.no-results i {
+    opacity: 0.3;
+    margin-bottom: 1rem;
+}
+
+/* Enhanced Table Styles */
+.regulations-table {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.regulations-table thead {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.regulations-table th {
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    border: none;
+    padding: 1rem 0.75rem;
+    color: var(--text-color);
+}
+
+.regulations-table td {
+    padding: 1rem 0.75rem;
+    border: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    vertical-align: middle;
+}
+
+.regulations-table tbody tr:hover {
+    background: linear-gradient(135deg, rgba(13, 110, 253, 0.02) 0%, rgba(13, 110, 253, 0.05) 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease;
+}
+
+.sortable:hover {
+    background: rgba(13, 110, 253, 0.05);
+    color: var(--primary-color);
+}
+
+.sort-icon {
+    opacity: 0.5;
+    margin-left: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.sortable:hover .sort-icon {
+    opacity: 1;
+}
+
+.sort-asc .sort-icon,
+.sort-desc .sort-icon {
+    opacity: 1;
+    color: var(--primary-color);
+}
+
+/* Enhanced Card Styles */
+.regulation-card-item {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-left: 4px solid var(--secondary-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.regulation-card-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    border-left-color: var(--cyan-hover);
+}
+
+.regulation-card-item .card-header {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin-bottom: 1rem;
+}
+
+.regulation-card-item .card-title a {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.regulation-card-item .card-title a:hover {
+    color: var(--secondary-color);
+}
+
+.regulation-card-item .card-body {
+    padding: 0;
+}
+
+/* Kaystreet Management Update Cards */
+.update-item {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-left: 4px solid var(--secondary-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+    transition: all 0.3s ease;
+    margin-bottom: 1.5rem;
+}
+
+.update-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    border-left-color: var(--cyan-hover);
+}
+
+.update-item .card-body {
+    padding: 0;
+}
+
+.update-item .card-title {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.75rem;
+}
+
+.update-item .card-text {
+    font-family: 'Yantramanav', Arial, sans-serif;
+    font-size: 1rem;
+    color: #666666;
+    line-height: 1.6;
+}
+
+/* Section Titles and Subtitles */
+.section-title {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.section-subtitle {
+    font-family: 'Yantramanav', Arial, sans-serif;
+    font-size: 1.125rem;
+    color: #666666;
+    line-height: 1.6;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Key Features Section */
+.kaystreet-features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.feature-card .card {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-left: 4px solid var(--secondary-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.feature-card .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    border-left-color: var(--cyan-hover);
+}
+
+.feature-card .card-body {
+    padding: 0;
+    text-align: center;
+}
+
+.feature-icon-container {
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.feature-card .card-title {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.feature-card .card-text {
+    font-family: 'Yantramanav', Arial, sans-serif;
+    font-size: 1rem;
+    color: #666666;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+/* Database Usage Section */
+.database-usage-section {
+    background: var(--primary-color);
+    padding: 80px 0;
+    margin: 60px 0;
+}
+
+.usage-title {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 1rem;
+}
+
+.usage-subtitle {
+    font-family: 'Yantramanav', Arial, sans-serif;
+    font-size: 1.125rem;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.6;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.usage-step {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    border-left: 4px solid var(--secondary-color);
+    transition: all 0.3s ease;
+}
+
+.usage-step:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.step-number {
+    background: var(--secondary-color);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-weight: 700;
+    font-size: 1.25rem;
+    margin-right: 1rem;
+    flex-shrink: 0;
+}
+
+.step-content h4 {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 0.5rem;
+}
+
+.step-content p {
+    font-family: 'Yantramanav', Arial, sans-serif;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.6;
+    margin-bottom: 0;
+}
+
+/* Compliance Areas Section */
+.compliance-areas-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+}
+
+.compliance-area-card .card {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-left: 4px solid var(--secondary-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.compliance-area-card .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    border-left-color: var(--cyan-hover);
+}
+
+.compliance-area-card .card-body {
+    padding: 0;
+}
+
+.compliance-icon-container {
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.compliance-area-card .card-title {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.compliance-area-card .card-text {
+    font-family: 'Yantramanav', Arial, sans-serif;
+    font-size: 1rem;
+    color: #666666;
+    line-height: 1.6;
+}
+
+/* Responsive Design for Feature Sections */
+@media (max-width: 1024px) {
+    .kaystreet-features-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .compliance-areas-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .section-title {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .kaystreet-features-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .compliance-areas-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .feature-card .card,
+    .compliance-area-card .card {
+        padding: 20px;
+    }
+    
+    .section-title {
+        font-size: 1.75rem;
+    }
+    
+    .section-subtitle {
+        font-size: 1rem;
+    }
+    
+    .database-usage-section {
+        padding: 60px 0;
+    }
+    
+    .usage-title {
+        font-size: 2rem;
+    }
+    
+    .usage-subtitle {
+        font-size: 1rem;
+    }
+    
+    .usage-step {
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .step-number {
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
+    }
+    
+    .step-content h4 {
+        font-size: 1.125rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .section-title {
+        font-size: 1.5rem;
+    }
+    
+    .usage-step {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .step-number {
+        margin-right: 0;
+        margin-bottom: 1rem;
+    }
+}
+
+/* Kaystreet Management Professional Hero Section */
+.kaystreet-hero-section {
+    position: relative;
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    background: linear-gradient(135deg, var(--primary-color) 0%, #1a237e 100%);
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><defs><pattern id="legal-pattern" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse"><rect width="100" height="100" fill="rgba(255,255,255,0.02)"/><path d="M20,20 L80,20 L80,80 L20,80 Z" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/><circle cx="50" cy="50" r="15" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/></pattern></defs><rect width="1200" height="800" fill="url(%23legal-pattern)"/></svg>');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    padding: 80px 0;
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 22, 89, 0.7);
+    z-index: 1;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 600px;
+    color: white;
+}
+
+.hero-intro {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--secondary-color);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+}
+
+.hero-headline {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 3rem;
+    font-weight: 700;
+    color: white;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+}
+
+.hero-subheading {
+    font-family: 'Yantramanav', Arial, sans-serif;
+    font-size: 1.125rem;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.hero-btn-primary {
+    background: var(--secondary-color);
+    border: 2px solid var(--secondary-color);
+    color: white;
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-weight: 600;
+    padding: 12px 24px;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+
+.hero-btn-primary:hover {
+    background: var(--cyan-hover);
+    border-color: var(--cyan-hover);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(18, 195, 224, 0.3);
+}
+
+.hero-btn-secondary {
+    background: transparent;
+    border: 2px solid var(--secondary-color);
+    color: var(--secondary-color);
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-weight: 600;
+    padding: 12px 24px;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+
+.hero-btn-secondary:hover {
+    background: var(--secondary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(18, 195, 224, 0.3);
+}
+
+/* Hero Section Mobile Optimization */
+@media (max-width: 768px) {
+    .kaystreet-hero-section {
+        min-height: 60vh;
+        padding: 60px 0;
+        background-attachment: scroll;
+    }
+    
+    .hero-headline {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+    
+    .hero-subheading {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .hero-buttons {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+    }
+    
+    .hero-btn-primary,
+    .hero-btn-secondary {
+        text-align: center;
+        padding: 14px 20px;
+    }
+}
+
+@media (max-width: 576px) {
+    .kaystreet-hero-section {
+        padding: 40px 0;
+    }
+    
+    .hero-content {
+        max-width: 100%;
+    }
+    
+    .hero-headline {
+        font-size: 1.75rem;
+    }
+    
+         .hero-intro {
+         font-size: 0.75rem;
+     }
+}
+
+/* Hero Feature Card */
+.hero-card {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-left: 4px solid var(--secondary-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+    transition: all 0.3s ease;
+    margin-top: 2rem;
+}
+
+.hero-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    border-left-color: var(--cyan-hover);
+}
+
+.hero-card .card-body {
+    padding: 0;
+}
+
+.hero-card .card-title {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.hero-card .card-text {
+    font-family: 'Yantramanav', Arial, sans-serif;
+    font-size: 1rem;
+    color: #666666;
+    line-height: 1.6;
+}
+
+/* Admin Dashboard Cards */
+.admin-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+}
+
+.admin-stat-card .card {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-left: 4px solid var(--secondary-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.admin-stat-card .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    border-left-color: var(--cyan-hover);
+}
+
+.admin-stat-card .card-body {
+    padding: 0;
+}
+
+.admin-stat-card .card-title {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.admin-stat-card .card-text {
+    font-family: 'Yantramanav', Arial, sans-serif;
+    font-size: 1rem;
+    color: #666666;
+    line-height: 1.6;
+}
+
+.admin-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+}
+
+.admin-action-card .card {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-left: 4px solid var(--secondary-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+    transition: all 0.3s ease;
+}
+
+.admin-action-card .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    border-left-color: var(--cyan-hover);
+}
+
+.admin-action-card .card-header {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin-bottom: 1rem;
+}
+
+.admin-action-card .card-body {
+    padding: 0;
+}
+
+.admin-action-card .card-title {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 1.25rem;
     font-weight: 600;
     color: var(--primary-color);
 }
 
-/* Forms */
-.form-control, .form-select {
-    border-radius: 6px;
-    border: 1px solid #ced4da;
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+.admin-action-card .card-text {
+    font-family: 'Yantramanav', Arial, sans-serif;
+    font-size: 1rem;
+    color: #666666;
+    line-height: 1.6;
+    margin-bottom: 1rem;
 }
 
-.form-control:focus, .form-select:focus {
-    border-color: var(--accent-color);
-    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+/* Admin Cards Responsive */
+@media (max-width: 1024px) {
+    .admin-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
-/* Footer */
-.footer {
-    background: var(--dark-bg);
-    color: #6c757d;
-    border-top: 1px solid #dee2e6;
-}
-
-/* Responsive adjustments */
 @media (max-width: 768px) {
-    .hero-section {
-        padding: 2rem 0;
+    .admin-stats-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
     }
     
-    .hero-section h1 {
-        font-size: 2rem;
+    .admin-actions-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
     }
     
-    .btn-group {
-        flex-direction: column;
-    }
-    
-    .btn-group .btn {
-        margin-bottom: 0.25rem;
+    .admin-stat-card .card,
+    .admin-action-card .card {
+        padding: 20px;
     }
 }
 
-/* Dark theme adjustments */
-[data-bs-theme="dark"] .hero-section {
-    background: linear-gradient(135deg, rgba(13, 27, 42, 0.95), rgba(27, 38, 49, 0.95));
+/* Search Result Highlighting */
+mark {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    padding: 0.125rem 0.25rem;
+    border-radius: 3px;
+    font-weight: 600;
 }
 
-[data-bs-theme="dark"] .card {
-    background-color: var(--bs-dark);
-    border: 1px solid var(--bs-gray-700);
+/* View Toggle Buttons */
+.view-options .btn-group-sm .btn {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    border-radius: 6px;
 }
 
-[data-bs-theme="dark"] .table-hover tbody tr:hover {
-    background-color: rgba(255, 255, 255, 0.05);
+.view-options .btn.active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
 }
 
-/* Loading states */
-.loading {
-    opacity: 0.6;
-    pointer-events: none;
+/* Header Actions */
+.header-actions .btn {
+    margin-left: 0.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
 }
 
-/* Animation classes */
-.fade-in {
-    animation: fadeIn 0.5s ease-in;
+.header-actions .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+/* Page Header */
+.page-header {
+    background: var(--light-bg);
+    padding: 2rem;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--cyan-border);
 }
 
-/* Print styles */
+.page-title {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+    font-family: 'Yantramanav', Arial, sans-serif;
+    font-size: 1.125rem;
+    color: var(--text-muted);
+    margin-bottom: 0;
+}
+
+/* Usage Guide */
+.usage-guide .card-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.usage-guide h6 {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+}
+
+.usage-guide p {
+    margin-bottom: 0;
+    line-height: 1.5;
+}
+
+/* Result Count */
+.results-count {
+    font-size: 1rem;
+    color: var(--text-secondary) !important;
+}
+
+.results-count strong {
+    color: var(--text-primary) !important;
+    font-size: 1.25rem;
+}
+
+/* Date Range Inputs */
+input[type="date"] {
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    padding: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+input[type="date"]:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Animation for dynamic content */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.regulation-row,
+.regulation-card {
+    animation: fadeInUp 0.3s ease-out;
+}
+
+/* Print Styles */
 @media print {
-    .navbar, .footer, .btn, .pagination {
+    .header-actions,
+    .quick-filters,
+    .search-filter-section,
+    .view-options,
+    .no-results {
         display: none !important;
     }
     
-    .card {
-        border: 1px solid #000 !important;
-        box-shadow: none !important;
+    .regulations-table {
+        box-shadow: none;
+        border: 1px solid #ccc;
     }
     
-    .hero-section {
-        background: none !important;
-        color: #000 !important;
+    .regulations-table th,
+    .regulations-table td {
+        padding: 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    .badge {
+        border: 1px solid #ccc;
+        background: white !important;
+        color: black !important;
     }
 }
 
-/* Accessibility improvements */
-.sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .page-title {
+        font-size: 1.875rem;
+    }
+    
+    .header-actions {
+        margin-top: 1rem;
+    }
+    
+    .header-actions .btn {
+        margin: 0.25rem;
+        width: 100%;
+    }
+    
+    .quick-filters {
+        text-align: center;
+    }
+    
+    .quick-filter-btn {
+        margin: 0.25rem;
+        display: inline-block;
+    }
+    
+    .search-input {
+        font-size: 16px; /* Prevent zoom on iOS */
+    }
+    
+    .modal-xl .modal-dialog {
+        max-width: 95%;
+        margin: 1rem auto;
+    }
+    
+    .modal-body {
+        padding: 1rem;
+    }
+    
+    .filter-checkboxes {
+        max-height: 150px;
+    }
+    
+    .regulations-table th,
+    .regulations-table td {
+        padding: 0.5rem 0.25rem;
+        font-size: 0.875rem;
+    }
+    
+    .badge {
+        font-size: 0.6875rem;
+        padding: 0.25rem 0.5rem;
+    }
 }
 
-/* Focus indicators */
-.btn:focus, .form-control:focus, .form-select:focus {
-    outline: 2px solid var(--accent-color);
-    outline-offset: 2px;
+@media (max-width: 576px) {
+    .results-count,
+    .view-options {
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+    
+    .search-results-info {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .regulation-card {
+        margin-bottom: 1rem;
+    }
 }
 
-/* Custom utilities */
-.text-gradient {
-    background: linear-gradient(135deg, var(--accent-color), var(--info-color));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+/* Additional text color fixes */
+.text-muted {
+    color: var(--text-muted) !important;
 }
 
-.border-gradient {
-    border: 2px solid;
-    border-image: linear-gradient(135deg, var(--accent-color), var(--info-color)) 1;
+.text-secondary {
+    color: var(--text-secondary) !important;
 }
+
+.text-primary {
+    color: var(--text-primary) !important;
+}
+
+/* Quick filter button text colors */
+.quick-filter-btn {
+    color: var(--text-secondary) !important;
+}
+
+.quick-filter-btn:hover {
+    color: var(--text-primary) !important;
+}
+
+/* Force light mode for modals and forms */
+.modal-content {
+    background: white !important;
+    color: #333 !important;
+}
+
+.modal-header {
+    background: white !important;
+    color: #333 !important;
+    border-bottom: 1px solid #dee2e6 !important;
+}
+
+.modal-body {
+    background: white !important;
+    color: #333 !important;
+}
+
+.modal-footer {
+    background: white !important;
+    color: #333 !important;
+    border-top: 1px solid #dee2e6 !important;
+}
+
+.form-control, .form-select {
+    background: white !important;
+    color: #333 !important;
+    border: 1px solid #ced4da !important;
+}
+
+.form-control:focus, .form-select:focus {
+    background: white !important;
+    color: #333 !important;
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 22, 89, 0.25) !important;
+}
+
+.form-label {
+    color: #333 !important;
+}
+
+/* Dark mode support (disabled for now) */
+/* @media (prefers-color-scheme: dark) {
+    .search-suggestions {
+        background: #2d3436;
+        border-color: #636e72;
+        color: white;
+    }
+    
+    .suggestion-category-header {
+        background-color: #636e72;
+        color: #ddd;
+    }
+    
+    .suggestion-item:hover {
+        background-color: var(--primary-color);
+    }
+    
+    .modal-content {
+        background: #2d3436;
+        color: white;
+    }
+    
+    .filter-checkboxes {
+        background: #636e72;
+        border-color: #636e72;
+    }
+} */

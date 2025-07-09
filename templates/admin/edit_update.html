@@ -11,7 +11,7 @@
                     <i class="fas fa-newspaper me-2"></i>
                     {{ title }}
                 </h1>
-                <a href="{{ url_for('admin_manage_updates') }}" class="btn btn-outline-secondary">
+                <a href="{{ url_for('main.admin_manage_updates') }}" class="btn btn-outline-secondary">
                     <i class="fas fa-arrow-left me-1"></i> Back to List
                 </a>
             </div>
@@ -35,7 +35,7 @@
                         
                         <div class="mb-3">
                             {{ form.description.label(class="form-label") }}
-                            {{ form.description(class="form-control", rows="6", placeholder="Describe the regulatory update, change, or proposal in detail...") }}
+                            {{ form.description(class="form-control", rows="4", placeholder="Enter detailed description of the update") }}
                             {% if form.description.errors %}
                                 <div class="text-danger small">
                                     {% for error in form.description.errors %}
@@ -48,8 +48,37 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
+                                    {{ form.category.label(class="form-label") }}
+                                    {{ form.category(class="form-select") }}
+                                    {% if form.category.errors %}
+                                        <div class="text-danger small">
+                                            {% for error in form.category.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.impact_level.label(class="form-label") }}
+                                    {{ form.impact_level(class="form-select") }}
+                                    {% if form.impact_level.errors %}
+                                        <div class="text-danger small">
+                                            {% for error in form.impact_level.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
                                     {{ form.jurisdiction_affected.label(class="form-label") }}
-                                    {{ form.jurisdiction_affected(class="form-control", placeholder="e.g., USA, Florida, Tampa") }}
+                                    {{ form.jurisdiction_affected(class="form-control", placeholder="e.g., Tampa, Florida, USA") }}
                                     {% if form.jurisdiction_affected.errors %}
                                         <div class="text-danger small">
                                             {% for error in form.jurisdiction_affected.errors %}
@@ -60,6 +89,22 @@
                                 </div>
                             </div>
                             <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.property_types.label(class="form-label") }}
+                                    {{ form.property_types(class="form-select") }}
+                                    {% if form.property_types.errors %}
+                                        <div class="text-danger small">
+                                            {% for error in form.property_types.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
                                 <div class="mb-3">
                                     {{ form.status.label(class="form-label") }}
                                     {{ form.status(class="form-select") }}
@@ -72,21 +117,128 @@
                                     {% endif %}
                                 </div>
                             </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form.priority.label(class="form-label") }}
+                                    {{ form.priority(class="form-select") }}
+                                    {% if form.priority.errors %}
+                                        <div class="text-danger small">
+                                            {% for error in form.priority.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form.update_date.label(class="form-label") }}
+                                    {{ form.update_date(class="form-control") }}
+                                    {% if form.update_date.errors %}
+                                        <div class="text-danger small">
+                                            {% for error in form.update_date.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">Date of announcement/publication</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.effective_date.label(class="form-label") }}
+                                    {{ form.effective_date(class="form-control") }}
+                                    {% if form.effective_date.errors %}
+                                        <div class="text-danger small">
+                                            {% for error in form.effective_date.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">When the change becomes effective</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.deadline_date.label(class="form-label") }}
+                                    {{ form.deadline_date(class="form-control") }}
+                                    {% if form.deadline_date.errors %}
+                                        <div class="text-danger small">
+                                            {% for error in form.deadline_date.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">Deadline for compliance or action</div>
+                                </div>
+                            </div>
                         </div>
                         
                         <div class="mb-3">
-                            {{ form.update_date.label(class="form-label") }}
-                            {{ form.update_date(class="form-control") }}
-                            {% if form.update_date.errors %}
+                            <div class="form-check">
+                                {{ form.action_required(class="form-check-input", id="actionRequiredCheck") }}
+                                {{ form.action_required.label(class="form-check-label", for="actionRequiredCheck") }}
+                            </div>
+                            <div class="form-text">Check if this update requires immediate action from property operators</div>
+                        </div>
+                        
+                        <div class="mb-3" id="actionDescriptionDiv" style="display: none;">
+                            {{ form.action_description.label(class="form-label") }}
+                            {{ form.action_description(class="form-control", rows="3", placeholder="Describe what action is required...") }}
+                            {% if form.action_description.errors %}
                                 <div class="text-danger small">
-                                    {% for error in form.update_date.errors %}
+                                    {% for error in form.action_description.errors %}
                                         <div>{{ error }}</div>
                                     {% endfor %}
                                 </div>
                             {% endif %}
-                            <div class="form-text">
-                                For recent updates: when it took effect. For upcoming: when it will take effect. For proposed: when it was proposed.
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.related_regulation_ids.label(class="form-label") }}
+                                    {{ form.related_regulation_ids(class="form-control", placeholder="e.g., 1, 3, 5") }}
+                                    {% if form.related_regulation_ids.errors %}
+                                        <div class="text-danger small">
+                                            {% for error in form.related_regulation_ids.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">Link to related regulations by ID</div>
+                                </div>
                             </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.tags.label(class="form-label") }}
+                                    {{ form.tags(class="form-control", placeholder="e.g., zoning, permits, taxes") }}
+                                    {% if form.tags.errors %}
+                                        <div class="text-danger small">
+                                            {% for error in form.tags.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">Tags for better categorization and search</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.source_url.label(class="form-label") }}
+                            {{ form.source_url(class="form-control", placeholder="https://example.com/official-announcement") }}
+                            {% if form.source_url.errors %}
+                                <div class="text-danger small">
+                                    {% for error in form.source_url.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Link to official source or announcement</div>
                         </div>
                         
                         <div class="d-flex justify-content-between">
@@ -99,7 +251,7 @@
                                 {% endif %}
                             </div>
                             <div>
-                                <a href="{{ url_for('admin_manage_updates') }}" class="btn btn-secondary me-2">Cancel</a>
+                                <a href="{{ url_for('main.admin_manage_updates') }}" class="btn btn-secondary me-2">Cancel</a>
                                 {{ form.submit(class="btn btn-primary") }}
                             </div>
                         </div>
@@ -140,6 +292,26 @@ function deleteUpdate(id, title) {
     document.getElementById('deleteForm').action = `/admin/updates/${id}/delete`;
     new bootstrap.Modal(document.getElementById('deleteModal')).show();
 }
+
+// Show/hide action description based on checkbox
+document.addEventListener('DOMContentLoaded', function() {
+    const actionRequiredCheck = document.getElementById('actionRequiredCheck');
+    const actionDescriptionDiv = document.getElementById('actionDescriptionDiv');
+    
+    function toggleActionDescription() {
+        if (actionRequiredCheck.checked) {
+            actionDescriptionDiv.style.display = 'block';
+        } else {
+            actionDescriptionDiv.style.display = 'none';
+        }
+    }
+    
+    // Initial state
+    toggleActionDescription();
+    
+    // Listen for changes
+    actionRequiredCheck.addEventListener('change', toggleActionDescription);
+});
 </script>
 {% endif %}
 {% endblock %}
