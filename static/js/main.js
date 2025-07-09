@@ -33,9 +33,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Table enhancements
     initializeTableFeatures();
     
-    // Table sorting for regulations page
-    initializeTableSorting();
-    
     // Keyboard shortcuts
     initializeKeyboardShortcuts();
 });
@@ -46,136 +43,15 @@ function showRegulationDetails(regulationId) {
     const isVisible = !detailsRow.classList.contains('d-none');
     
     // Hide all other details
-    document.querySelectorAll('.regulation-details-row').forEach(function(row) {
+    document.querySelectorAll('.regulation-details').forEach(function(row) {
         row.classList.add('d-none');
     });
     
     // Toggle current details
     if (!isVisible) {
         detailsRow.classList.remove('d-none');
-        detailsRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        detailsRow.classList.add('fade-in');
     }
-}
-
-function downloadRegulation(regulationId) {
-    // Get regulation data from the row
-    const row = document.querySelector(`[data-regulation-id="${regulationId}"]`);
-    if (!row) return;
-    
-    const title = row.querySelector('.regulation-title').textContent.trim();
-    const location = row.querySelector('.location-text').textContent.trim();
-    const jurisdiction = row.querySelector('.jurisdiction-badge').textContent.trim();
-    const category = row.querySelector('.category-badge').textContent.trim();
-    const lastUpdated = row.parentNode.querySelector(`#details-${regulationId} .meta-item:last-of-type`).textContent.replace('Last Updated:', '').trim();
-    const requirements = row.parentNode.querySelector(`#details-${regulationId} .requirements-text`).textContent.trim();
-    
-    // Create downloadable content
-    const content = `
-STR Regulatory Requirement
-=========================
-
-Title: ${title}
-Jurisdiction: ${jurisdiction}
-Location: ${location}
-Category: ${category}
-Last Updated: ${lastUpdated}
-
-Key Requirements:
-${requirements}
-
----
-Downloaded from STR Compliance Toolkit
-${new Date().toLocaleDateString()}
-    `.trim();
-    
-    // Create and trigger download
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_regulation.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-    
-    // Show success message
-    showToast('Regulation downloaded successfully!', 'success');
-}
-
-function initializeTableSorting() {
-    const sortableHeaders = document.querySelectorAll('.sortable');
-    
-    sortableHeaders.forEach(header => {
-        header.addEventListener('click', function() {
-            const sortBy = this.getAttribute('data-sort');
-            const table = this.closest('table');
-            const tbody = table.querySelector('tbody');
-            const rows = Array.from(tbody.querySelectorAll('.notion-row'));
-            
-            // Determine sort direction
-            const currentDirection = this.getAttribute('data-direction') || 'asc';
-            const newDirection = currentDirection === 'asc' ? 'desc' : 'asc';
-            
-            // Clear all direction indicators
-            sortableHeaders.forEach(h => {
-                h.removeAttribute('data-direction');
-                const icon = h.querySelector('i');
-                icon.className = 'fas fa-sort ms-1';
-            });
-            
-            // Set current direction
-            this.setAttribute('data-direction', newDirection);
-            const icon = this.querySelector('i');
-            icon.className = newDirection === 'asc' ? 'fas fa-sort-up ms-1' : 'fas fa-sort-down ms-1';
-            
-            // Sort rows
-            rows.sort((a, b) => {
-                let aValue, bValue;
-                
-                switch(sortBy) {
-                    case 'location':
-                        aValue = a.querySelector('.location-text').textContent.trim();
-                        bValue = b.querySelector('.location-text').textContent.trim();
-                        break;
-                    case 'title':
-                        aValue = a.querySelector('.regulation-title').textContent.trim();
-                        bValue = b.querySelector('.regulation-title').textContent.trim();
-                        break;
-                    case 'key_requirements':
-                        aValue = a.querySelector('.requirements-preview').textContent.trim();
-                        bValue = b.querySelector('.requirements-preview').textContent.trim();
-                        break;
-                    case 'last_updated':
-                        aValue = new Date(a.querySelector('.date-display').textContent.trim());
-                        bValue = new Date(b.querySelector('.date-display').textContent.trim());
-                        break;
-                    case 'category':
-                        aValue = a.querySelector('.category-badge').textContent.trim();
-                        bValue = b.querySelector('.category-badge').textContent.trim();
-                        break;
-                    default:
-                        return 0;
-                }
-                
-                if (sortBy === 'last_updated') {
-                    return newDirection === 'asc' ? aValue - bValue : bValue - aValue;
-                } else {
-                    const comparison = aValue.localeCompare(bValue);
-                    return newDirection === 'asc' ? comparison : -comparison;
-                }
-            });
-            
-            // Reorder rows in DOM
-            rows.forEach((row, index) => {
-                const detailsRow = tbody.querySelector(`#details-${row.getAttribute('data-regulation-id')}`);
-                tbody.appendChild(row);
-                if (detailsRow) {
-                    tbody.appendChild(detailsRow);
-                }
-            });
-        });
-    });
 }
 
 // Enhanced search functionality
