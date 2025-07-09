@@ -1,0 +1,209 @@
+Create a web application that replicates the core functionality of a Short-Term Rental Legal and Compliance toolkit. The app should focus on displaying regulatory requirements at different jurisdiction levels and tracking industry updates, with full backend management capabilities for adding and editing content.
+
+Core Features to Replicate:
+
+1. Regulatory Requirements by Jurisdiction
+
+•
+Create a database/table structure with these fields:
+
+•
+Jurisdiction Level (National, State, Local)
+
+•
+Location (USA, Florida, Tampa, St. Petersburg, Clearwater, Sarasota)
+
+•
+Regulation Title
+
+•
+Key Requirements (detailed description)
+
+•
+Last Updated Date
+
+
+
+•
+Display this information in a clean, filterable table format
+
+•
+Allow users to filter by location to see applicable regulations
+
+2. Industry Updates Timeline
+
+•
+Create a timeline or list view showing:
+
+•
+Recent regulatory changes
+
+•
+Upcoming changes
+
+•
+Proposed changes under consideration
+
+
+
+•
+Include date, jurisdiction affected, and detailed description of change
+
+3. Backend Management System (REQUIRED)
+
+•
+Admin Authentication: Simple login system for authorized users
+
+•
+Content Management Interface with the ability to:
+
+•
+Add new regulations: Form to input jurisdiction level, location, title, requirements, and date
+
+•
+Edit existing regulations: Click-to-edit functionality for all regulation entries
+
+•
+Delete regulations: Remove outdated or incorrect entries
+
+•
+Add new updates: Form to input regulatory updates with date, jurisdiction, and description
+
+•
+Edit/delete updates: Manage the updates timeline
+
+•
+Manage locations: Add new cities/jurisdictions as needed
+
+
+
+•
+Data validation: Ensure required fields are filled and dates are properly formatted
+
+•
+Bulk operations: Ability to update multiple entries at once if needed
+
+4. User Interface
+
+•
+Public View: Clean, professional display for end users
+
+•
+Admin Panel: Separate interface for content management
+
+•
+Navigation between regulations database and updates section
+
+•
+Search/filter functionality for regulations
+
+•
+Mobile-responsive layout for both public and admin views
+
+Technical Requirements:
+
+•
+Backend Framework: Flask (Python) or Express (Node.js) with proper routing
+
+•
+Database: SQLite for development, easily upgradeable to PostgreSQL
+
+•
+Authentication: Simple session-based auth for admin access
+
+•
+Frontend: HTML/CSS with JavaScript for dynamic interactions
+
+•
+Forms: Proper form handling for CRUD operations
+
+•
+API endpoints: RESTful endpoints for all data operations
+
+Database Schema:
+
+Plain Text
+
+
+Regulations Table:
+- id (primary key)
+- jurisdiction_level (National/State/Local)
+- location (text)
+- title (text)
+- key_requirements (text)
+- last_updated (date)
+- created_at (timestamp)
+
+Updates Table:
+- id (primary key)
+- title (text)
+- description (text)
+- jurisdiction_affected (text)
+- update_date (date)
+- status (Recent/Upcoming/Proposed)
+- created_at (timestamp)
+
+Admin Users Table:
+- id (primary key)
+- username (text)
+- password_hash (text)
+
+
+Sample Data to Include:
+
+•
+National: Fair Housing Act compliance, ADA considerations
+
+•
+Florida State: State licensing requirements, tax collection obligations
+
+•
+Tampa: Business tax receipt, zoning restrictions
+
+•
+St. Petersburg: Minimum 7-day stay, registration requirements
+
+•
+Clearwater: 31-day minimum in residential areas
+
+•
+Sarasota: Minimum 7-day stay, registration requirements
+
+Admin Features Required:
+
+1.
+Dashboard: Overview of total regulations, recent updates, last login
+
+2.
+Regulation Management:
+
+•
+List all regulations with edit/delete buttons
+
+•
+"Add New Regulation" button with form
+
+•
+Bulk edit capabilities
+
+
+
+3.
+Updates Management:
+
+•
+List all updates with edit/delete buttons
+
+•
+"Add New Update" button with form
+
+•
+Status management (Recent/Upcoming/Proposed)
+
+
+
+4.
+Settings: Manage admin accounts, backup data
+
+The goal is to create a functional web app that not only displays regulatory requirements and tracks industry changes like the original Notion toolkit, but also provides a complete backend system for easy content management and updates.
+
