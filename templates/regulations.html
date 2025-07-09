@@ -30,7 +30,7 @@
                             <a href="{{ url_for('regulations') }}" class="text-info">All</a>
                         </small>
                     </div>
-                    <form method="GET" action="{{ url_for('regulations') }}" class="row g-3">
+                    <form method="GET" action="{{ url_for('regulations') }}" class="row g-3" id="filterForm">
                         <div class="col-md-3">
                             <label for="jurisdiction" class="form-label">Jurisdiction Level</label>
                             <select class="form-select" id="jurisdiction" name="jurisdiction">
@@ -61,7 +61,7 @@
                         <div class="col-md-2">
                             <label class="form-label">&nbsp;</label>
                             <div class="d-grid">
-                                <button type="submit" class="btn btn-primary">
+                                <button type="button" class="btn btn-primary" onclick="submitFilter()">
                                     <i class="fas fa-search"></i> Filter
                                 </button>
                             </div>
@@ -144,6 +144,35 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function submitFilter() {
+    const form = document.getElementById('filterForm');
+    const jurisdiction = document.getElementById('jurisdiction').value;
+    const location = document.getElementById('location').value;
+    const search = document.getElementById('search').value;
+    
+    // Build the URL with parameters
+    let url = '/regulations?';
+    const params = [];
+    
+    if (jurisdiction) {
+        params.push('jurisdiction=' + encodeURIComponent(jurisdiction));
+    }
+    if (location) {
+        params.push('location=' + encodeURIComponent(location));
+    }
+    if (search) {
+        params.push('search=' + encodeURIComponent(search));
+    }
+    
+    url += params.join('&');
+    window.location.href = url;
+    return false; // Prevent default form submission
+}
+</script>
 {% endblock %}
 
 

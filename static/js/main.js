@@ -65,9 +65,31 @@ function initializeSearch() {
             debounceTimer = setTimeout(function() {
                 // Auto-submit search after 500ms of no typing
                 if (searchInput.value.length >= 3 || searchInput.value.length === 0) {
-                    searchInput.closest('form').submit();
+                    // Ensure form values are properly captured before submit
+                    const form = searchInput.closest('form');
+                    if (form) {
+                        form.submit();
+                    }
                 }
             }, 500);
+        });
+    }
+    
+    // Add change listeners to dropdown filters for immediate filtering
+    const jurisdictionSelect = document.getElementById('jurisdiction');
+    const locationSelect = document.getElementById('location');
+    
+    if (jurisdictionSelect) {
+        jurisdictionSelect.addEventListener('change', function() {
+            // Optional: auto-submit on dropdown change
+            // this.closest('form').submit();
+        });
+    }
+    
+    if (locationSelect) {
+        locationSelect.addEventListener('change', function() {
+            // Optional: auto-submit on dropdown change
+            // this.closest('form').submit();
         });
     }
 }
