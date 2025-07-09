@@ -8,6 +8,7 @@ class Regulation(db.Model):
     title = db.Column(db.String(200), nullable=False)
     key_requirements = db.Column(db.Text, nullable=False)
     last_updated = db.Column(db.Date, nullable=False)
+    category = db.Column(db.String(50), nullable=False, default='Legal')  # Legal, Licensing, Taxes, Zoning, Occupancy, Registration, Discrimination
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):

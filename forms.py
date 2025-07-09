@@ -15,6 +15,11 @@ class RegulationForm(FlaskForm):
     title = StringField('Regulation Title', validators=[DataRequired(), Length(max=200)])
     key_requirements = TextAreaField('Key Requirements', validators=[DataRequired()])
     last_updated = DateField('Last Updated', validators=[DataRequired()])
+    category = SelectField('Category', 
+                          choices=[('Legal', 'Legal'), ('Licensing', 'Licensing'), ('Taxes', 'Taxes'), 
+                                  ('Zoning', 'Zoning'), ('Occupancy', 'Occupancy'), ('Registration', 'Registration'), 
+                                  ('Discrimination', 'Discrimination')],
+                          validators=[DataRequired()])
     submit = SubmitField('Save Regulation')
 
 class UpdateForm(FlaskForm):
