@@ -141,7 +141,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <form id="deleteRegulationForm" method="POST" class="d-inline">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    {{ csrf_token() }}
                     <button type="submit" class="btn btn-danger">Delete</button>
                 </form>
             </div>
