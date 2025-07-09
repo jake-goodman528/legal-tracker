@@ -4,6 +4,10 @@ from flask import Flask
 from flask_wtf.csrf import CSRFProtect
 from werkzeug.middleware.proxy_fix import ProxyFix
 import traceback
+import sys
+
+# Add the current directory to Python path to ensure imports work
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
