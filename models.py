@@ -114,6 +114,14 @@ class Update(db.Model):
     source_url = db.Column(db.String(500), nullable=True)  # Official source URL
     priority = db.Column(db.Integer, default=3)  # 1=High, 2=Medium, 3=Low (for sorting)
     
+    # New fields for expanded functionality
+    expected_decision_date = db.Column(db.Date, nullable=True)  # Expected decision date for proposed changes
+    potential_impact = db.Column(db.Text, nullable=True)  # Impact assessment for proposed changes
+    decision_status = db.Column(db.String(20), nullable=True)  # Under Review, Public Hearings, Proposed, Approved, Rejected
+    change_type = db.Column(db.String(20), nullable=False, default='Recent')  # Recent, Upcoming, Proposed
+    compliance_deadline = db.Column(db.Date, nullable=True)  # Deadline for compliance with new changes
+    affected_operators = db.Column(db.Text, nullable=True)  # Description of which operators are affected
+    
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -139,6 +147,12 @@ class Update(db.Model):
             'tags': self.tags,
             'source_url': self.source_url,
             'priority': self.priority,
+            'expected_decision_date': self.expected_decision_date.isoformat() if self.expected_decision_date else None,
+            'potential_impact': self.potential_impact,
+            'decision_status': self.decision_status,
+            'change_type': self.change_type,
+            'compliance_deadline': self.compliance_deadline.isoformat() if self.compliance_deadline else None,
+            'affected_operators': self.affected_operators,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Page Not Found - STR Compliance Toolkit{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <div class="error-page">
+                <h1 class="display-1 text-muted">404</h1>
+                <h2 class="mb-4">Page Not Found</h2>
+                <p class="lead mb-4">
+                    Sorry, the page you are looking for could not be found. 
+                    It may have been moved, deleted, or you may have entered an incorrect URL.
+                </p>
+                
+                <div class="mb-4">
+                    <a href="{{ url_for('main.index') }}" class="btn btn-primary me-2">
+                        <i class="fas fa-home"></i> Go Home
+                    </a>
+                    <a href="{{ url_for('main.updates') }}" class="btn btn-outline-primary me-2">
+                        <i class="fas fa-bell"></i> View Updates
+                    </a>
+                    <a href="{{ url_for('main.regulations') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-book"></i> View Regulations
+                    </a>
+                </div>
+                
+                <div class="mt-4">
+                    <p class="text-muted">
+                        If you believe this is an error, please 
+                        <a href="mailto:support@example.com">contact support</a>.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.error-page {
+    padding: 2rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.error-page h1 {
+    font-size: 8rem;
+    font-weight: bold;
+    color: #6c757d;
+}
+
+.error-page h2 {
+    color: #495057;
+}
+</style>
+{% endblock %} 

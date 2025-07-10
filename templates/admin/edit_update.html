@@ -5,9 +5,9 @@
 {% block content %}
 <div class="container my-4">
     <div class="row">
-        <div class="col-lg-8 mx-auto">
+        <div class="col-lg-10 mx-auto">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1>
+                <h1 class="admin-form-title">
                     <i class="fas fa-newspaper me-2"></i>
                     {{ title }}
                 </h1>
@@ -16,252 +16,467 @@
                 </a>
             </div>
 
-            <div class="card">
-                <div class="card-body">
-                    <form method="POST">
-                        {{ form.hidden_tag() }}
-                        
-                        <div class="mb-3">
-                            {{ form.title.label(class="form-label") }}
-                            {{ form.title(class="form-control", placeholder="Enter update title") }}
-                            {% if form.title.errors %}
-                                <div class="text-danger small">
-                                    {% for error in form.title.errors %}
-                                        <div>{{ error }}</div>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
+            <div class="admin-form-container">
+                <form method="POST" id="updateForm">
+                    {{ form.hidden_tag() }}
+                    
+                    <!-- Section 1: Basic Information -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <h3 class="section-title">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Basic Information
+                            </h3>
+                            <p class="section-description">Core details about the update</p>
                         </div>
                         
-                        <div class="mb-3">
-                            {{ form.description.label(class="form-label") }}
-                            {{ form.description(class="form-control", rows="4", placeholder="Enter detailed description of the update") }}
-                            {% if form.description.errors %}
-                                <div class="text-danger small">
-                                    {% for error in form.description.errors %}
-                                        <div>{{ error }}</div>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    {{ form.category.label(class="form-label") }}
-                                    {{ form.category(class="form-select") }}
-                                    {% if form.category.errors %}
-                                        <div class="text-danger small">
-                                            {% for error in form.category.errors %}
-                                                <div>{{ error }}</div>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
+                        <div class="section-content">
+                            <div class="mb-4">
+                                {{ form.title.label(class="form-label required") }}
+                                {{ form.title(class="form-control form-control-lg", placeholder="Enter a clear, descriptive title for this update") }}
+                                {% if form.title.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.title.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Make the title specific and informative (e.g., "Tampa Implements New STR Registration Requirements")
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    {{ form.impact_level.label(class="form-label") }}
-                                    {{ form.impact_level(class="form-select") }}
-                                    {% if form.impact_level.errors %}
-                                        <div class="text-danger small">
-                                            {% for error in form.impact_level.errors %}
-                                                <div>{{ error }}</div>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
+                            
+                            <div class="mb-4">
+                                {{ form.description.label(class="form-label required") }}
+                                {{ form.description(class="form-control", rows="5", placeholder="Provide detailed information about this update, including what changed, why it matters, and how it affects property operators...") }}
+                                {% if form.description.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.description.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Include specific details about what changed, background context, and implications for operators
                                 </div>
                             </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    {{ form.jurisdiction_affected.label(class="form-label") }}
-                                    {{ form.jurisdiction_affected(class="form-control", placeholder="e.g., Tampa, Florida, USA") }}
-                                    {% if form.jurisdiction_affected.errors %}
-                                        <div class="text-danger small">
-                                            {% for error in form.jurisdiction_affected.errors %}
-                                                <div>{{ error }}</div>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    {{ form.property_types.label(class="form-label") }}
-                                    {{ form.property_types(class="form-select") }}
-                                    {% if form.property_types.errors %}
-                                        <div class="text-danger small">
-                                            {% for error in form.property_types.errors %}
-                                                <div>{{ error }}</div>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
+                            
+                            <div class="mb-4">
+                                {{ form.category.label(class="form-label required") }}
+                                {{ form.category(class="form-select form-select-lg") }}
+                                {% if form.category.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.category.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Select the primary category that best describes this update
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Section 2: Classification -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <h3 class="section-title">
+                                <i class="fas fa-tags me-2"></i>
+                                Classification
+                            </h3>
+                            <p class="section-description">Status, priority, and impact classification</p>
+                        </div>
                         
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    {{ form.status.label(class="form-label") }}
-                                    {{ form.status(class="form-select") }}
-                                    {% if form.status.errors %}
-                                        <div class="text-danger small">
-                                            {% for error in form.status.errors %}
-                                                <div>{{ error }}</div>
-                                            {% endfor %}
+                        <div class="section-content">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-4">
+                                        {{ form.change_type.label(class="form-label required") }}
+                                        {{ form.change_type(class="form-select", id="changeTypeSelect") }}
+                                        {% if form.change_type.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.change_type.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-text">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Choose based on implementation timeline
                                         </div>
-                                    {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-4">
+                                        {{ form.priority.label(class="form-label required") }}
+                                        {{ form.priority(class="form-select") }}
+                                        {% if form.priority.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.priority.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-text">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            High: Urgent action required, Medium: Important but not urgent, Low: FYI
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-4">
+                                        {{ form.impact_level.label(class="form-label required") }}
+                                        {{ form.impact_level(class="form-select") }}
+                                        {% if form.impact_level.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.impact_level.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-text">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Assess the potential impact on property operators
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    {{ form.priority.label(class="form-label") }}
-                                    {{ form.priority(class="form-select") }}
-                                    {% if form.priority.errors %}
-                                        <div class="text-danger small">
-                                            {% for error in form.priority.errors %}
-                                                <div>{{ error }}</div>
-                                            {% endfor %}
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-4">
+                                        {{ form.jurisdiction_affected.label(class="form-label required") }}
+                                        {{ form.jurisdiction_affected(class="form-control", placeholder="e.g., Tampa, Florida, USA") }}
+                                        {% if form.jurisdiction_affected.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.jurisdiction_affected.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-text">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Specify the geographic area where this update applies
                                         </div>
-                                    {% endif %}
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    {{ form.update_date.label(class="form-label") }}
-                                    {{ form.update_date(class="form-control") }}
-                                    {% if form.update_date.errors %}
-                                        <div class="text-danger small">
-                                            {% for error in form.update_date.errors %}
-                                                <div>{{ error }}</div>
-                                            {% endfor %}
+                                <div class="col-md-6">
+                                    <div class="mb-4">
+                                        {{ form.property_types.label(class="form-label required") }}
+                                        {{ form.property_types(class="form-select") }}
+                                        {% if form.property_types.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.property_types.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-text">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Select which property types are affected by this update
                                         </div>
-                                    {% endif %}
-                                    <div class="form-text">Date of announcement/publication</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Section 3: Timeline -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <h3 class="section-title">
+                                <i class="fas fa-calendar-alt me-2"></i>
+                                Timeline
+                            </h3>
+                            <p class="section-description">Important dates and deadlines</p>
+                        </div>
                         
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    {{ form.effective_date.label(class="form-label") }}
-                                    {{ form.effective_date(class="form-control") }}
-                                    {% if form.effective_date.errors %}
-                                        <div class="text-danger small">
-                                            {% for error in form.effective_date.errors %}
-                                                <div>{{ error }}</div>
-                                            {% endfor %}
+                        <div class="section-content">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-4">
+                                        {{ form.update_date.label(class="form-label required") }}
+                                        {{ form.update_date(class="form-control") }}
+                                        {% if form.update_date.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.update_date.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-text">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Date when this update was announced or published
                                         </div>
-                                    {% endif %}
-                                    <div class="form-text">When the change becomes effective</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-4">
+                                        {{ form.effective_date.label(class="form-label") }}
+                                        {{ form.effective_date(class="form-control") }}
+                                        {% if form.effective_date.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.effective_date.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-text">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            When this change becomes or became effective
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    {{ form.deadline_date.label(class="form-label") }}
-                                    {{ form.deadline_date(class="form-control") }}
-                                    {% if form.deadline_date.errors %}
-                                        <div class="text-danger small">
-                                            {% for error in form.deadline_date.errors %}
-                                                <div>{{ error }}</div>
-                                            {% endfor %}
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-4">
+                                        {{ form.deadline_date.label(class="form-label") }}
+                                        {{ form.deadline_date(class="form-control") }}
+                                        {% if form.deadline_date.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.deadline_date.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-text">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            General deadline for compliance or action
                                         </div>
-                                    {% endif %}
-                                    <div class="form-text">Deadline for compliance or action</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-4">
+                                        {{ form.compliance_deadline.label(class="form-label") }}
+                                        {{ form.compliance_deadline(class="form-control") }}
+                                        {% if form.compliance_deadline.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.compliance_deadline.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-text">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Specific deadline by which operators must comply
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Conditional field for Proposed changes -->
+                            <div class="row" id="proposedFields" style="display: none;">
+                                <div class="col-md-6">
+                                    <div class="mb-4">
+                                        {{ form.expected_decision_date.label(class="form-label") }}
+                                        {{ form.expected_decision_date(class="form-control") }}
+                                        {% if form.expected_decision_date.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.expected_decision_date.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-text">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Expected date when a decision will be made on this proposed change
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-4">
+                                        {{ form.decision_status.label(class="form-label") }}
+                                        {{ form.decision_status(class="form-select") }}
+                                        {% if form.decision_status.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.decision_status.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-text">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Current status of the decision-making process
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="mb-3">
-                            {{ form.action_required.label(class="form-label") }}
-                            {{ form.action_required(class="form-select", id="actionRequiredSelect") }}
-                            {% if form.action_required.errors %}
-                                <div class="text-danger small">
-                                    {% for error in form.action_required.errors %}
-                                        <div>{{ error }}</div>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                            <div class="form-text">Select if this update requires immediate action from property operators</div>
+                    </div>
+
+                    <!-- Section 4: Impact & Requirements -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <h3 class="section-title">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Impact & Requirements
+                            </h3>
+                            <p class="section-description">Assessment of impact and required actions</p>
                         </div>
                         
-                        <div class="mb-3" id="actionDescriptionDiv" style="display: none;">
-                            {{ form.action_description.label(class="form-label") }}
-                            {{ form.action_description(class="form-control", rows="3", placeholder="Describe what action is required...") }}
-                            {% if form.action_description.errors %}
-                                <div class="text-danger small">
-                                    {% for error in form.action_description.errors %}
-                                        <div>{{ error }}</div>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    {{ form.related_regulation_ids.label(class="form-label") }}
-                                    {{ form.related_regulation_ids(class="form-control", placeholder="e.g., 1, 3, 5") }}
-                                    {% if form.related_regulation_ids.errors %}
-                                        <div class="text-danger small">
-                                            {% for error in form.related_regulation_ids.errors %}
-                                                <div>{{ error }}</div>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                    <div class="form-text">Link to related regulations by ID</div>
+                        <div class="section-content">
+                            <div class="mb-4">
+                                {{ form.potential_impact.label(class="form-label") }}
+                                {{ form.potential_impact(class="form-control", rows="4", placeholder="Describe the potential impact on property owners and operators. Include financial implications, operational changes, compliance requirements, etc.") }}
+                                {% if form.potential_impact.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.potential_impact.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Provide a detailed assessment of how this change might affect short-term rental operators
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    {{ form.tags.label(class="form-label") }}
-                                    {{ form.tags(class="form-control", placeholder="e.g., zoning, permits, taxes") }}
-                                    {% if form.tags.errors %}
-                                        <div class="text-danger small">
-                                            {% for error in form.tags.errors %}
-                                                <div>{{ error }}</div>
-                                            {% endfor %}
+                            
+                            <div class="mb-4">
+                                {{ form.affected_operators.label(class="form-label") }}
+                                {{ form.affected_operators(class="form-control", rows="3", placeholder="Describe which types of operators are affected (e.g., all STR operators, only commercial operators, properties with >X units, etc.)") }}
+                                {% if form.affected_operators.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.affected_operators.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Specify which operators or property types are affected by this change
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-4">
+                                        {{ form.action_required.label(class="form-label required") }}
+                                        {{ form.action_required(class="form-select", id="actionRequiredSelect") }}
+                                        {% if form.action_required.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.action_required.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-text">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Select if this update requires immediate action from property operators
                                         </div>
-                                    {% endif %}
-                                    <div class="form-text">Tags for better categorization and search</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4" id="actionDescriptionDiv" style="display: none;">
+                                {{ form.action_description.label(class="form-label") }}
+                                {{ form.action_description(class="form-control", rows="4", placeholder="Describe what specific actions are required, deadlines, and steps operators need to take...") }}
+                                {% if form.action_description.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.action_description.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Provide specific, actionable steps that operators must take
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="mb-3">
-                            {{ form.source_url.label(class="form-label") }}
-                            {{ form.source_url(class="form-control", placeholder="https://example.com/official-announcement") }}
-                            {% if form.source_url.errors %}
-                                <div class="text-danger small">
-                                    {% for error in form.source_url.errors %}
-                                        <div>{{ error }}</div>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                            <div class="form-text">Link to official source or announcement</div>
+                    </div>
+
+                    <!-- Section 5: Relationships -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <h3 class="section-title">
+                                <i class="fas fa-link me-2"></i>
+                                Relationships
+                            </h3>
+                            <p class="section-description">Links to related regulations, tags, and sources</p>
                         </div>
                         
-                        <div class="d-flex justify-content-between">
+                        <div class="section-content">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-4">
+                                        {{ form.related_regulation_ids.label(class="form-label") }}
+                                        {{ form.related_regulation_ids(class="form-control", placeholder="e.g., 1, 3, 5") }}
+                                        {% if form.related_regulation_ids.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.related_regulation_ids.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-text">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Link to related regulations by ID (comma-separated)
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-4">
+                                        {{ form.tags.label(class="form-label") }}
+                                        {{ form.tags(class="form-control", placeholder="e.g., zoning, permits, taxes, licensing") }}
+                                        {% if form.tags.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.tags.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-text">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Tags for better categorization and search (comma-separated)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                {{ form.source_url.label(class="form-label") }}
+                                {{ form.source_url(class="form-control", placeholder="https://example.com/official-announcement") }}
+                                {% if form.source_url.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.source_url.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Link to official source, announcement, or documentation
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 {% if update %}
                                 <button type="button" class="btn btn-outline-danger" 
                                         onclick="deleteUpdate({{ update.id }}, '{{ update.title }}')">
-                                    <i class="fas fa-trash me-1"></i> Delete
+                                    <i class="fas fa-trash me-1"></i> Delete Update
                                 </button>
                                 {% endif %}
                             </div>
-                            <div>
-                                <a href="{{ url_for('admin.manage_updates') }}" class="btn btn-secondary me-2">Cancel</a>
-                                {{ form.submit(class="btn btn-primary") }}
+                            <div class="action-buttons">
+                                <a href="{{ url_for('admin.manage_updates') }}" class="btn btn-secondary btn-lg me-3">
+                                    <i class="fas fa-times me-1"></i> Cancel
+                                </a>
+                                {{ form.submit(class="btn btn-primary btn-lg") }}
                             </div>
                         </div>
-                    </form>
-                </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -284,39 +499,333 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <form id="deleteForm" method="POST" class="d-inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <button type="submit" class="btn btn-danger">Delete</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
+{% endif %}
+
+<style>
+/* Enhanced Admin Form Styles */
+.admin-form-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--admin-primary);
+    margin-bottom: 0;
+}
+
+.admin-form-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    border-left: 4px solid var(--admin-accent);
+}
+
+.form-section {
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.form-section:last-child {
+    border-bottom: none;
+}
+
+.section-header {
+    background: linear-gradient(135deg, #F8F9FA 0%, #E5E7EB 100%);
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.section-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--admin-primary);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.section-title i {
+    color: var(--admin-accent);
+}
+
+.section-description {
+    font-family: 'Yantramanav', sans-serif;
+    color: #6B7280;
+    margin-bottom: 0;
+    font-size: 0.9rem;
+}
+
+.section-content {
+    padding: 2rem;
+}
+
+.form-label {
+    font-family: 'Yantramanav', sans-serif;
+    font-weight: 600;
+    color: var(--admin-primary);
+    margin-bottom: 0.5rem;
+}
+
+.form-label.required::after {
+    content: " *";
+    color: #DC2626;
+    font-weight: bold;
+}
+
+.form-control, .form-select {
+    border: 2px solid #E5E7EB;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-family: 'Yantramanav', sans-serif;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--admin-accent);
+    box-shadow: 0 0 0 0.2rem rgba(13, 148, 136, 0.25);
+}
+
+.form-control-lg, .form-select-lg {
+    padding: 1rem 1.25rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.form-text {
+    font-family: 'Yantramanav', sans-serif;
+    font-size: 0.85rem;
+    color: #6B7280;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.25rem;
+}
+
+.form-text i {
+    color: var(--admin-accent);
+    margin-top: 0.1rem;
+    flex-shrink: 0;
+}
+
+.invalid-feedback {
+    font-family: 'Yantramanav', sans-serif;
+    font-size: 0.85rem;
+    color: #DC2626;
+    margin-top: 0.5rem;
+}
+
+.form-actions {
+    background: #F8F9FA;
+    padding: 2rem;
+    border-top: 1px solid #E5E7EB;
+}
+
+.action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.btn-lg {
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 8px;
+}
+
+/* Conditional field animations */
+.conditional-field {
+    transition: all 0.3s ease;
+}
+
+.conditional-field.hidden {
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .admin-form-container {
+        border-radius: 8px;
+        margin: 0 -15px;
+    }
+    
+    .section-header {
+        padding: 1rem 1.5rem;
+    }
+    
+    .section-content {
+        padding: 1.5rem;
+    }
+    
+    .form-actions {
+        padding: 1.5rem;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .action-buttons .btn {
+        width: 100%;
+    }
+    
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
+
+/* Form validation enhancements */
+.form-control.is-invalid, .form-select.is-invalid {
+    border-color: #DC2626;
+}
+
+.form-control.is-valid, .form-select.is-valid {
+    border-color: #059669;
+}
+
+/* Loading state for submit button */
+.btn-loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.btn-loading::after {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin-left: -8px;
+    margin-top: -8px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
 
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Conditional field display logic
+    const changeTypeSelect = document.getElementById('changeTypeSelect');
+    const actionRequiredSelect = document.getElementById('actionRequiredSelect');
+    const proposedFields = document.getElementById('proposedFields');
+    const actionDescriptionDiv = document.getElementById('actionDescriptionDiv');
+    
+    // Show/hide proposed fields based on change type
+    function toggleProposedFields() {
+        if (changeTypeSelect.value === 'Proposed') {
+            proposedFields.style.display = 'block';
+            proposedFields.classList.remove('hidden');
+        } else {
+            proposedFields.style.display = 'none';
+            proposedFields.classList.add('hidden');
+        }
+    }
+    
+    // Show/hide action description based on action required
+    function toggleActionDescription() {
+        if (actionRequiredSelect.value === 'True') {
+            actionDescriptionDiv.style.display = 'block';
+            actionDescriptionDiv.classList.remove('hidden');
+        } else {
+            actionDescriptionDiv.style.display = 'none';
+            actionDescriptionDiv.classList.add('hidden');
+        }
+    }
+    
+    // Initial state
+    toggleProposedFields();
+    toggleActionDescription();
+    
+    // Listen for changes
+    changeTypeSelect.addEventListener('change', toggleProposedFields);
+    actionRequiredSelect.addEventListener('change', toggleActionDescription);
+    
+    // Form validation
+    const form = document.getElementById('updateForm');
+    const submitButton = form.querySelector('button[type="submit"]');
+    
+    form.addEventListener('submit', function(e) {
+        // Add loading state to submit button
+        submitButton.classList.add('btn-loading');
+        submitButton.disabled = true;
+        
+        // Basic client-side validation
+        const requiredFields = form.querySelectorAll('[required]');
+        let isValid = true;
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                field.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                field.classList.remove('is-invalid');
+                field.classList.add('is-valid');
+            }
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            submitButton.classList.remove('btn-loading');
+            submitButton.disabled = false;
+            
+            // Scroll to first invalid field
+            const firstInvalid = form.querySelector('.is-invalid');
+            if (firstInvalid) {
+                firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstInvalid.focus();
+            }
+        }
+    });
+    
+    // Real-time validation
+    const inputs = form.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.hasAttribute('required') && !this.value.trim()) {
+                this.classList.add('is-invalid');
+                this.classList.remove('is-valid');
+            } else if (this.value.trim()) {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            }
+        });
+        
+        input.addEventListener('input', function() {
+            if (this.classList.contains('is-invalid') && this.value.trim()) {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            }
+        });
+    });
+});
+
+{% if update %}
 function deleteUpdate(id, title) {
     document.getElementById('deleteUpdateTitle').textContent = title;
     document.getElementById('deleteForm').action = `/admin/updates/${id}/delete`;
     new bootstrap.Modal(document.getElementById('deleteModal')).show();
 }
-
-// Show/hide action description based on select field
-document.addEventListener('DOMContentLoaded', function() {
-    const actionRequiredSelect = document.getElementById('actionRequiredSelect');
-    const actionDescriptionDiv = document.getElementById('actionDescriptionDiv');
-    
-    function toggleActionDescription() {
-        if (actionRequiredSelect.value === 'True') {
-            actionDescriptionDiv.style.display = 'block';
-        } else {
-            actionDescriptionDiv.style.display = 'none';
-        }
-    }
-    
-    // Initial state
-    toggleActionDescription();
-    
-    // Listen for changes
-    actionRequiredSelect.addEventListener('change', toggleActionDescription);
-});
-</script>
 {% endif %}
+</script>
 {% endblock %}

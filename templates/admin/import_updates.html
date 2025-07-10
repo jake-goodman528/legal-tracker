@@ -1,0 +1,465 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Import Updates - Kaystreet Management{% endblock %}
+
+{% block content %}
+<div class="admin-content">
+    <!-- Page Header -->
+    <div class="admin-page-header">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <h1 class="admin-page-title">
+                    <i class="fas fa-upload"></i>
+                    Import Updates from CSV
+                </h1>
+                <p class="admin-page-subtitle">Bulk import regulatory updates from a CSV file to quickly populate your database.</p>
+            </div>
+            <div class="admin-header-actions">
+                <a href="{{ url_for('admin.manage_updates') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>
+                    Back to Updates
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <!-- Import Form -->
+            <div class="admin-import-card">
+                <div class="import-card-header">
+                    <h5 class="import-card-title">
+                        <i class="fas fa-file-csv me-2"></i>
+                        Upload CSV File
+                    </h5>
+                </div>
+                <div class="import-card-body">
+                    <form method="POST" enctype="multipart/form-data" id="importForm">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        
+                        <div class="upload-area" id="uploadArea">
+                            <div class="upload-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <div class="upload-text">
+                                <h6>Drop your CSV file here or click to browse</h6>
+                                <p class="text-muted">Maximum file size: 10MB</p>
+                            </div>
+                            <input type="file" name="csv_file" id="csvFile" accept=".csv" required>
+                        </div>
+                        
+                        <div class="file-info" id="fileInfo" style="display: none;">
+                            <div class="file-details">
+                                <i class="fas fa-file-csv"></i>
+                                <span id="fileName"></span>
+                                <span id="fileSize" class="text-muted"></span>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearFile()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="import-options">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="skipDuplicates" name="skip_duplicates" checked>
+                                <label class="form-check-label" for="skipDuplicates">
+                                    Skip duplicate entries (based on title and jurisdiction)
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="validateData" name="validate_data" checked>
+                                <label class="form-check-label" for="validateData">
+                                    Validate data before import
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="import-actions">
+                            <button type="submit" class="btn btn-primary btn-lg" id="importBtn">
+                                <i class="fas fa-upload me-2"></i>
+                                Import Updates
+                            </button>
+                            <a href="{{ url_for('admin.export_updates_csv') }}" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-download me-2"></i>
+                                Download Template
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Instructions -->
+            <div class="admin-instructions-card mt-4">
+                <div class="instructions-header">
+                    <h5 class="instructions-title">
+                        <i class="fas fa-info-circle me-2"></i>
+                        CSV Format Instructions
+                    </h5>
+                </div>
+                <div class="instructions-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="instructions-subtitle">Required Fields</h6>
+                            <ul class="instructions-list">
+                                <li><strong>Title</strong> - Update title</li>
+                                <li><strong>Description</strong> - Detailed description</li>
+                                <li><strong>Jurisdiction</strong> - Geographic area affected</li>
+                            </ul>
+                            
+                            <h6 class="instructions-subtitle mt-3">Date Format</h6>
+                            <p class="instructions-text">
+                                All dates should be in <code>YYYY-MM-DD</code> format (e.g., 2024-03-15)
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="instructions-subtitle">Optional Fields</h6>
+                            <ul class="instructions-list">
+                                <li>Status (Recent, Upcoming, Proposed)</li>
+                                <li>Category (Regulatory Changes, Tax Updates, etc.)</li>
+                                <li>Impact Level (High, Medium, Low)</li>
+                                <li>Priority (1=High, 2=Medium, 3=Low)</li>
+                                <li>Effective Date, Deadline Date</li>
+                                <li>Expected Decision Date</li>
+                                <li>Compliance Deadline</li>
+                                <li>Decision Status</li>
+                                <li>Potential Impact</li>
+                                <li>Affected Operators</li>
+                                <li>Action Required (Yes/No)</li>
+                                <li>Action Description</li>
+                                <li>Property Types (Residential, Commercial, Both)</li>
+                                <li>Tags (comma-separated)</li>
+                                <li>Source URL</li>
+                                <li>Related Regulation IDs (comma-separated)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        <strong>Tip:</strong> Download the template CSV file to see the exact format and column headers required.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Import Page Styles */
+.admin-import-card {
+    background: white;
+    border-radius: 8px;
+    border-left: 4px solid var(--admin-accent);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.import-card-header {
+    background: #F8F9FA;
+    border-bottom: 1px solid #E5E7EB;
+    padding: 1.5rem;
+}
+
+.import-card-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--admin-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.import-card-title i {
+    color: var(--admin-accent);
+}
+
+.import-card-body {
+    padding: 2rem;
+}
+
+.upload-area {
+    border: 2px dashed #D1D5DB;
+    border-radius: 8px;
+    padding: 3rem 2rem;
+    text-align: center;
+    background: #F9FAFB;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.upload-area:hover {
+    border-color: var(--admin-accent);
+    background: #F0F9FF;
+}
+
+.upload-area.dragover {
+    border-color: var(--admin-accent);
+    background: #EFF6FF;
+    transform: scale(1.02);
+}
+
+.upload-icon {
+    font-size: 3rem;
+    color: #9CA3AF;
+    margin-bottom: 1rem;
+}
+
+.upload-area:hover .upload-icon {
+    color: var(--admin-accent);
+}
+
+.upload-text h6 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    color: var(--admin-primary);
+    margin-bottom: 0.5rem;
+}
+
+.upload-area input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.file-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background: #F0F9FF;
+    border: 1px solid #BAE6FD;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.file-details {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'Yantramanav', sans-serif;
+}
+
+.file-details i {
+    color: var(--admin-accent);
+    font-size: 1.2rem;
+}
+
+.import-options {
+    margin-bottom: 2rem;
+}
+
+.form-check {
+    margin-bottom: 0.75rem;
+}
+
+.form-check-label {
+    font-family: 'Yantramanav', sans-serif;
+    font-weight: 500;
+    color: var(--admin-primary);
+}
+
+.import-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-lg {
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+}
+
+/* Instructions Card */
+.admin-instructions-card {
+    background: white;
+    border-radius: 8px;
+    border-left: 4px solid #3B82F6;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.instructions-header {
+    background: linear-gradient(135deg, #EFF6FF 0%, #F0F9FF 100%);
+    border-bottom: 1px solid #E5E7EB;
+    padding: 1.5rem;
+}
+
+.instructions-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--admin-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.instructions-title i {
+    color: #3B82F6;
+}
+
+.instructions-body {
+    padding: 2rem;
+}
+
+.instructions-subtitle {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    color: var(--admin-primary);
+    margin-bottom: 0.75rem;
+}
+
+.instructions-list {
+    font-family: 'Yantramanav', sans-serif;
+    color: #6B7280;
+    padding-left: 1.5rem;
+}
+
+.instructions-list li {
+    margin-bottom: 0.5rem;
+}
+
+.instructions-text {
+    font-family: 'Yantramanav', sans-serif;
+    color: #6B7280;
+}
+
+/* Loading state */
+.btn-loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.btn-loading::after {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin-left: -8px;
+    margin-top: -8px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .upload-area {
+        padding: 2rem 1rem;
+    }
+    
+    .upload-icon {
+        font-size: 2rem;
+    }
+    
+    .import-actions {
+        flex-direction: column;
+    }
+    
+    .import-actions .btn {
+        width: 100%;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('csvFile');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    const importForm = document.getElementById('importForm');
+    const importBtn = document.getElementById('importBtn');
+    
+    // Handle file selection
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            showFileInfo(file);
+        }
+    });
+    
+    // Handle drag and drop
+    uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+    
+    uploadArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+    });
+    
+    uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            const file = files[0];
+            if (file.type === 'text/csv' || file.name.toLowerCase().endsWith('.csv')) {
+                fileInput.files = files;
+                showFileInfo(file);
+            } else {
+                alert('Please select a CSV file');
+            }
+        }
+    });
+    
+    // Show file information
+    function showFileInfo(file) {
+        fileName.textContent = file.name;
+        fileSize.textContent = formatFileSize(file.size);
+        uploadArea.style.display = 'none';
+        fileInfo.style.display = 'flex';
+    }
+    
+    // Clear file selection
+    window.clearFile = function() {
+        fileInput.value = '';
+        uploadArea.style.display = 'block';
+        fileInfo.style.display = 'none';
+    };
+    
+    // Format file size
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+    
+    // Handle form submission
+    importForm.addEventListener('submit', function(e) {
+        if (!fileInput.files[0]) {
+            e.preventDefault();
+            alert('Please select a CSV file to import');
+            return;
+        }
+        
+        // Add loading state
+        importBtn.classList.add('btn-loading');
+        importBtn.disabled = true;
+        importBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Importing...';
+    });
+});
+</script>
+{% endblock %} 

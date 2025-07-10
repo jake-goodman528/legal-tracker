@@ -192,6 +192,12 @@ def create_app():
         "pool_pre_ping": True,
     }
     
+    # Configure server settings for URL generation (only set SERVER_NAME if explicitly provided)
+    if os.environ.get('SERVER_NAME'):
+        app.config['SERVER_NAME'] = os.environ.get('SERVER_NAME')
+    app.config['APPLICATION_ROOT'] = '/'
+    app.config['PREFERRED_URL_SCHEME'] = 'http'
+    
     # Configure CSRF exemptions for specific endpoints
     app.config['WTF_CSRF_EXEMPT_LIST'] = ['/api/client-errors']
 

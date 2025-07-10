@@ -406,7 +406,7 @@ def set_reminder(update_id):
 @api_bp.route('/updates/search')
 @log_api_call('search_updates')
 def search_updates():
-    """Search updates with filters"""
+    """Search updates with filters including all new fields"""
     try:
         search_params = {
             'query': request.args.get('q', ''),
@@ -416,38 +416,225 @@ def search_updates():
             'date_from': request.args.get('date_from'),
             'date_to': request.args.get('date_to'),
             'impact_levels': request.args.getlist('impact_levels[]'),
-            'action_required': request.args.get('action_required')
+            'action_required': request.args.get('action_required'),
+            'priorities': request.args.getlist('priorities[]'),
+            'decision_statuses': request.args.getlist('decision_statuses[]'),
+            'change_types': request.args.getlist('change_types[]'),
+            'affected_operators': request.args.getlist('affected_operators[]')
         }
         
         logger.info(f"Update search with params: {search_params}")
         
         results = UpdateService.search_updates(search_params)
         
-        updates_data = [{
-            'id': update.id,
-            'title': update.title,
-            'description': update.description,
-            'jurisdiction_affected': update.jurisdiction_affected,
-            'update_date': update.update_date.strftime('%Y-%m-%d'),
-            'status': update.status,
-            'category': update.category,
-            'impact_level': update.impact_level,
-            'action_required': update.action_required
-        } for update in results]
+        # Include all new fields in the response
+        updates_data = []
+        for update in results:
+            update_data = {
+                'id': update.id,
+                'title': update.title,
+                'description': update.description,
+                'jurisdiction_affected': update.jurisdiction_affected,
+                'update_date': update.update_date.strftime('%Y-%m-%d') if update.update_date else None,
+                'status': update.status,
+                'category': update.category,
+                'impact_level': update.impact_level,
+                'action_required': update.action_required,
+                'priority': update.priority,
+                'change_type': update.change_type,
+                'decision_status': update.decision_status,
+                'potential_impact': update.potential_impact,
+                'affected_operators': update.affected_operators,
+                'effective_date': update.effective_date.strftime('%Y-%m-%d') if update.effective_date else None,
+                'deadline_date': update.deadline_date.strftime('%Y-%m-%d') if update.deadline_date else None,
+                'compliance_deadline': update.compliance_deadline.strftime('%Y-%m-%d') if update.compliance_deadline else None,
+                'expected_decision_date': update.expected_decision_date.strftime('%Y-%m-%d') if update.expected_decision_date else None,
+                'tags': update.tags,
+                'source_url': update.source_url,
+                'related_regulation_ids': update.related_regulation_ids
+            }
+            updates_data.append(update_data)
         
         logger.info(f"Update search returned {len(updates_data)} results")
         
         return jsonify({
             'success': True,
             'updates': updates_data,
-            'count': len(updates_data)
+            'count': len(updates_data),
+            'search_params': search_params
         })
         
     except Exception as e:
         logger.error(f"Update search error: {str(e)}", exc_info=True)
         return jsonify({
             'success': False,
-            'error': 'Update search failed'
+            'error': 'Update search failed',
+            'details': str(e)
+        }), 500
+
+
+@api_bp.route('/updates')
+@log_api_call('get_updates')
+def get_updates():
+    """Get all updates with optional filtering"""
+    try:
+        # Get filter parameters
+        filters = {
+            'status': request.args.get('status'),
+            'category': request.args.get('category'),
+            'jurisdiction': request.args.get('jurisdiction'),
+            'impact_level': request.args.get('impact_level'),
+            'priority': request.args.get('priority'),
+            'decision_status': request.args.get('decision_status'),
+            'change_type': request.args.get('change_type'),
+            'action_required': request.args.get('action_required'),
+            'limit': request.args.get('limit', 50, type=int),
+            'offset': request.args.get('offset', 0, type=int)
+        }
+        
+        # Remove None values
+        filters = {k: v for k, v in filters.items() if v is not None}
+        
+        logger.info(f"Getting updates with filters: {filters}")
+        
+        # Build query
+        query = Update.query
+        
+        # Apply filters
+        if filters.get('status'):
+            query = query.filter(Update.status == filters['status'])
+        if filters.get('category'):
+            query = query.filter(Update.category == filters['category'])
+        if filters.get('jurisdiction'):
+            query = query.filter(Update.jurisdiction_affected == filters['jurisdiction'])
+        if filters.get('impact_level'):
+            query = query.filter(Update.impact_level == filters['impact_level'])
+        if filters.get('priority'):
+            query = query.filter(Update.priority == filters['priority'])
+        if filters.get('decision_status'):
+            query = query.filter(Update.decision_status == filters['decision_status'])
+        if filters.get('change_type'):
+            query = query.filter(Update.change_type == filters['change_type'])
+        if filters.get('action_required'):
+            query = query.filter(Update.action_required == (filters['action_required'].lower() == 'true'))
+        
+        # Get total count
+        total_count = query.count()
+        
+        # Apply pagination
+        updates = query.order_by(Update.update_date.desc()).offset(filters['offset']).limit(filters['limit']).all()
+        
+        # Format response with all fields
+        updates_data = []
+        for update in updates:
+            update_data = {
+                'id': update.id,
+                'title': update.title,
+                'description': update.description,
+                'jurisdiction_affected': update.jurisdiction_affected,
+                'update_date': update.update_date.strftime('%Y-%m-%d') if update.update_date else None,
+                'status': update.status,
+                'category': update.category,
+                'impact_level': update.impact_level,
+                'action_required': update.action_required,
+                'action_description': update.action_description,
+                'priority': update.priority,
+                'change_type': update.change_type,
+                'decision_status': update.decision_status,
+                'potential_impact': update.potential_impact,
+                'affected_operators': update.affected_operators,
+                'effective_date': update.effective_date.strftime('%Y-%m-%d') if update.effective_date else None,
+                'deadline_date': update.deadline_date.strftime('%Y-%m-%d') if update.deadline_date else None,
+                'compliance_deadline': update.compliance_deadline.strftime('%Y-%m-%d') if update.compliance_deadline else None,
+                'expected_decision_date': update.expected_decision_date.strftime('%Y-%m-%d') if update.expected_decision_date else None,
+                'property_types': update.property_types,
+                'tags': update.tags,
+                'source_url': update.source_url,
+                'related_regulation_ids': update.related_regulation_ids
+            }
+            updates_data.append(update_data)
+        
+        logger.info(f"Retrieved {len(updates_data)} updates (total: {total_count})")
+        
+        return jsonify({
+            'success': True,
+            'updates': updates_data,
+            'count': len(updates_data),
+            'total_count': total_count,
+            'filters': filters
+        })
+        
+    except Exception as e:
+        logger.error(f"Get updates error: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': 'Failed to retrieve updates',
+            'details': str(e)
+        }), 500
+
+
+@api_bp.route('/updates/<int:update_id>')
+@log_api_call('get_update')
+def get_update(update_id):
+    """Get a single update by ID with all fields"""
+    try:
+        update = Update.query.get(update_id)
+        if not update:
+            logger.warning(f"Update not found - ID: {update_id}")
+            return jsonify({
+                'success': False,
+                'error': 'Update not found'
+            }), 404
+        
+        # Get related regulations
+        related_regulations = update.get_related_regulations()
+        
+        update_data = {
+            'id': update.id,
+            'title': update.title,
+            'description': update.description,
+            'jurisdiction_affected': update.jurisdiction_affected,
+            'update_date': update.update_date.strftime('%Y-%m-%d') if update.update_date else None,
+            'status': update.status,
+            'category': update.category,
+            'impact_level': update.impact_level,
+            'action_required': update.action_required,
+            'action_description': update.action_description,
+            'priority': update.priority,
+            'change_type': update.change_type,
+            'decision_status': update.decision_status,
+            'potential_impact': update.potential_impact,
+            'affected_operators': update.affected_operators,
+            'effective_date': update.effective_date.strftime('%Y-%m-%d') if update.effective_date else None,
+            'deadline_date': update.deadline_date.strftime('%Y-%m-%d') if update.deadline_date else None,
+            'compliance_deadline': update.compliance_deadline.strftime('%Y-%m-%d') if update.compliance_deadline else None,
+            'expected_decision_date': update.expected_decision_date.strftime('%Y-%m-%d') if update.expected_decision_date else None,
+            'property_types': update.property_types,
+            'tags': update.tags,
+            'source_url': update.source_url,
+            'related_regulation_ids': update.related_regulation_ids,
+            'related_regulations': [
+                {
+                    'id': reg.id,
+                    'title': reg.title,
+                    'jurisdiction': reg.jurisdiction
+                } for reg in related_regulations
+            ]
+        }
+        
+        logger.info(f"Retrieved update - ID: {update_id}")
+        
+        return jsonify({
+            'success': True,
+            'update': update_data
+        })
+        
+    except Exception as e:
+        logger.error(f"Get update error - ID: {update_id} | Error: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': 'Failed to retrieve update',
+            'details': str(e)
         }), 500
 
 

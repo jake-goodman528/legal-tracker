@@ -10,6 +10,7 @@ Handles all update-related business logic:
 from typing import Dict, List, Optional, Tuple, Any, Union
 from models import db, Update
 import logging
+from datetime import datetime
 
 
 class UpdateService:
@@ -67,7 +68,7 @@ class UpdateService:
     @staticmethod
     def get_filter_options():
         """
-        Get available filter options for updates
+        Get available filter options for updates including new fields
         
         Returns:
             dict: Dictionary containing filter options
@@ -77,11 +78,19 @@ class UpdateService:
             jurisdictions_query = Update.query.distinct(Update.jurisdiction_affected).all()
             jurisdictions = [u.jurisdiction_affected for u in jurisdictions_query if u.jurisdiction_affected]
             
+            # Get distinct decision statuses
+            decision_statuses_query = Update.query.distinct(Update.decision_status).all()
+            decision_statuses = [u.decision_status for u in decision_statuses_query if u.decision_status]
+            
             return {
                 'statuses': ['Recent', 'Upcoming', 'Proposed'],
                 'jurisdictions': list(set(jurisdictions)),  # Remove duplicates
                 'categories': ['Regulatory Changes', 'Tax Updates', 'Licensing Changes', 'Court Decisions', 'Industry News'],
-                'impact_levels': ['High', 'Medium', 'Low']
+                'impact_levels': ['High', 'Medium', 'Low'],
+                'decision_statuses': list(set(decision_statuses)),
+                'priorities': ['1', '2', '3'],  # 1=High, 2=Medium, 3=Low
+                'change_types': ['Recent', 'Upcoming', 'Proposed'],
+                'property_types': ['Residential', 'Commercial', 'Both']
             }
             
         except Exception as e:
@@ -90,7 +99,11 @@ class UpdateService:
                 'statuses': ['Recent', 'Upcoming', 'Proposed'],
                 'jurisdictions': [],
                 'categories': ['Regulatory Changes', 'Tax Updates', 'Licensing Changes', 'Court Decisions', 'Industry News'],
-                'impact_levels': ['High', 'Medium', 'Low']
+                'impact_levels': ['High', 'Medium', 'Low'],
+                'decision_statuses': [],
+                'priorities': ['1', '2', '3'],
+                'change_types': ['Recent', 'Upcoming', 'Proposed'],
+                'property_types': ['Residential', 'Commercial', 'Both']
             }
     
     @staticmethod
@@ -167,7 +180,7 @@ class UpdateService:
             Update: The update object or None if not found
         """
         try:
-            return Update.query.get_or_404(update_id)
+            return Update.query.get(update_id)
         except Exception as e:
             logging.error(f"Error getting update by ID {update_id}: {str(e)}")
             return None
@@ -175,7 +188,7 @@ class UpdateService:
     @staticmethod
     def create_update(update_data):
         """
-        Create a new update
+        Create a new update with all fields including new ones
         
         Args:
             update_data (dict): Dictionary containing update data
@@ -200,7 +213,14 @@ class UpdateService:
                 related_regulation_ids=update_data.get('related_regulation_ids'),
                 tags=update_data.get('tags'),
                 source_url=update_data.get('source_url'),
-                priority=int(update_data.get('priority', 3))  # Default to low priority
+                priority=int(update_data.get('priority', 3)),  # Default to low priority
+                # New fields
+                expected_decision_date=update_data.get('expected_decision_date'),
+                potential_impact=update_data.get('potential_impact'),
+                decision_status=update_data.get('decision_status'),
+                change_type=update_data.get('change_type'),
+                compliance_deadline=update_data.get('compliance_deadline'),
+                affected_operators=update_data.get('affected_operators')
             )
             
             db.session.add(update)
@@ -332,4 +352,125 @@ class UpdateService:
                 
         except Exception as e:
             logging.error(f"Error getting all updates: {str(e)}")
-            return [] 
+            return []
+    
+    @staticmethod
+    def get_recent_upcoming_updates(filters):
+        """
+        Get recent and upcoming updates with applied filters
+        
+        Args:
+            filters (dict): Dictionary containing filter criteria
+            
+        Returns:
+            list: List of filtered Update objects with status 'Recent' or 'Upcoming'
+        """
+        try:
+            query = Update.query.filter(Update.change_type.in_(['Recent', 'Upcoming']))
+            
+            # Apply filters
+            query = UpdateService._apply_filters(query, filters)
+            
+            # Order by priority then by date
+            return query.order_by(Update.priority.asc(), Update.update_date.desc()).all()
+            
+        except Exception as e:
+            logging.error(f"Error getting recent/upcoming updates: {str(e)}")
+            return []
+    
+    @staticmethod
+    def get_proposed_updates(filters):
+        """
+        Get proposed updates with applied filters
+        
+        Args:
+            filters (dict): Dictionary containing filter criteria
+            
+        Returns:
+            list: List of filtered Update objects with status 'Proposed'
+        """
+        try:
+            query = Update.query.filter(Update.change_type == 'Proposed')
+            
+            # Apply filters
+            query = UpdateService._apply_filters(query, filters)
+            
+            # Order by expected decision date, then priority
+            return query.order_by(
+                Update.expected_decision_date.asc().nullslast(),
+                Update.priority.asc(),
+                Update.update_date.desc()
+            ).all()
+            
+        except Exception as e:
+            logging.error(f"Error getting proposed updates: {str(e)}")
+            return []
+    
+    @staticmethod
+    def _apply_filters(query, filters):
+        """
+        Apply common filters to a query including all new fields
+        
+        Args:
+            query: SQLAlchemy query object
+            filters (dict): Dictionary containing filter criteria
+            
+        Returns:
+            query: Filtered SQLAlchemy query object
+        """
+        if filters.get('jurisdiction'):
+            query = query.filter(Update.jurisdiction_affected.ilike(f'%{filters["jurisdiction"]}%'))
+        
+        if filters.get('category'):
+            query = query.filter(Update.category == filters['category'])
+        
+        if filters.get('impact'):
+            query = query.filter(Update.impact_level == filters['impact'])
+        
+        if filters.get('priority'):
+            query = query.filter(Update.priority == int(filters['priority']))
+        
+        if filters.get('decision_status'):
+            query = query.filter(Update.decision_status == filters['decision_status'])
+        
+        if filters.get('change_type'):
+            query = query.filter(Update.change_type == filters['change_type'])
+        
+        if filters.get('status'):
+            query = query.filter(Update.status == filters['status'])
+        
+        if filters.get('action_required'):
+            if filters['action_required'].lower() == 'true':
+                query = query.filter(Update.action_required == True)
+            elif filters['action_required'].lower() == 'false':
+                query = query.filter(Update.action_required == False)
+        
+        if filters.get('search'):
+            search_terms = f'%{filters["search"]}%'
+            query = query.filter(
+                db.or_(
+                    Update.title.ilike(search_terms),
+                    Update.description.ilike(search_terms),
+                    Update.tags.ilike(search_terms),
+                    Update.jurisdiction_affected.ilike(search_terms),
+                    Update.potential_impact.ilike(search_terms),
+                    Update.affected_operators.ilike(search_terms),
+                    Update.action_description.ilike(search_terms)
+                )
+            )
+        
+        if filters.get('date_from'):
+            try:
+                date_from = datetime.strptime(filters['date_from'], '%Y-%m-%d').date()
+                query = query.filter(Update.update_date >= date_from)
+            except ValueError:
+                pass
+        
+        if filters.get('date_to'):
+            try:
+                date_to = datetime.strptime(filters['date_to'], '%Y-%m-%d').date()
+                query = query.filter(Update.update_date <= date_to)
+            except ValueError:
+                pass
+        
+        return query 

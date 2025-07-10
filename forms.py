@@ -234,4 +234,63 @@ class UpdateForm(FlaskForm):
                           validators=[DataRequired()],
                           default='3')
     
+    # New fields for expanded functionality
+    expected_decision_date = DateField(
+        'Expected Decision Date',
+        validators=[Optional()],
+        description="Expected date when a decision will be made on this proposed change"
+    )
+    
+    potential_impact = TextAreaField(
+        'Potential Impact',
+        validators=[Optional()],
+        render_kw={
+            "placeholder": "Describe the potential impact on property owners and operators...",
+            "rows": 4
+        },
+        description="Assessment of how this change might affect short-term rental operators"
+    )
+    
+    decision_status = SelectField(
+        'Decision Status',
+        choices=[
+            ('', 'Not Applicable'),
+            ('Under Review', 'Under Review'),
+            ('Public Hearings', 'Public Hearings'),
+            ('Proposed', 'Proposed'),
+            ('Approved', 'Approved'),
+            ('Rejected', 'Rejected')
+        ],
+        validators=[Optional()],
+        description="Current status of the decision-making process for proposed changes"
+    )
+    
+    change_type = SelectField(
+        'Change Type',
+        choices=[
+            ('Recent', 'Recent - Already implemented'),
+            ('Upcoming', 'Upcoming - Will be implemented'),
+            ('Proposed', 'Proposed - Under consideration')
+        ],
+        validators=[DataRequired()],
+        default='Recent',
+        description="Type of change based on implementation timeline"
+    )
+    
+    compliance_deadline = DateField(
+        'Compliance Deadline',
+        validators=[Optional()],
+        description="Deadline by which operators must comply with this change"
+    )
+    
+    affected_operators = TextAreaField(
+        'Affected Operators',
+        validators=[Optional()],
+        render_kw={
+            "placeholder": "Describe which types of operators are affected (e.g., all STR operators, only commercial operators, etc.)...",
+            "rows": 3
+        },
+        description="Description of which operators or property types are affected by this change"
+    )
+    
     submit = SubmitField('Save Update') 
