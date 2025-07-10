@@ -23,7 +23,7 @@
         </div>
     </div>
 
-    {% if updates.items %}
+    {% if updates %}
     <!-- Professional Updates Table -->
     <div class="admin-updates-table-card">
         <div class="updates-table-header">
@@ -31,7 +31,7 @@
                 <h5 class="updates-table-title">
                     <i class="fas fa-table"></i>
                     All Updates
-                    <span class="updates-count-badge">{{ updates.total }}</span>
+                    <span class="updates-count-badge">{{ updates | length }}</span>
                 </h5>
                 <div class="table-actions">
                     <button class="btn btn-admin-secondary btn-sm" onclick="exportUpdatesToCSV()">
@@ -69,7 +69,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for update in updates.items %}
+                        {% for update in updates %}
                         <tr class="update-table-row">
                             <td class="title-cell">
                                 <div class="update-title-text">{{ update.title }}</div>
@@ -114,45 +114,7 @@
                 </table>
             </div>
         </div>
-        
-        <!-- Pagination -->
-        {% if updates.pages > 1 %}
-        <div class="card-footer">
-            <nav aria-label="Updates pagination">
-                <ul class="pagination justify-content-center mb-0">
-                    {% if updates.has_prev %}
-                    <li class="page-item">
-                        <a class="page-link" href="{{ url_for('admin.manage_updates', page=updates.prev_num) }}">Previous</a>
-                    </li>
-                    {% endif %}
-                    
-                    {% for page_num in updates.iter_pages() %}
-                        {% if page_num %}
-                            {% if page_num != updates.page %}
-                            <li class="page-item">
-                                <a class="page-link" href="{{ url_for('admin.manage_updates', page=page_num) }}">{{ page_num }}</a>
-                            </li>
-                            {% else %}
-                            <li class="page-item active">
-                                <span class="page-link">{{ page_num }}</span>
-                            </li>
-                            {% endif %}
-                        {% else %}
-                        <li class="page-item disabled">
-                            <span class="page-link">...</span>
-                        </li>
-                        {% endif %}
-                    {% endfor %}
-                    
-                    {% if updates.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="{{ url_for('admin.manage_updates', page=updates.next_num) }}">Next</a>
-                    </li>
-                    {% endif %}
-                </ul>
-            </nav>
-        </div>
-        {% endif %}
+
     </div>
     {% else %}
     <!-- Professional Empty State -->

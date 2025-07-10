@@ -23,7 +23,7 @@
         </div>
     </div>
 
-    {% if regulations.items %}
+    {% if regulations %}
     <!-- Professional Statistics -->
     <div class="row mb-4">
         <div class="col-xl-3 col-md-6 mb-3">
@@ -32,7 +32,7 @@
                     <i class="fas fa-book"></i>
                 </div>
                 <div class="regulation-stat-content">
-                    <div class="regulation-stat-number">{{ regulations.total }}</div>
+                    <div class="regulation-stat-number">{{ regulations | length }}</div>
                     <div class="regulation-stat-label">Total Regulations</div>
                     <div class="regulation-stat-desc">All jurisdictions</div>
                 </div>
@@ -45,7 +45,7 @@
                 </div>
                 <div class="regulation-stat-content">
                     <div class="regulation-stat-number">
-                        {{ regulations.items | selectattr('jurisdiction_level', 'equalto', 'National') | list | length }}
+                        {{ regulations | selectattr('jurisdiction_level', 'equalto', 'National') | list | length }}
                     </div>
                     <div class="regulation-stat-label">National Level</div>
                     <div class="regulation-stat-desc">Federal requirements</div>
@@ -59,7 +59,7 @@
                 </div>
                 <div class="regulation-stat-content">
                     <div class="regulation-stat-number">
-                        {{ regulations.items | selectattr('jurisdiction_level', 'equalto', 'State') | list | length }}
+                        {{ regulations | selectattr('jurisdiction_level', 'equalto', 'State') | list | length }}
                     </div>
                     <div class="regulation-stat-label">State Level</div>
                     <div class="regulation-stat-desc">State requirements</div>
@@ -73,7 +73,7 @@
                 </div>
                 <div class="regulation-stat-content">
                     <div class="regulation-stat-number">
-                        {{ regulations.items | selectattr('jurisdiction_level', 'equalto', 'Local') | list | length }}
+                        {{ regulations | selectattr('jurisdiction_level', 'equalto', 'Local') | list | length }}
                     </div>
                     <div class="regulation-stat-label">Local Level</div>
                     <div class="regulation-stat-desc">Municipal requirements</div>
@@ -89,7 +89,7 @@
                 <h5 class="regulations-table-title">
                     <i class="fas fa-table"></i>
                     All Regulations
-                    <span class="regulations-count-badge">{{ regulations.total }}</span>
+                    <span class="regulations-count-badge">{{ regulations | length }}</span>
                 </h5>
                 <div class="table-actions">
                     <button class="btn btn-admin-secondary btn-sm" onclick="exportToCSV()">
@@ -131,7 +131,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for regulation in regulations.items %}
+                        {% for regulation in regulations %}
                         <tr class="regulation-table-row">
                             <td class="level-cell">
                                 <span class="jurisdiction-badge 
@@ -194,58 +194,7 @@
                 </table>
             </div>
         </div>
-        
-        <!-- Enhanced Pagination -->
-        {% if regulations.pages > 1 %}
-        <div class="card-footer">
-            <div class="d-flex justify-content-between align-items-center">
-                <div class="pagination-info">
-                    <small class="text-muted">
-                        Showing {{ ((regulations.page - 1) * regulations.per_page) + 1 }} to 
-                        {{ min(regulations.page * regulations.per_page, regulations.total) }} of 
-                        {{ regulations.total }} regulations
-                    </small>
-                </div>
-                <nav aria-label="Regulations pagination">
-                    <ul class="pagination pagination-sm mb-0">
-                        {% if regulations.has_prev %}
-                        <li class="page-item">
-                            <a class="page-link" href="{{ url_for('admin.manage_regulations', page=regulations.prev_num) }}">
-                                <i class="fas fa-chevron-left"></i>
-                            </a>
-                        </li>
-                        {% endif %}
-                        
-                        {% for page_num in regulations.iter_pages() %}
-                            {% if page_num %}
-                                {% if page_num != regulations.page %}
-                                <li class="page-item">
-                                    <a class="page-link" href="{{ url_for('admin.manage_regulations', page=page_num) }}">{{ page_num }}</a>
-                                </li>
-                                {% else %}
-                                <li class="page-item active">
-                                    <span class="page-link">{{ page_num }}</span>
-                                </li>
-                                {% endif %}
-                            {% else %}
-                            <li class="page-item disabled">
-                                <span class="page-link">...</span>
-                            </li>
-                            {% endif %}
-                        {% endfor %}
-                        
-                        {% if regulations.has_next %}
-                        <li class="page-item">
-                            <a class="page-link" href="{{ url_for('admin.manage_regulations', page=regulations.next_num) }}">
-                                <i class="fas fa-chevron-right"></i>
-                            </a>
-                        </li>
-                        {% endif %}
-                    </ul>
-                </nav>
-            </div>
-        </div>
-        {% endif %}
+
     </div>
     {% else %}
     <!-- Enhanced Empty State -->
