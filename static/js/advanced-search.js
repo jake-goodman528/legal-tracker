@@ -9,6 +9,7 @@ class AdvancedSearch {
         this.currentResults = [];
         this.activeFilters = {};
         this.savedSearches = [];
+        this.abortController = null; // Track current search request
         
         this.init();
     }
@@ -39,6 +40,15 @@ class AdvancedSearch {
             });
         }
 
+        // Clear button functionality
+        const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+        if (clearFiltersBtn) {
+            clearFiltersBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.clearAllFilters();
+            });
+        }
+
         // Filter dropdowns - no need to bind events since we use the Apply Filters button
 
         // Table sorting
@@ -65,7 +75,12 @@ class AdvancedSearch {
     }
 
     debouncedSearch(query) {
-        clearTimeout(this.searchTimeout);
+        // Clear existing timeout
+        if (this.searchTimeout) {
+            clearTimeout(this.searchTimeout);
+        }
+        
+        // Set new timeout for debounced search
         this.searchTimeout = setTimeout(() => {
             this.performSearch(query);
         }, 300);
@@ -73,6 +88,12 @@ class AdvancedSearch {
 
     async performSearch(query = '') {
         try {
+            // Cancel any existing search
+            if (this.abortController) {
+                this.abortController.abort();
+            }
+            
+            // Show loading WITHOUT disabling input
             this.showLoading();
             
             // Get current filter values
@@ -86,23 +107,54 @@ class AdvancedSearch {
                 return;
             }
 
-            // Perform API search
-            const response = await fetch('/api/search/advanced?' + new URLSearchParams(filters));
-            const data = await response.json();
+            // Add timeout to search requests
+            this.abortController = new AbortController();
+            const timeoutId = setTimeout(() => this.abortController.abort(), 10000); // 10 second timeout
+            
+            try {
+                // Perform API search with timeout
+                const response = await fetch('/api/search/advanced?' + new URLSearchParams(filters), {
+                    signal: this.abortController.signal
+                });
+                
+                clearTimeout(timeoutId);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
 
-            if (data.success) {
-                this.currentResults = data.regulations;
-                this.updateResults(data.regulations);
-                this.updateResultCount(data.count, query);
-                this.highlightSearchTerms(query);
-            } else {
-                this.showError(data.error);
+                if (data.success) {
+                    // Support both 'regulations' and 'results' field names
+                    const regulations = data.regulations || data.results || [];
+                    this.currentResults = regulations;
+                    this.updateResults(regulations);
+                    this.updateResultCount(data.count || regulations.length, query);
+                    this.highlightSearchTerms(query);
+                } else {
+                    throw new Error(data.error || 'Search failed');
+                }
+            } catch (apiError) {
+                clearTimeout(timeoutId);
+                
+                if (apiError.name === 'AbortError') {
+                    throw new Error('Search timed out. Please try again.');
+                } else if (apiError.message.includes('Failed to fetch')) {
+                    console.warn('API search failed, falling back to client-side filtering:', apiError);
+                    // Fall back to client-side filtering
+                    this.performClientSideSearch({ q: query });
+                    return;
+                } else {
+                    throw apiError;
+                }
             }
 
         } catch (error) {
             console.error('Search error:', error);
-            this.showError('Search failed. Please try again.');
+            this.showError(error.message || 'Search failed. Please try again.');
         } finally {
+            // Always hide loading and ensure input stays enabled
             this.hideLoading();
         }
     }
@@ -371,6 +423,71 @@ class AdvancedSearch {
         if (container) container.style.opacity = '1';
     }
 
+    forceHideAllLoading() {
+        // Force hide all possible loading states
+        const loadingElements = document.querySelectorAll('.loading-spinner, .spinner-border');
+        loadingElements.forEach(el => {
+            const loadingParent = el.closest('.loading-spinner');
+            if (loadingParent) {
+                loadingParent.remove();
+            }
+        });
+        
+        // Ensure main container is visible and has proper content
+        const container = document.getElementById('regulationsContainer');
+        if (container && container.innerHTML.includes('loading-spinner')) {
+            // Container was replaced with loading spinner, restore proper structure
+            const tableView = container.querySelector('#tableView');
+            if (!tableView) {
+                container.innerHTML = `
+                    <div class="table-view" id="tableView">
+                        <div class="table-responsive">
+                            <table class="table table-hover regulations-table" id="regulationsTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="sortable" data-sort="jurisdiction_level">
+                                            <i class="fas fa-layer-group"></i> Level
+                                            <i class="fas fa-sort sort-icon"></i>
+                                        </th>
+                                        <th class="sortable" data-sort="location">
+                                            <i class="fas fa-map-marker-alt"></i> Location
+                                            <i class="fas fa-sort sort-icon"></i>
+                                        </th>
+                                        <th class="sortable" data-sort="title">
+                                            <i class="fas fa-gavel"></i> Regulation
+                                            <i class="fas fa-sort sort-icon"></i>
+                                        </th>
+                                        <th class="sortable" data-sort="category">
+                                            <i class="fas fa-tags"></i> Category
+                                            <i class="fas fa-sort sort-icon"></i>
+                                        </th>
+                                        <th class="sortable" data-sort="compliance_level">
+                                            <i class="fas fa-exclamation-triangle"></i> Priority
+                                            <i class="fas fa-sort sort-icon"></i>
+                                        </th>
+                                        <th class="sortable" data-sort="last_updated">
+                                            <i class="fas fa-calendar-alt"></i> Updated
+                                            <i class="fas fa-sort sort-icon"></i>
+                                        </th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="regulationsTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        // Reset container styles
+        if (container) {
+            container.style.opacity = '1';
+            container.style.display = 'block';
+        }
+    }
+
     showNoResults() {
         const noResults = document.getElementById('noResults');
         const container = document.getElementById('regulationsContainer');
@@ -388,9 +505,26 @@ class AdvancedSearch {
     }
 
     showError(message) {
-        // You can implement a toast notification system here
-        console.error(message);
-        alert(message); // Simple fallback
+        this.hideLoading();
+        
+        // Show error in results area
+        const resultsContainer = document.querySelector('.regulations-results, .table-responsive, #regulationsContainer');
+        if (resultsContainer) {
+            resultsContainer.innerHTML = `
+                <div class="alert alert-danger text-center" role="alert">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Search Error:</strong> ${message}
+                    <div class="mt-2">
+                        <button class="btn btn-outline-danger btn-sm" onclick="location.reload()">
+                            <i class="fas fa-refresh"></i> Refresh Page
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Also log to console for debugging
+        console.error('AdvancedSearch Error:', message);
     }
 
     applyFilters() {
@@ -449,13 +583,81 @@ class AdvancedSearch {
         if (dateTo) dateTo.value = '';
         if (dateRange) dateRange.value = '';
         
-        // Reset results to show all regulations
-        this.performSearch('');
+        // Reset all state variables
+        this.currentResults = [];
+        this.activeFilters = {};
+        
+        // Cancel any pending search requests
+        if (this.abortController) {
+            this.abortController.abort();
+            this.abortController = null;
+        }
+        
+        // Clear any search timeouts
+        if (this.searchTimeout) {
+            clearTimeout(this.searchTimeout);
+            this.searchTimeout = null;
+        }
+        
+        // Hide all loading spinners and restore container
+        this.hideLoading();
+        this.forceHideAllLoading();
+        
+        // Hide no results message
+        this.hideNoResults();
+        
+        // Clear search suggestions
+        this.hideSearchSuggestions();
+        
+        // Load all regulations and update display
+        this.loadAllRegulations();
+        
+        // Update filter summary
         this.updateFilterSummary();
+        
+        // Update URL to remove search parameters
+        if (window.history && window.history.pushState) {
+            window.history.pushState({}, '', window.location.pathname);
+        }
         
         // Close modal if open
         const modal = bootstrap.Modal.getInstance(document.getElementById('advancedSearchModal'));
         if (modal) modal.hide();
+    }
+
+    loadAllRegulations() {
+        try {
+            // Use stored original data if available, otherwise extract from table
+            let allRegulations;
+            if (window.originalRegulationsData && window.originalRegulationsData.length > 0) {
+                allRegulations = window.originalRegulationsData;
+            } else {
+                // Fallback to extracting from table (for pages without stored data)
+                allRegulations = this.getAllRegulations();
+            }
+            
+            // Update results and display
+            this.currentResults = allRegulations;
+            this.updateResults(allRegulations);
+            this.updateResultCount(allRegulations.length, '');
+            
+            // Remove any highlighting
+            this.removeHighlighting();
+            
+        } catch (error) {
+            console.error('Error loading all regulations:', error);
+            this.showError('Failed to reload regulations. Please refresh the page.');
+        }
+    }
+
+    removeHighlighting() {
+        // Remove any search term highlighting
+        const highlightedElements = document.querySelectorAll('mark');
+        highlightedElements.forEach(element => {
+            const parent = element.parentNode;
+            parent.replaceChild(document.createTextNode(element.textContent), element);
+            parent.normalize();
+        });
     }
 
     switchView(viewType) {
@@ -545,8 +747,13 @@ class AdvancedSearch {
     }
 
     getAllRegulations() {
-        // Get all regulations from the initial page load
+        // Use stored original data if available and table is empty
         const rows = document.querySelectorAll('.regulation-row');
+        if (rows.length === 0 && window.originalRegulationsData && window.originalRegulationsData.length > 0) {
+            return window.originalRegulationsData;
+        }
+        
+        // Get all regulations from the current table rows
         return Array.from(rows).map(row => {
             // Extract text content from badges and links
             const jurisdictionBadge = row.cells[0].querySelector('.jurisdiction-badge');
@@ -694,8 +901,10 @@ class AdvancedSearch {
                 const data = await response.json();
                 
                 if (data.success) {
-                    this.currentResults = data.regulations;
-                    this.updateResults(data.regulations);
+                    // Support both 'regulations' and 'results' field names
+                    const regulations = data.regulations || data.results || [];
+                    this.currentResults = regulations;
+                    this.updateResults(regulations);
                     this.updateResultCount(data.count, criteria.q);
                     this.highlightSearchTerms(criteria.q);
                     
@@ -721,6 +930,8 @@ class AdvancedSearch {
         }
     }
     
+
+
     performClientSideSearch(criteria) {
         // Get all regulations from the page
         let regulations = this.getAllRegulations();
@@ -834,12 +1045,16 @@ function selectSuggestion(text) {
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
         searchInput.value = text;
-        advancedSearch.debouncedSearch(text);
+        if (window.advancedSearch && typeof window.advancedSearch.debouncedSearch === 'function') {
+            window.advancedSearch.debouncedSearch(text);
+        }
     }
 }
 
 function applySavedSearch(searchId) {
-    advancedSearch.applySavedSearch(searchId);
+    if (window.advancedSearch && typeof window.advancedSearch.applySavedSearch === 'function') {
+        window.advancedSearch.applySavedSearch(searchId);
+    }
 }
 
 function clearAllFilters() {
@@ -865,12 +1080,102 @@ function clearAllFilters() {
         }
     });
     
-    // Try to use advanced search if available, otherwise reload page
-    if (window.advancedSearch && typeof window.advancedSearch.performSearch === 'function') {
-        window.advancedSearch.performSearch('');
+    // Try to use advanced search if available
+    if (window.advancedSearch && typeof window.advancedSearch.clearAllFilters === 'function') {
+        window.advancedSearch.clearAllFilters();
     } else {
-        // Fallback: reload page to show all results
-        window.location.href = window.location.pathname;
+        // Fallback: Try to restore original data without reloading
+        try {
+            // Hide any loading indicators
+            const loadingElement = document.getElementById('searchLoading');
+            if (loadingElement) {
+                loadingElement.style.display = 'none';
+            }
+            
+            // Force remove any LoadingManager loading spinners
+            const loadingSpinners = document.querySelectorAll('.loading-spinner, .spinner-border');
+            loadingSpinners.forEach(spinner => {
+                const parent = spinner.closest('.loading-spinner');
+                if (parent) parent.remove();
+            });
+            
+            // Hide no results message
+            const noResults = document.getElementById('noResults');
+            if (noResults) {
+                noResults.style.display = 'none';
+            }
+            
+            // Show the main content
+            const mainContainer = document.getElementById('regulationsContainer') || 
+                                 document.getElementById('tableView');
+            if (mainContainer) {
+                mainContainer.style.display = 'block';
+            }
+            
+            // Try to restore original data if available
+            if (window.originalRegulationsData && window.originalRegulationsData.length > 0) {
+                const tbody = document.getElementById('regulationsTableBody');
+                if (tbody) {
+                    // Recreate table rows from stored data
+                    const html = window.originalRegulationsData.map(reg => {
+                        const complianceBadge = reg.compliance_level === 'Mandatory' 
+                            ? `<span class="badge bg-danger"><i class="fas fa-exclamation-triangle"></i> Mandatory</span>`
+                            : reg.compliance_level === 'Recommended'
+                            ? `<span class="badge bg-warning"><i class="fas fa-info-circle"></i> Recommended</span>`
+                            : `<span class="badge bg-secondary"><i class="fas fa-minus-circle"></i> Optional</span>`;
+                        
+                        return `
+                            <tr class="regulation-row" data-regulation-id="${reg.id}">
+                                <td>
+                                    <span class="jurisdiction-badge jurisdiction-${reg.jurisdiction_level.toLowerCase()}">
+                                        ${reg.jurisdiction_level}
+                                    </span>
+                                </td>
+                                <td class="location-cell">${reg.location}</td>
+                                <td class="title-cell">
+                                    <a href="/regulations/${reg.id}" class="regulation-title-link text-decoration-none">
+                                        ${reg.title}
+                                    </a>
+                                </td>
+                                <td>
+                                    <span class="badge category-badge category-${reg.category.toLowerCase().replace(' ', '-')}">
+                                        ${reg.category}
+                                    </span>
+                                </td>
+                                <td>${complianceBadge}</td>
+                                <td class="date-cell">${reg.last_updated}</td>
+                                <td>
+                                    <a href="/regulations/${reg.id}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                    
+                    tbody.innerHTML = html;
+                    
+                    // Update result count
+                    const resultCount = document.getElementById('resultCount');
+                    if (resultCount) {
+                        resultCount.textContent = window.originalRegulationsData.length;
+                    }
+                }
+            } else {
+                // If no stored data, reload page as last resort
+                window.location.href = window.location.pathname;
+            }
+            
+            // Update URL to remove search parameters
+            if (window.history && window.history.pushState) {
+                window.history.pushState({}, '', window.location.pathname);
+            }
+            
+        } catch (error) {
+            console.error('Error in fallback clear function:', error);
+            // Ultimate fallback - just reload the page
+            window.location.reload();
+        }
     }
 }
 
@@ -943,17 +1248,5 @@ function clearAdvancedFilters() {
     }
 }
 
-// Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-    window.advancedSearch = new AdvancedSearch();
-    
-    // Add event listener for clear button
-    const clearBtn = document.getElementById('clearFiltersBtn');
-    if (clearBtn) {
-        clearBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            clearAllFilters();
-        });
-    }
-}); 
+// Prevent automatic initialization - will be initialized by specific pages that need it
+// This prevents conflicts when multiple pages include this script 

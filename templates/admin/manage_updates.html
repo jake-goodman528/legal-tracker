@@ -70,7 +70,7 @@
                     </thead>
                     <tbody>
                         {% for update in updates %}
-                        <tr class="update-table-row">
+                        <tr class="update-table-row" data-item-id="{{ update.id }}">
                             <td class="title-cell">
                                 <div class="update-title-text">{{ update.title }}</div>
                                 <div class="update-description-preview">
@@ -89,7 +89,13 @@
                                 </span>
                             </td>
                             <td class="date-cell">
-                                <div class="update-date">{{ update.update_date.strftime('%b %d, %Y') }}</div>
+                                <div class="update-date">
+                                    {% if update.update_date %}
+                                        {{ update.update_date.strftime('%b %d, %Y') }}
+                                    {% else %}
+                                        Not specified
+                                    {% endif %}
+                                </div>
                             </td>
                             <td class="actions-cell">
                                 <div class="update-actions">
@@ -475,4 +481,9 @@ function exportUpdatesToCSV() {
     window.URL.revokeObjectURL(url);
 }
 </script>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/admin-bulk-operations.js') }}"></script>
 {% endblock %}

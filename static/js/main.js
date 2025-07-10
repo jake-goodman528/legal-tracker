@@ -1,570 +1,695 @@
-// Main JavaScript for STR Compliance Toolkit - Enhanced Database Interface
+/**
+ * STR Compliance Toolkit - Main JavaScript
+ * Enhanced with comprehensive error logging and monitoring
+ */
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize tooltips
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
+// Error tracking and logging system
+class ErrorTracker {
+    constructor() {
+        this.errors = [];
+        this.maxErrors = 100; // Store max 100 errors in memory
+        this.setupGlobalErrorHandling();
+        this.setupPerformanceMonitoring();
+    }
 
-    // Initialize popovers
-    const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
-    popoverTriggerList.map(function (popoverTriggerEl) {
-        return new bootstrap.Popover(popoverTriggerEl);
-    });
+    setupGlobalErrorHandling() {
+        // Global JavaScript error handler
+        window.addEventListener('error', (event) => {
+            this.logError({
+                type: 'javascript_error',
+                message: event.message,
+                filename: event.filename,
+                lineno: event.lineno,
+                colno: event.colno,
+                stack: event.error ? event.error.stack : null,
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent,
+                url: window.location.href
+            });
+        });
 
-    // Auto-dismiss alerts after 5 seconds
-    const alerts = document.querySelectorAll('.alert');
-    alerts.forEach(function(alert) {
-        if (alert.classList.contains('alert-success') || alert.classList.contains('alert-info')) {
-            setTimeout(function() {
-                const bsAlert = new bootstrap.Alert(alert);
-                bsAlert.close();
-            }, 5000);
+        // Promise rejection handler
+        window.addEventListener('unhandledrejection', (event) => {
+            this.logError({
+                type: 'unhandled_promise_rejection',
+                message: event.reason ? event.reason.toString() : 'Unknown promise rejection',
+                stack: event.reason && event.reason.stack ? event.reason.stack : null,
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent,
+                url: window.location.href
+            });
+        });
+
+        // Network error detection
+        window.addEventListener('online', () => {
+            this.logInfo('Network connection restored');
+        });
+
+        window.addEventListener('offline', () => {
+            this.logError({
+                type: 'network_error',
+                message: 'Network connection lost',
+                timestamp: new Date().toISOString(),
+                url: window.location.href
+            });
+        });
+    }
+
+    setupPerformanceMonitoring() {
+        // Monitor page load performance
+        if ('PerformanceObserver' in window) {
+            try {
+                // Monitor largest contentful paint
+                const lcpObserver = new PerformanceObserver((list) => {
+                    for (const entry of list.getEntries()) {
+                        if (entry.startTime > 4000) { // LCP > 4s is poor
+                            this.logWarning({
+                                type: 'performance_warning',
+                                metric: 'largest_contentful_paint',
+                                value: entry.startTime,
+                                message: `Poor LCP performance: ${entry.startTime}ms`,
+                                timestamp: new Date().toISOString()
+                            });
+                        }
+                    }
+                });
+                lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
+
+                // Monitor long tasks
+                const longTaskObserver = new PerformanceObserver((list) => {
+                    for (const entry of list.getEntries()) {
+                        this.logWarning({
+                            type: 'performance_warning',
+                            metric: 'long_task',
+                            duration: entry.duration,
+                            message: `Long task detected: ${entry.duration}ms`,
+                            timestamp: new Date().toISOString()
+                        });
+                    }
+                });
+                longTaskObserver.observe({ entryTypes: ['longtask'] });
+
+            } catch (e) {
+                console.warn('Performance monitoring setup failed:', e);
+            }
         }
-    });
 
-    // Initialize navigation active states
-    initializeNavigation();
-    
-    // Initialize features (compatible with advanced search)
-    initializeFormValidation();
-    initializeKeyboardShortcuts();
-    initializeAnimations();
-    initializeCompatibilityFeatures();
-});
-
-// Initialize navigation active states and functionality
-function initializeNavigation() {
-    // Set active nav link based on current page
-    const currentPath = window.location.pathname;
-    const navLinks = document.querySelectorAll('.kaystreet-nav-link');
-    
-    navLinks.forEach(link => {
-        link.classList.remove('active');
-        
-        // Check if link href matches current path
-        const linkPath = new URL(link.href).pathname;
-        if (linkPath === currentPath || 
-            (currentPath.includes('/regulations') && linkPath.includes('/regulations')) ||
-            (currentPath.includes('/updates') && linkPath.includes('/updates')) ||
-            (currentPath.includes('/admin') && linkPath.includes('/admin'))) {
-            link.classList.add('active');
-        }
-    });
-    
-    // Smooth scroll behavior for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
+        // Monitor resource loading errors
+        document.addEventListener('error', (event) => {
+            if (event.target !== window) {
+                this.logError({
+                    type: 'resource_error',
+                    message: `Failed to load resource: ${event.target.src || event.target.href}`,
+                    element: event.target.tagName,
+                    timestamp: new Date().toISOString(),
+                    url: window.location.href
                 });
             }
-        });
-    });
-    
-    // Handle mobile menu close when clicking nav links
-    const navLinks_mobile = document.querySelectorAll('.kaystreet-nav-link');
-    const mobileMenu = document.getElementById('kaystreetNav');
-    
-    navLinks_mobile.forEach(link => {
-        link.addEventListener('click', function() {
-            if (window.innerWidth < 992 && mobileMenu.classList.contains('show')) {
-                const bsCollapse = new bootstrap.Collapse(mobileMenu);
-                bsCollapse.hide();
-            }
-        });
-    });
-}
-
-// Compatibility features for pages without advanced search
-function initializeCompatibilityFeatures() {
-    // Only initialize if advanced search is not present
-    if (!document.getElementById('searchInput') && document.getElementById('search')) {
-        initializeLegacySearch();
+        }, true);
     }
-    
-    // Initialize table features if regulations table exists but advanced search doesn't handle it
-    if (document.querySelector('.regulations-table') && !window.advancedSearch) {
-        initializeLegacyTableFeatures();
-    }
-}
 
-// Legacy search for pages without advanced search
-function initializeLegacySearch() {
-    const searchInput = document.getElementById('search');
-    const jurisdictionSelect = document.getElementById('jurisdiction');
-    const locationSelect = document.getElementById('location');
-    const categorySelect = document.getElementById('category');
-    
-    let debounceTimer;
-    
-    // Enhanced search with debouncing
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            clearTimeout(debounceTimer);
-            const searchValue = this.value.trim();
-            
-            // Show loading indicator
-            showSearchLoading(true);
-            
-            debounceTimer = setTimeout(function() {
-                if (searchValue.length >= 2 || searchValue.length === 0) {
-                    submitLegacyFilter();
-                }
-                showSearchLoading(false);
-            }, 300);
+    logError(error) {
+        console.error('Client Error:', error);
+        this.storeError({ ...error, level: 'error' });
+        this.sendToServer(error, 'error');
+    }
+
+    logWarning(warning) {
+        console.warn('Client Warning:', warning);
+        this.storeError({ ...warning, level: 'warning' });
+        this.sendToServer(warning, 'warning');
+    }
+
+    logInfo(message) {
+        console.info('Client Info:', message);
+        this.storeError({ 
+            type: 'info',
+            message: message,
+            level: 'info',
+            timestamp: new Date().toISOString(),
+            url: window.location.href
         });
+    }
+
+    storeError(error) {
+        this.errors.push(error);
         
-        // Clear search functionality
-        const clearSearchBtn = createClearSearchButton(searchInput);
-        if (searchInput.value) {
-            clearSearchBtn.style.display = 'block';
+        // Keep only the most recent errors
+        if (this.errors.length > this.maxErrors) {
+            this.errors = this.errors.slice(-this.maxErrors);
+        }
+
+        // Store in localStorage for persistence across page loads
+        try {
+            const storedErrors = JSON.parse(localStorage.getItem('str_client_errors') || '[]');
+            storedErrors.push(error);
+            
+            // Keep only last 50 errors in localStorage
+            const recentErrors = storedErrors.slice(-50);
+            localStorage.setItem('str_client_errors', JSON.stringify(recentErrors));
+        } catch (e) {
+            console.warn('Failed to store error in localStorage:', e);
         }
     }
-    
-    // Auto-filter on dropdown changes
-    [jurisdictionSelect, locationSelect, categorySelect].forEach(select => {
-        if (select) {
-            select.addEventListener('change', function() {
-                showSearchLoading(true);
-                setTimeout(() => {
-                    submitLegacyFilter();
-                    showSearchLoading(false);
-                }, 100);
+
+    sendToServer(error, level = 'error') {
+        // Only send errors in production or if explicitly enabled
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            return; // Don't send errors in development
+        }
+
+        // Debounce error sending to avoid spam
+        if (this.lastErrorSent && Date.now() - this.lastErrorSent < 1000) {
+            return;
+        }
+        this.lastErrorSent = Date.now();
+
+        try {
+            fetch('/api/client-errors', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    error: error,
+                    level: level,
+                    session_id: this.getSessionId(),
+                    page_info: {
+                        url: window.location.href,
+                        referrer: document.referrer,
+                        viewport: {
+                            width: window.innerWidth,
+                            height: window.innerHeight
+                        },
+                        screen: {
+                            width: window.screen.width,
+                            height: window.screen.height
+                        }
+                    }
+                })
+            }).catch(e => {
+                console.warn('Failed to send error to server:', e);
             });
+        } catch (e) {
+            console.warn('Error sending error to server:', e);
         }
-    });
-}
-
-// Legacy filter submission
-function submitLegacyFilter() {
-    const form = document.getElementById('filterForm');
-    if (form) {
-        // Add loading state to form
-        form.classList.add('loading');
-        form.submit();
     }
-}
 
-// Create clear search button
-function createClearSearchButton(searchInput) {
-    const clearBtn = document.createElement('button');
-    clearBtn.type = 'button';
-    clearBtn.className = 'btn btn-link position-absolute end-0 top-50 translate-middle-y me-2';
-    clearBtn.style.display = 'none';
-    clearBtn.style.zIndex = '10';
-    clearBtn.innerHTML = '<i class="fas fa-times"></i>';
-    
-    clearBtn.addEventListener('click', function() {
-        searchInput.value = '';
-        this.style.display = 'none';
-        if (window.advancedSearch) {
-            window.advancedSearch.clearAllFilters();
-        } else {
-            submitLegacyFilter();
+    getSessionId() {
+        // Simple session ID generation/retrieval
+        let sessionId = sessionStorage.getItem('str_session_id');
+        if (!sessionId) {
+            sessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            sessionStorage.setItem('str_session_id', sessionId);
         }
-    });
-    
-    searchInput.addEventListener('input', function() {
-        clearBtn.style.display = this.value ? 'block' : 'none';
-    });
-    
-    // Position the clear button
-    const inputGroup = searchInput.parentNode;
-    inputGroup.style.position = 'relative';
-    inputGroup.appendChild(clearBtn);
-    
-    return clearBtn;
-}
+        return sessionId;
+    }
 
-// Show/hide search loading indicator
-function showSearchLoading(show) {
-    const searchInput = document.getElementById('search') || document.getElementById('searchInput');
-    if (!searchInput) return;
-    
-    let loadingIndicator = searchInput.parentNode.querySelector('.search-loading');
-    
-    if (show && !loadingIndicator) {
-        loadingIndicator = document.createElement('div');
-        loadingIndicator.className = 'search-loading position-absolute end-0 top-50 translate-middle-y me-4';
-        loadingIndicator.innerHTML = '<i class="fas fa-spinner fa-spin text-muted"></i>';
-        loadingIndicator.style.zIndex = '5';
-        searchInput.parentNode.appendChild(loadingIndicator);
-    } else if (!show && loadingIndicator) {
-        loadingIndicator.remove();
+    getErrors() {
+        return this.errors;
+    }
+
+    clearErrors() {
+        this.errors = [];
+        localStorage.removeItem('str_client_errors');
+    }
+
+    // Method to track API errors specifically
+    trackApiError(endpoint, error, requestData = null) {
+        this.logError({
+            type: 'api_error',
+            endpoint: endpoint,
+            message: error.message || error.toString(),
+            status: error.status || null,
+            response: error.response || null,
+            requestData: requestData ? JSON.stringify(requestData).substring(0, 500) : null,
+            timestamp: new Date().toISOString(),
+            url: window.location.href
+        });
+    }
+
+    // Method to track user interactions for debugging
+    trackUserAction(action, details = {}) {
+        this.logInfo({
+            type: 'user_action',
+            action: action,
+            details: details,
+            timestamp: new Date().toISOString(),
+            url: window.location.href
+        });
     }
 }
 
-// Legacy table features for non-advanced search pages
-function initializeLegacyTableFeatures() {
-    const sortableHeaders = document.querySelectorAll('.sortable');
-    let currentSort = { column: null, direction: 'asc' };
-    
-    sortableHeaders.forEach(header => {
-        header.style.cursor = 'pointer';
-        header.addEventListener('click', function() {
-            legacySortTable(this);
-        });
-    });
-    
-    // Table density toggle
-    const densityToggle = document.querySelector('[onclick*="toggleTableDensity"]');
-    if (densityToggle) {
-        densityToggle.addEventListener('click', function(e) {
-            e.preventDefault();
-            toggleTableDensity();
-        });
+// API Helper with error tracking
+class ApiClient {
+    constructor(errorTracker) {
+        this.errorTracker = errorTracker;
+        this.baseUrl = '/api';
     }
-    
-    // Enhanced table row hover effects
-    const tableRows = document.querySelectorAll('.regulation-row');
-    tableRows.forEach(row => {
-        row.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-1px)';
-            this.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
-        });
-        
-        row.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0)';
-            this.style.boxShadow = 'none';
-        });
-    });
-}
 
-// Legacy table sorting function
-function legacySortTable(header) {
-    const table = header.closest('table');
-    const tbody = table.querySelector('tbody');
-    const rows = Array.from(tbody.querySelectorAll('tr'));
-    const columnIndex = Array.from(header.parentNode.children).indexOf(header);
-    const isAscending = header.classList.contains('sort-asc');
-    
-    // Remove existing sort classes
-    header.parentNode.querySelectorAll('th').forEach(th => {
-        th.classList.remove('sort-asc', 'sort-desc');
-        const icon = th.querySelector('.sort-icon');
-        if (icon) {
-            icon.className = 'fas fa-sort sort-icon';
-        }
-    });
-    
-    // Sort rows
-    rows.sort((a, b) => {
-        const aText = a.children[columnIndex].textContent.trim();
-        const bText = b.children[columnIndex].textContent.trim();
-        
-        // Check if values are dates
-        if (!isNaN(Date.parse(aText)) && !isNaN(Date.parse(bText))) {
-            return isAscending ? new Date(aText) - new Date(bText) : new Date(bText) - new Date(aText);
-        } else {
-            return isAscending ? aText.localeCompare(bText) : bText.localeCompare(aText);
-        }
-    });
-    
-    // Update header classes
-    header.classList.add(isAscending ? 'sort-desc' : 'sort-asc');
-    const icon = header.querySelector('.sort-icon');
-    if (icon) {
-        icon.className = `fas fa-sort-${isAscending ? 'down' : 'up'} sort-icon text-primary`;
-    }
-    
-    // Re-append sorted rows with animation
-    rows.forEach((row, index) => {
-        setTimeout(() => {
-            tbody.appendChild(row);
-            row.style.opacity = '0';
-            row.style.animation = 'fadeInUp 0.3s ease-out forwards';
-            row.style.animationDelay = `${index * 0.02}s`;
-        }, index * 10);
-    });
-}
+    async request(endpoint, options = {}) {
+        const url = `${this.baseUrl}${endpoint}`;
+        const startTime = performance.now();
 
-// Table density toggle
-function toggleTableDensity() {
-    const table = document.querySelector('.regulations-table') || document.querySelector('.notion-table');
-    if (table) {
-        table.classList.toggle('table-compact');
-        
-        // Save preference
-        const isCompact = table.classList.contains('table-compact');
-        localStorage.setItem('tableCompact', isCompact);
-    }
-}
-
-// Form validation functionality
-function initializeFormValidation() {
-    const forms = document.querySelectorAll('form[novalidate]');
-    
-    forms.forEach(form => {
-        form.addEventListener('submit', function(event) {
-            if (!form.checkValidity()) {
-                event.preventDefault();
-                event.stopPropagation();
-                
-                // Highlight first invalid field
-                const firstInvalid = form.querySelector(':invalid');
-                if (firstInvalid) {
-                    firstInvalid.focus();
-                    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-            }
-            form.classList.add('was-validated');
-        });
-        
-        // Real-time validation
-        const inputs = form.querySelectorAll('input, textarea, select');
-        inputs.forEach(input => {
-            input.addEventListener('blur', function() {
-                if (this.checkValidity()) {
-                    this.classList.remove('is-invalid');
-                    this.classList.add('is-valid');
-                } else {
-                    this.classList.remove('is-valid');
-                    this.classList.add('is-invalid');
-                }
+        try {
+            const response = await fetch(url, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                },
+                ...options
             });
-            
-            input.addEventListener('input', function() {
-                if (this.classList.contains('is-invalid') && this.checkValidity()) {
-                    this.classList.remove('is-invalid');
-                    this.classList.add('is-valid');
-                }
-            });
-        });
-    });
-    
-    // Character count for textareas
-    const textareas = document.querySelectorAll('textarea[maxlength]');
-    textareas.forEach(textarea => {
-        updateCharacterCount(textarea);
-        textarea.addEventListener('input', () => updateCharacterCount(textarea));
-    });
-}
 
-// Update character count for textareas
-function updateCharacterCount(textarea) {
-    const maxLength = textarea.getAttribute('maxlength');
-    const currentLength = textarea.value.length;
-    
-    let counter = textarea.parentNode.querySelector('.character-count');
-    if (!counter) {
-        counter = document.createElement('div');
-        counter.className = 'character-count text-muted small mt-1';
-        textarea.parentNode.appendChild(counter);
-    }
-    
-    counter.textContent = `${currentLength}/${maxLength} characters`;
-    
-    if (currentLength > maxLength * 0.9) {
-        counter.classList.add('text-warning');
-        counter.classList.remove('text-muted');
-    } else {
-        counter.classList.add('text-muted');
-        counter.classList.remove('text-warning');
-    }
-}
+            const duration = performance.now() - startTime;
 
-// Keyboard shortcuts
-function initializeKeyboardShortcuts() {
-    document.addEventListener('keydown', function(event) {
-        // Ctrl/Cmd + K for search focus
-        if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
-            event.preventDefault();
-            const searchInput = document.getElementById('searchInput') || document.getElementById('search');
-            if (searchInput) {
-                searchInput.focus();
-                searchInput.select();
+            // Log slow API calls
+            if (duration > 2000) {
+                this.errorTracker.logWarning({
+                    type: 'slow_api_call',
+                    endpoint: endpoint,
+                    duration: duration,
+                    message: `Slow API call: ${endpoint} took ${duration.toFixed(2)}ms`,
+                    timestamp: new Date().toISOString()
+                });
             }
-        }
-        
-        // Ctrl/Cmd + Shift + F for advanced search
-        if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'F') {
-            event.preventDefault();
-            if (window.openAdvancedSearch) {
-                window.openAdvancedSearch();
-            }
-        }
-        
-        // Escape to clear search
-        if (event.key === 'Escape') {
-            const searchInput = document.getElementById('searchInput') || document.getElementById('search');
-            if (searchInput && document.activeElement === searchInput) {
-                searchInput.value = '';
-                if (window.advancedSearch) {
-                    window.advancedSearch.clearAllFilters();
-                }
-                searchInput.blur();
-            }
-        }
-        
-        // Arrow keys for table navigation (when table row is focused)
-        if (['ArrowUp', 'ArrowDown'].includes(event.key)) {
-            const focusedRow = document.activeElement.closest('.regulation-row');
-            if (focusedRow) {
-                event.preventDefault();
-                const rows = Array.from(document.querySelectorAll('.regulation-row'));
-                const currentIndex = rows.indexOf(focusedRow);
-                let newIndex;
+
+            if (!response.ok) {
+                const errorData = await response.text();
+                const error = new Error(`API Error: ${response.status} ${response.statusText}`);
+                error.status = response.status;
+                error.response = errorData;
                 
-                if (event.key === 'ArrowUp') {
-                    newIndex = currentIndex > 0 ? currentIndex - 1 : rows.length - 1;
-                } else {
-                    newIndex = currentIndex < rows.length - 1 ? currentIndex + 1 : 0;
-                }
-                
-                if (rows[newIndex]) {
-                    rows[newIndex].focus();
-                    rows[newIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }
+                this.errorTracker.trackApiError(endpoint, error, options.body);
+                throw error;
             }
+
+            const data = await response.json();
+            
+            // Log successful API calls in debug mode
+            if (window.STR_DEBUG) {
+                console.log(`API Success: ${endpoint} (${duration.toFixed(2)}ms)`, data);
+            }
+
+            return data;
+
+        } catch (error) {
+            const duration = performance.now() - startTime;
+            
+            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                // Network error
+                this.errorTracker.trackApiError(endpoint, {
+                    message: 'Network error - check internet connection',
+                    type: 'network_error'
+                }, options.body);
+            } else {
+                this.errorTracker.trackApiError(endpoint, error, options.body);
+            }
+
+            throw error;
         }
-    });
-    
-    // Add tabindex to regulation rows for keyboard navigation
-    const regulationRows = document.querySelectorAll('.regulation-row');
-    regulationRows.forEach((row, index) => {
-        row.tabIndex = index === 0 ? 0 : -1;
-        row.addEventListener('focus', function() {
-            regulationRows.forEach(r => r.tabIndex = -1);
-            this.tabIndex = 0;
+    }
+
+    // Convenience methods
+    get(endpoint, params = {}) {
+        const url = new URL(endpoint, window.location.origin + this.baseUrl);
+        Object.keys(params).forEach(key => {
+            if (params[key] !== null && params[key] !== undefined) {
+                url.searchParams.append(key, params[key]);
+            }
         });
         
-        // Enter key to view details
-        row.addEventListener('keydown', function(event) {
-            if (event.key === 'Enter') {
-                const link = this.querySelector('a[href*="/regulations/"]');
-                if (link) {
-                    link.click();
-                }
+        return this.request(url.pathname + url.search);
+    }
+
+    post(endpoint, data = {}) {
+        return this.request(endpoint, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+    }
+
+    put(endpoint, data = {}) {
+        return this.request(endpoint, {
+            method: 'PUT',
+            body: JSON.stringify(data)
+        });
+    }
+
+    delete(endpoint) {
+        return this.request(endpoint, {
+            method: 'DELETE'
+        });
+    }
+}
+
+// Initialize error tracking and API client
+const errorTracker = new ErrorTracker();
+const apiClient = new ApiClient(errorTracker);
+
+// Enhanced alert management with error tracking
+class AlertManager {
+    constructor() {
+        this.alerts = [];
+        this.setupAlertManagement();
+    }
+
+    setupAlertManagement() {
+        // Auto-dismiss alerts after timeout
+        document.addEventListener('DOMContentLoaded', () => {
+            this.managePersistentAlerts();
+        });
+
+        // Track alert interactions
+        document.addEventListener('click', (event) => {
+            if (event.target.classList.contains('btn-close') && event.target.closest('.alert')) {
+                const alert = event.target.closest('.alert');
+                const alertType = this.getAlertType(alert);
+                errorTracker.trackUserAction('alert_dismissed', { type: alertType });
             }
         });
-    });
-}
+    }
 
-// Animation initialization
-function initializeAnimations() {
-    // Intersection Observer for fade-in animations
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
-    
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('fade-in');
-                observer.unobserve(entry.target);
+    managePersistentAlerts() {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach((alert, index) => {
+            const alertType = this.getAlertType(alert);
+            let timeout = 5000; // Default 5 seconds
+
+            // Different timeouts for different alert types
+            switch (alertType) {
+                case 'success':
+                    timeout = 4000;
+                    break;
+                case 'info':
+                    timeout = 6000;
+                    break;
+                case 'warning':
+                    timeout = 8000;
+                    break;
+                case 'error':
+                case 'danger':
+                    timeout = 10000;
+                    break;
             }
+
+            // Auto-dismiss after timeout
+            setTimeout(() => {
+                if (alert && alert.parentNode) {
+                    const bootstrap = window.bootstrap;
+                    if (bootstrap && bootstrap.Alert) {
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    } else {
+                        alert.remove();
+                    }
+                }
+            }, timeout + (index * 1000)); // Stagger multiple alerts
         });
-    }, observerOptions);
-    
-    // Observe elements for animation
-    const animatableElements = document.querySelectorAll('.card, .regulation-row, .regulation-card');
-    animatableElements.forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
-        observer.observe(el);
-    });
-    
-    // Add CSS for fade-in animation if not exists
-    if (!document.querySelector('#fade-in-styles')) {
-        const style = document.createElement('style');
-        style.id = 'fade-in-styles';
-        style.textContent = `
-            .fade-in {
-                opacity: 1 !important;
-                transform: translateY(0) !important;
-                transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-            }
-            
-            @keyframes fadeInUp {
-                from {
-                    opacity: 0;
-                    transform: translateY(20px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-        `;
-        document.head.appendChild(style);
     }
-}
 
-// Utility functions for loading states
-function showLoading(element) {
-    if (element) {
-        element.classList.add('loading');
+    getAlertType(alertElement) {
+        const classes = alertElement.className;
+        if (classes.includes('alert-success')) return 'success';
+        if (classes.includes('alert-danger')) return 'error';
+        if (classes.includes('alert-warning')) return 'warning';
+        if (classes.includes('alert-info')) return 'info';
+        return 'unknown';
     }
-}
 
-function hideLoading(element) {
-    if (element) {
-        element.classList.remove('loading');
-    }
-}
-
-// Toast notification system
-function showToast(message, type = 'info', duration = 5000) {
-    // Create toast container if it doesn't exist
-    let toastContainer = document.querySelector('.toast-container');
-    if (!toastContainer) {
-        toastContainer = createToastContainer();
-    }
-    
-    // Create toast element
-    const toast = document.createElement('div');
-    toast.className = `toast align-items-center text-white bg-${type} border-0`;
-    toast.setAttribute('role', 'alert');
-    toast.setAttribute('aria-live', 'assertive');
-    toast.setAttribute('aria-atomic', 'true');
-    
-    toast.innerHTML = `
-        <div class="d-flex">
-            <div class="toast-body">
-                ${message}
+    show(message, type = 'info', duration = 5000) {
+        const alertId = 'alert_' + Date.now();
+        const alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert" id="${alertId}">
+                <div class="d-flex align-items-center">
+                    <div class="alert-icon me-3">
+                        <i class="fas fa-${this.getIcon(type)}"></i>
+                    </div>
+                    <div class="alert-content flex-grow-1">
+                        ${message}
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-        </div>
-    `;
-    
-    toastContainer.appendChild(toast);
-    
-    // Initialize and show toast
-    const bsToast = new bootstrap.Toast(toast, { delay: duration });
-    bsToast.show();
-    
-    // Remove toast element after it's hidden
-    toast.addEventListener('hidden.bs.toast', () => {
-        toast.remove();
-    });
+        `;
+
+        // Add to container
+        const container = document.querySelector('.container') || document.body;
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = alertHtml;
+        const alertElement = tempDiv.firstElementChild;
+        
+        container.insertBefore(alertElement, container.firstChild);
+
+        // Auto-dismiss
+        if (duration > 0) {
+            setTimeout(() => {
+                if (alertElement && alertElement.parentNode) {
+                    alertElement.remove();
+                }
+            }, duration);
+        }
+
+        errorTracker.trackUserAction('alert_shown', { type, message: message.substring(0, 100) });
+        return alertId;
+    }
+
+    getIcon(type) {
+        switch (type) {
+            case 'success': return 'check-circle';
+            case 'error':
+            case 'danger': return 'exclamation-triangle';
+            case 'warning': return 'exclamation-circle';
+            case 'info': return 'info-circle';
+            default: return 'info-circle';
+        }
+    }
 }
 
-// Create toast container
-function createToastContainer() {
-    const container = document.createElement('div');
-    container.className = 'toast-container position-fixed top-0 end-0 p-3';
-    container.style.zIndex = '1055';
-    document.body.appendChild(container);
-    return container;
-}
+// Initialize alert manager
+const alertManager = new AlertManager();
 
-// Global utility functions for backward compatibility
-window.submitFilter = function() {
-    if (window.advancedSearch) {
-        window.advancedSearch.applyFilters();
-    } else {
-        submitLegacyFilter();
+// Enhanced utility functions
+const STRUtils = {
+    // Debounce function with error tracking
+    debounce(func, wait, immediate = false) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                timeout = null;
+                if (!immediate) {
+                    try {
+                        func(...args);
+                    } catch (error) {
+                        errorTracker.logError({
+                            type: 'debounced_function_error',
+                            message: error.message,
+                            stack: error.stack,
+                            timestamp: new Date().toISOString()
+                        });
+                    }
+                }
+            };
+            const callNow = immediate && !timeout;
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+            if (callNow) {
+                try {
+                    func(...args);
+                } catch (error) {
+                    errorTracker.logError({
+                        type: 'immediate_function_error',
+                        message: error.message,
+                        stack: error.stack,
+                        timestamp: new Date().toISOString()
+                    });
+                }
+            }
+        };
+    },
+
+    // Format date with error handling
+    formatDate(date, format = 'YYYY-MM-DD') {
+        try {
+            if (!date) return '';
+            
+            const d = new Date(date);
+            if (isNaN(d.getTime())) {
+                throw new Error(`Invalid date: ${date}`);
+            }
+
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+
+            switch (format) {
+                case 'YYYY-MM-DD':
+                    return `${year}-${month}-${day}`;
+                case 'MM/DD/YYYY':
+                    return `${month}/${day}/${year}`;
+                case 'DD/MM/YYYY':
+                    return `${day}/${month}/${year}`;
+                default:
+                    return d.toLocaleDateString();
+            }
+        } catch (error) {
+            errorTracker.logError({
+                type: 'date_formatting_error',
+                message: error.message,
+                input: date,
+                format: format,
+                timestamp: new Date().toISOString()
+            });
+            return 'Invalid Date';
+        }
+    },
+
+    // Safe localStorage operations
+    setStorage(key, value) {
+        try {
+            localStorage.setItem(key, JSON.stringify(value));
+            return true;
+        } catch (error) {
+            errorTracker.logError({
+                type: 'storage_error',
+                operation: 'set',
+                message: error.message,
+                key: key,
+                timestamp: new Date().toISOString()
+            });
+            return false;
+        }
+    },
+
+    getStorage(key, defaultValue = null) {
+        try {
+            const item = localStorage.getItem(key);
+            return item ? JSON.parse(item) : defaultValue;
+        } catch (error) {
+            errorTracker.logError({
+                type: 'storage_error',
+                operation: 'get',
+                message: error.message,
+                key: key,
+                timestamp: new Date().toISOString()
+            });
+            return defaultValue;
+        }
+    },
+
+    // Form validation with error tracking
+    validateForm(formElement) {
+        try {
+            if (!formElement) {
+                throw new Error('Form element is required');
+            }
+
+            const errors = [];
+            const requiredFields = formElement.querySelectorAll('[required]');
+
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    errors.push(`${field.name || field.id || 'Unknown field'} is required`);
+                }
+            });
+
+            // Email validation
+            const emailFields = formElement.querySelectorAll('input[type="email"]');
+            emailFields.forEach(field => {
+                if (field.value && !this.isValidEmail(field.value)) {
+                    errors.push(`${field.name || field.id || 'Email field'} must be a valid email address`);
+                }
+            });
+
+            if (errors.length > 0) {
+                errorTracker.trackUserAction('form_validation_failed', {
+                    form: formElement.id || formElement.name || 'unknown',
+                    errors: errors
+                });
+            }
+
+            return {
+                isValid: errors.length === 0,
+                errors: errors
+            };
+
+        } catch (error) {
+            errorTracker.logError({
+                type: 'form_validation_error',
+                message: error.message,
+                timestamp: new Date().toISOString()
+            });
+            return {
+                isValid: false,
+                errors: ['Form validation failed']
+            };
+        }
+    },
+
+    isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
     }
 };
 
-window.toggleTableDensity = toggleTableDensity;
-window.showToast = showToast;
-window.showLoading = showLoading;
-window.hideLoading = hideLoading;
+// Page load performance tracking
+document.addEventListener('DOMContentLoaded', () => {
+    // Track page load performance
+    if ('performance' in window && 'timing' in performance) {
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const timing = performance.timing;
+                const loadTime = timing.loadEventEnd - timing.navigationStart;
+                const domReady = timing.domContentLoadedEventEnd - timing.navigationStart;
+
+                if (loadTime > 5000) {
+                    errorTracker.logWarning({
+                        type: 'slow_page_load',
+                        loadTime: loadTime,
+                        domReady: domReady,
+                        message: `Slow page load: ${loadTime}ms`,
+                        timestamp: new Date().toISOString()
+                    });
+                }
+
+                // Log performance metrics
+                if (window.STR_DEBUG) {
+                    console.log('Page Performance:', {
+                        loadTime: loadTime,
+                        domReady: domReady,
+                        firstPaint: timing.responseEnd - timing.navigationStart
+                    });
+                }
+            }, 100);
+        });
+    }
+
+    // Track user interactions
+    errorTracker.trackUserAction('page_loaded', {
+        page: window.location.pathname,
+        referrer: document.referrer
+    });
+});
+
+// Export for global access
+window.STR = {
+    errorTracker,
+    apiClient,
+    alertManager,
+    utils: STRUtils
+};
+
+// Development mode helpers
+if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    window.STR_DEBUG = true;
+    
+    // Add debug helpers to console
+    window.STRDebug = {
+        getErrors: () => errorTracker.getErrors(),
+        clearErrors: () => errorTracker.clearErrors(),
+        testError: () => { throw new Error('Test error for debugging'); },
+        testApiError: () => apiClient.get('/test-error-endpoint'),
+        showAlert: (message, type) => alertManager.show(message, type)
+    };
+    
+    console.log('STR Debug mode enabled. Use STRDebug object for debugging helpers.');
+}

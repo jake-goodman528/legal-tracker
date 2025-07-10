@@ -63,6 +63,10 @@ Thumbs.db
 *.log
 logs/
 
+# Temporary/Backup Files
+*_backup.html
+cookies.txt
+
 # Testing
 .coverage
 .pytest_cache/

@@ -1381,6 +1381,43 @@ small, .small-text {
     font-weight: 500;
 }
 
+/* Enhanced Loading States for Search and Filter Operations */
+.loading-spinner.enhanced {
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.spinner-border {
+    width: 2rem;
+    height: 2rem;
+}
+
+/* Smooth transitions for content changes */
+#results-container {
+    transition: opacity 0.3s ease-in-out;
+}
+
+.loading-overlay {
+    position: relative;
+}
+
+.loading-overlay::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+
 /* Kaystreet Management Signature Card Design */
 .card {
     background: #FFFFFF;
@@ -1859,7 +1896,7 @@ small, .small-text {
 
 .update-item .card-title {
     font-family: 'Montserrat', Arial, sans-serif;
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     font-weight: 600;
     color: var(--primary-color);
     margin-bottom: 0.75rem;
@@ -1867,9 +1904,42 @@ small, .small-text {
 
 .update-item .card-text {
     font-family: 'Yantramanav', Arial, sans-serif;
-    font-size: 1rem;
+    font-size: 1.125rem;
+    color: #4B5563;
+    line-height: 1.6;
+}
+
+/* Updates page specific styling to match regulations */
+.updates-title {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.updates-subtitle {
+    font-family: 'Yantramanav', Arial, sans-serif;
+    font-size: 1.125rem;
     color: #666666;
     line-height: 1.6;
+    max-width: 800px;
+    margin: 0 auto 2rem;
+}
+
+/* Updates metadata text sizing */
+.update-item .text-muted.small {
+    font-size: 1rem !important;
+}
+
+.update-item .update-date {
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.update-item .badge {
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
 }
 
 /* Section Titles and Subtitles */
@@ -2758,3 +2828,267 @@ input[type="date"]:focus {
         border-color: #636e72;
     }
 } */
+
+/* Mobile-First Responsive Design */
+@media (max-width: 768px) {
+    /* Navigation improvements */
+    .navbar-nav {
+        text-align: center;
+    }
+    
+    .navbar-nav .nav-link {
+        padding: 0.75rem 1rem;
+        font-size: 1.1rem;
+    }
+    
+    /* Search and filter improvements */
+    .search-container {
+        margin-bottom: 1rem;
+    }
+    
+    .search-container input {
+        font-size: 16px; /* Prevents zoom on iOS */
+        padding: 0.75rem;
+    }
+    
+    .filter-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .filter-buttons .btn {
+        flex: 1;
+        min-width: 120px;
+        padding: 0.75rem 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    /* Card improvements */
+    .regulation-card,
+    .update-card {
+        margin-bottom: 1rem;
+        padding: 1rem;
+    }
+    
+    .card-title {
+        font-size: 1.1rem;
+        line-height: 1.3;
+    }
+    
+    .card-text {
+        font-size: 0.9rem;
+    }
+    
+    /* Table responsiveness */
+    .table-responsive {
+        border: none;
+    }
+    
+    .table-responsive table {
+        font-size: 0.85rem;
+    }
+    
+    /* Modal improvements */
+    .modal-dialog {
+        margin: 0.5rem;
+    }
+    
+    .modal-body {
+        padding: 1rem;
+    }
+    
+    /* Touch-friendly buttons */
+    .btn {
+        min-height: 44px; /* iOS touch target minimum */
+        padding: 0.75rem 1rem;
+    }
+    
+    .btn-sm {
+        min-height: 38px;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    /* Improved spacing */
+    .container-fluid {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    h1, h2, h3 {
+        font-size: calc(1.2rem + 0.5vw);
+        margin-bottom: 1rem;
+    }
+}
+
+/* Tablet improvements */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .container-fluid {
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+    
+    .regulation-card,
+    .update-card {
+        margin-bottom: 1.5rem;
+    }
+}
+
+/* Touch device improvements */
+@media (hover: none) and (pointer: coarse) {
+    .btn:hover {
+        transform: none;
+    }
+    
+    .card:hover {
+        transform: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    /* Larger touch targets */
+    .nav-link,
+    .btn,
+    .form-control,
+    .form-select {
+        min-height: 44px;
+    }
+}
+
+/* Bulk Operations Styling */
+.bulk-actions {
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.admin-regulations-table th:first-child,
+.admin-regulations-table td:first-child,
+.admin-updates-table th:first-child,
+.admin-updates-table td:first-child {
+    width: 40px;
+    text-align: center;
+}
+
+.form-check-input:indeterminate {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10h8'/%3e%3c/svg%3e");
+}
+
+.selected-count {
+    font-weight: 500;
+    color: #0d6efd;
+}
+
+/* Performance Optimizations */
+.lazy {
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.lazy.loaded {
+    opacity: 1;
+}
+
+.lazy-section {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.lazy-section.loaded {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Optimize animations */
+* {
+    will-change: auto;
+}
+
+.btn, .card, .modal {
+    will-change: transform;
+}
+
+/* Reduce layout thrashing */
+.container-fluid {
+    contain: layout;
+}
+
+.card {
+    contain: layout style;
+}
+
+/* Critical CSS inlining */
+.above-fold {
+    display: block;
+}
+
+.below-fold {
+    display: none;
+}
+
+.below-fold.loaded {
+    display: block;
+}
+
+/* Virtual scrolling */
+.virtual-scroll-container {
+    overflow-y: auto;
+    position: relative;
+}
+
+.virtual-scroll-container > * {
+    position: absolute;
+    width: 100%;
+}
+
+/* Ensure updates search input matches regulations exactly */
+#searchInput.regulations-search-input {
+    font-size: 1rem !important;
+    padding: 0.75rem 1rem !important;
+    height: auto !important;
+    line-height: 1.5 !important;
+}
+
+/* Remove any Bootstrap form-control-lg effects */
+.regulations-filter-section .form-control {
+    font-size: 1rem !important;
+    padding: 0.75rem 1rem !important;
+    height: auto !important;
+    line-height: 1.5 !important;
+}
+
+/* Force updates page search to match regulations - most specific selector */
+div.container-fluid div.regulations-filter-section div.filter-card div.filter-body div.row div.col-lg-8 div.position-relative input#searchInput.form-control.regulations-search-input {
+    font-size: 1rem !important;
+    padding: 0.75rem 1rem !important;
+    height: calc(1.5em + 0.75rem + 0.75rem + 2px) !important;
+    line-height: 1.5 !important;
+    border-width: 1px !important;
+}
+
+/* Nuclear option - override everything for updates search */
+.updates-search-override {
+    font-family: 'Yantramanav', Arial, sans-serif !important;
+    font-size: 1rem !important;
+    padding: 0.75rem 1rem !important;
+    border: 1px solid #E5E7EB !important;
+    border-radius: 6px !important;
+    transition: all 0.3s ease !important;
+    height: auto !important;
+    line-height: 1.5 !important;
+    background-color: white !important;
+    color: #333 !important;
+    box-sizing: border-box !important;
+}

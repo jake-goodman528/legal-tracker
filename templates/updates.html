@@ -3,62 +3,71 @@
 {% block title %}Industry Updates{% endblock %}
 
 {% block content %}
-<div class="container my-4">
+<div class="container-fluid">
+    <!-- Simple Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{{ url_for('main.index') }}"><i class="fas fa-home"></i> Home</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                <i class="fas fa-newspaper"></i> Updates
+            </li>
+        </ol>
+    </nav>
+
     <!-- Simplified Header -->
     <div class="text-center mb-4">
-        <h1 class="mb-2">
-            <i class="fas fa-newspaper me-2"></i>
-            Industry Updates
-        </h1>
-        <p class="text-muted">
+        <h1 class="regulations-title">📰 Industry Updates</h1>
+        <p class="regulations-subtitle text-muted">
             Stay informed about regulatory changes and legislation affecting short-term rentals
         </p>
     </div>
 
     <!-- Simplified Search and Filters -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="row g-3">
-                <!-- Main Search -->
-                <div class="col-lg-8">
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="fas fa-search"></i>
-                        </span>
-                        <input type="text" id="searchInput" class="form-control form-control-lg" 
-                               placeholder="Search updates by title, description, or tags..." 
-                               value="{{ current_search or '' }}">
+    <div class="regulations-filter-section mb-4">
+        <div class="filter-card">
+            <div class="filter-body">
+                <div class="row g-3">
+                    <!-- Main Search -->
+                    <div class="col-lg-8">
+                        <div class="position-relative">
+                            <input type="text" 
+                                   class="form-control regulations-search-input" 
+                                   id="searchInput"
+                                   placeholder="Search updates by title, description, or tags..."
+                                   value="{{ current_search or '' }}"
+                                   autocomplete="off">
+                            <div class="search-suggestions" id="searchSuggestions" style="display: none;"></div>
+                        </div>
                     </div>
-                </div>
-                
-                <!-- Quick Actions -->
-                <div class="col-lg-4">
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-outline-primary" onclick="showAdvancedFilters()">
-                            <i class="fas fa-sliders-h"></i> Filters
-                        </button>
-                        <button class="btn btn-outline-secondary" id="clearFiltersBtn">
-                            <i class="fas fa-times"></i> Clear
-                        </button>
+                    
+                    <!-- Quick Actions -->
+                    <div class="col-lg-4">
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-primary" onclick="showAdvancedFilters()">
+                                <i class="fas fa-sliders-h"></i> Filters
+                            </button>
+                            <button class="btn btn-outline-secondary" id="clearFiltersBtn">
+                                <i class="fas fa-times"></i> Clear
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
-            
-
         </div>
     </div>
 
     <!-- Results Summary -->
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <span class="text-muted">
-                Showing {{ updates|length }} update{% if updates|length != 1 %}s{% endif %}
-                {% if current_search or current_status or current_category or current_impact or current_jurisdiction %}
-                (filtered)
-                {% endif %}
-            </span>
+        <div class="results-count">
+            <span class="text-muted">Showing</span>
+            <strong id="resultCount">{{ updates|length }}</strong>
+            <span class="text-muted">update{% if updates|length != 1 %}s{% endif %}</span>
+            {% if current_search or current_status or current_category or current_impact or current_jurisdiction %}
+            <span class="text-muted">(filtered)</span>
+            {% endif %}
         </div>
-
     </div>
 
     <!-- Updates List -->
@@ -307,37 +316,45 @@
 <script>
 // Updates page functionality
 document.addEventListener('DOMContentLoaded', function() {
-    // Search functionality
-    const searchInput = document.getElementById('searchInput');
-    const filterForm = document.getElementById('filterForm');
-    const searchField = document.getElementById('searchField');
-    
-    if (searchInput && filterForm && searchField) {
-        // Search on Enter key
-        searchInput.addEventListener('keypress', function(e) {
-            if (e.which === 13 || e.keyCode === 13) {
-                performSearch();
-            }
-        });
+    // Wait a bit to ensure other scripts have initialized
+    setTimeout(function() {
+        // Only initialize updates-specific search if advanced search is not available
+        if (!window.advancedSearch) {
+            if (window.STR_DEBUG) console.log('🔧 Initializing updates-specific search functionality');
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        const filterForm = document.getElementById('filterForm');
+        const searchField = document.getElementById('searchField');
         
-        // Debounced search on input
-        let searchTimeout;
-        searchInput.addEventListener('input', function() {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(function() {
-                performSearch();
-            }, 500);
-        });
-    }
-    
-    // Clear button functionality
-    const clearBtn = document.getElementById('clearFiltersBtn');
-    if (clearBtn) {
-        clearBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            clearFilters();
-        });
-    }
+        if (searchInput && filterForm && searchField) {
+            // Search on Enter key
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.which === 13 || e.keyCode === 13) {
+                    performSearch();
+                }
+            });
+            
+            // Debounced search on input
+            let searchTimeout;
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(function() {
+                    performSearch();
+                }, 500);
+            });
+        }
+        
+        // Clear button functionality
+        const clearBtn = document.getElementById('clearFiltersBtn');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                clearFilters();
+            });
+        } else {
+            if (window.STR_DEBUG) console.log('✅ AdvancedSearch already initialized, skipping updates-specific handlers');
+        }
+    }, 100); // Wait 100ms to let AdvancedSearch initialize first
 });
 
 function performSearch() {

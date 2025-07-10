@@ -1,20 +1,167 @@
 import os
 import logging
-from flask import Flask
+import logging.handlers
+from flask import Flask, request, g
 from flask_wtf.csrf import CSRFProtect
 from werkzeug.middleware.proxy_fix import ProxyFix
 import traceback
 import sys
+import time
+from datetime import datetime
 
 # Add the parent directory to Python path to ensure imports work (models.py is in parent dir)
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Set up logging - configurable via environment
-log_level = os.environ.get("LOG_LEVEL", "INFO").upper()
-logging.basicConfig(
-    level=getattr(logging, log_level, logging.INFO),
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+def configure_logging(app):
+    """Configure comprehensive logging for the application"""
+    # Create logs directory if it doesn't exist
+    log_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'logs')
+    os.makedirs(log_dir, exist_ok=True)
+    
+    # Set log level from environment
+    log_level = os.environ.get("LOG_LEVEL", "INFO").upper()
+    log_level_value = getattr(logging, log_level, logging.INFO)
+    
+    # Clear any existing handlers
+    for handler in logging.root.handlers[:]:
+        logging.root.removeHandler(handler)
+    
+    # Create formatters
+    detailed_formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(funcName)s() - %(message)s'
+    )
+    
+    simple_formatter = logging.Formatter(
+        '%(asctime)s - %(levelname)s - %(message)s'
+    )
+    
+    # Console handler for development
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setLevel(logging.INFO)
+    console_handler.setFormatter(simple_formatter)
+    
+    # File handler for all logs (rotating)
+    app_log_file = os.path.join(log_dir, 'app.log')
+    file_handler = logging.handlers.RotatingFileHandler(
+        app_log_file, 
+        maxBytes=10*1024*1024,  # 10MB
+        backupCount=5
+    )
+    file_handler.setLevel(log_level_value)
+    file_handler.setFormatter(detailed_formatter)
+    
+    # Error file handler for errors only
+    error_log_file = os.path.join(log_dir, 'errors.log')
+    error_handler = logging.handlers.RotatingFileHandler(
+        error_log_file,
+        maxBytes=10*1024*1024,  # 10MB
+        backupCount=5
+    )
+    error_handler.setLevel(logging.ERROR)
+    error_handler.setFormatter(detailed_formatter)
+    
+    # Configure root logger
+    root_logger = logging.getLogger()
+    root_logger.setLevel(log_level_value)
+    root_logger.addHandler(console_handler)
+    root_logger.addHandler(file_handler)
+    root_logger.addHandler(error_handler)
+    
+    # Configure Flask app logger
+    app.logger.setLevel(log_level_value)
+    
+    # Disable default Flask logging to avoid duplicates
+    logging.getLogger('werkzeug').setLevel(logging.WARNING)
+    
+    # Create application-specific logger
+    app_logger = logging.getLogger('str_tracker')
+    app_logger.info(f"Logging configured successfully - Level: {log_level}")
+    app_logger.info(f"Log files: {app_log_file}, {error_log_file}")
+    
+    return app_logger
+
+def setup_request_logging(app):
+    """Set up request-level logging and monitoring"""
+    
+    @app.before_request
+    def before_request():
+        """Log request start and set up timing"""
+        g.start_time = time.time()
+        g.request_id = f"{int(time.time())}-{id(request)}"
+        
+        # Log request details
+        logger = logging.getLogger('str_tracker.requests')
+        logger.info(
+            f"Request started - ID: {g.request_id} | Method: {request.method} | "
+            f"URL: {request.url} | Remote: {request.remote_addr} | "
+            f"User-Agent: {request.headers.get('User-Agent', 'Unknown')[:100]}"
+        )
+        
+        # Log form data for POST requests (excluding sensitive fields)
+        if request.method == 'POST' and request.form:
+            safe_form_data = {}
+            sensitive_fields = {'password', 'csrf_token', 'session_secret'}
+            for key, value in request.form.items():
+                if key.lower() not in sensitive_fields:
+                    safe_form_data[key] = value[:100] if len(str(value)) > 100 else value
+                else:
+                    safe_form_data[key] = '[REDACTED]'
+            logger.debug(f"Request form data - ID: {g.request_id} | Data: {safe_form_data}")
+    
+    @app.after_request
+    def after_request(response):
+        """Log request completion and performance metrics"""
+        if hasattr(g, 'start_time'):
+            duration = time.time() - g.start_time
+            logger = logging.getLogger('str_tracker.requests')
+            
+            # Determine log level based on response status and duration
+            if response.status_code >= 500:
+                log_level = logging.ERROR
+            elif response.status_code >= 400:
+                log_level = logging.WARNING
+            elif duration > 2.0:  # Slow request
+                log_level = logging.WARNING
+            else:
+                log_level = logging.INFO
+            
+            logger.log(
+                log_level,
+                f"Request completed - ID: {getattr(g, 'request_id', 'unknown')} | "
+                f"Status: {response.status_code} | Duration: {duration:.3f}s | "
+                f"Size: {response.content_length or 0} bytes"
+            )
+            
+            # Log slow requests separately
+            if duration > 1.0:
+                slow_logger = logging.getLogger('str_tracker.performance')
+                slow_logger.warning(
+                    f"Slow request detected - ID: {getattr(g, 'request_id', 'unknown')} | "
+                    f"URL: {request.url} | Duration: {duration:.3f}s"
+                )
+        
+        return response
+    
+    @app.errorhandler(404)
+    def handle_404(error):
+        """Log 404 errors with context"""
+        logger = logging.getLogger('str_tracker.errors')
+        logger.warning(
+            f"404 Not Found - URL: {request.url} | "
+            f"Referrer: {request.referrer} | Remote: {request.remote_addr}"
+        )
+        return error
+    
+    @app.errorhandler(500)
+    def handle_500(error):
+        """Log 500 errors with full context"""
+        logger = logging.getLogger('str_tracker.errors')
+        logger.error(
+            f"500 Internal Server Error - URL: {request.url} | "
+            f"Error: {str(error)} | Request ID: {getattr(g, 'request_id', 'unknown')}",
+            exc_info=True
+        )
+        return error
 
 def create_app():
     # create the app with correct template and static directories
@@ -23,9 +170,16 @@ def create_app():
                 template_folder='../templates',
                 static_folder='../static')
     
+    # Configure logging first
+    app_logger = configure_logging(app)
+    
+    # Set up request logging
+    setup_request_logging(app)
+    
     # Require secure session secret - no insecure fallback
     session_secret = os.environ.get("SESSION_SECRET")
     if not session_secret:
+        app_logger.error("SESSION_SECRET environment variable is required for security")
         raise ValueError("SESSION_SECRET environment variable is required for security")
     app.secret_key = session_secret
     
@@ -37,6 +191,9 @@ def create_app():
         "pool_recycle": 300,
         "pool_pre_ping": True,
     }
+    
+    # Configure CSRF exemptions for specific endpoints
+    app.config['WTF_CSRF_EXEMPT_LIST'] = ['/api/client-errors']
 
     try:
         # Import db from models and initialize the app
@@ -45,6 +202,7 @@ def create_app():
 
         # Initialize CSRF protection
         csrf = CSRFProtect(app)
+        app_logger.info("CSRF protection initialized")
 
         with app.app_context():
             # Import models after app context is created
@@ -54,12 +212,14 @@ def create_app():
             
             # Create all tables
             db.create_all()
+            app_logger.info("Database tables created/verified")
             
             # Create default admin user if none exists
             if not AdminUser.query.first():
                 admin_username = os.environ.get("ADMIN_USERNAME", "admin")
                 admin_password = os.environ.get("ADMIN_PASSWORD")
                 if not admin_password:
+                    app_logger.error("ADMIN_PASSWORD environment variable is required for initial admin setup")
                     raise ValueError("ADMIN_PASSWORD environment variable is required for initial admin setup")
                 
                 admin = AdminUser(
@@ -68,7 +228,7 @@ def create_app():
                 )
                 db.session.add(admin)
                 db.session.commit()
-                logging.info(f"Default admin user created: {admin_username}")
+                app_logger.info(f"Default admin user created: {admin_username}")
             
             # Add sample data if tables are empty (unless skipped for testing)
             if not Regulation.query.first() and not os.environ.get("SKIP_SAMPLE_DATA"):
@@ -149,7 +309,7 @@ def create_app():
                     db.session.add(regulation)
                 
                 db.session.commit()
-                logging.info("Sample regulations added")
+                app_logger.info("Sample regulations added")
             
             if not Update.query.first() and not os.environ.get("SKIP_SAMPLE_DATA"):
                 sample_updates = [
@@ -194,7 +354,7 @@ def create_app():
                     db.session.add(update)
                 
                 db.session.commit()
-                logging.info("Sample updates added")
+                app_logger.info("Sample updates added")
         
         # Import and register blueprints
         from app.blueprints.main import main_bp
@@ -205,16 +365,12 @@ def create_app():
         app.register_blueprint(api_bp)
         app.register_blueprint(admin_bp)
         
-        logging.info("Flask app created successfully")
+        app_logger.info("Flask app created successfully")
         return app
         
     except Exception as e:
-        logging.error(f"Error creating Flask app: {str(e)}")
-        logging.error(traceback.format_exc())
+        app_logger.error(f"Error creating Flask app: {str(e)}")
+        app_logger.error(traceback.format_exc())
         raise
 
-if __name__ == '__main__':
-    application = create_app()
-    # Only enable debug mode if explicitly set via environment variable
-    debug_mode = os.environ.get("FLASK_DEBUG", "False").lower() == "true"
-    application.run(host='0.0.0.0', port=9000, debug=debug_mode)
+

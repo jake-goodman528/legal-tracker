@@ -399,4 +399,92 @@ class RegulationService:
             return SavedSearch.query.filter_by(is_public=True).all()
         except Exception as e:
             logging.error(f"Error getting public saved searches: {str(e)}")
-            return [] 
+            return []
+
+    @staticmethod
+    def get_admin_statistics() -> Dict[str, Any]:
+        """
+        Get comprehensive statistics for admin dashboard.
+        
+        Returns various metrics and counts for regulation management,
+        including totals, recent activity, and breakdowns by category.
+        
+        Returns:
+            Dictionary containing:
+                - total: Total number of regulations
+                - recent: Recently updated regulations count
+                - by_category: Count by category
+                - by_jurisdiction: Count by jurisdiction level
+                - by_location: Count by location
+                - by_compliance_level: Count by compliance level
+                
+        Note:
+            Returns safe defaults if database query fails.
+        """
+        try:
+            from models import Regulation
+            from datetime import datetime, timedelta
+            from sqlalchemy import func
+            
+            # Basic counts
+            total_regulations = Regulation.query.count()
+            
+            # Recent regulations (updated in last 30 days)
+            thirty_days_ago = datetime.now() - timedelta(days=30)
+            recent_count = Regulation.query.filter(
+                Regulation.last_updated >= thirty_days_ago
+            ).count()
+            
+            # Category breakdown
+            category_stats = db.session.query(
+                Regulation.category,
+                func.count(Regulation.id).label('count')
+            ).group_by(Regulation.category).all()
+            
+            by_category = {stat.category or 'Unspecified': stat.count for stat in category_stats}
+            
+            # Jurisdiction level breakdown
+            jurisdiction_stats = db.session.query(
+                Regulation.jurisdiction_level,
+                func.count(Regulation.id).label('count')
+            ).group_by(Regulation.jurisdiction_level).all()
+            
+            by_jurisdiction = {stat.jurisdiction_level or 'Unspecified': stat.count for stat in jurisdiction_stats}
+            
+            # Location breakdown (top 10)
+            location_stats = db.session.query(
+                Regulation.location,
+                func.count(Regulation.id).label('count')
+            ).group_by(Regulation.location).order_by(func.count(Regulation.id).desc()).limit(10).all()
+            
+            by_location = {stat.location or 'Unspecified': stat.count for stat in location_stats}
+            
+            # Compliance level breakdown
+            compliance_stats = db.session.query(
+                Regulation.compliance_level,
+                func.count(Regulation.id).label('count')
+            ).group_by(Regulation.compliance_level).all()
+            
+            by_compliance_level = {stat.compliance_level or 'Unspecified': stat.count for stat in compliance_stats}
+            
+            return {
+                'total': total_regulations,
+                'recent': recent_count,
+                'by_category': by_category,
+                'by_jurisdiction': by_jurisdiction,
+                'by_location': by_location,
+                'by_compliance_level': by_compliance_level,
+                'last_updated': datetime.now().isoformat()
+            }
+            
+        except Exception as e:
+            logging.error(f"Error getting regulation admin statistics: {str(e)}")
+            return {
+                'total': 0,
+                'recent': 0,
+                'by_category': {},
+                'by_jurisdiction': {},
+                'by_location': {},
+                'by_compliance_level': {},
+                'last_updated': datetime.now().isoformat()
+            } 

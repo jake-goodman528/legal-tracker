@@ -132,7 +132,7 @@
                     </thead>
                     <tbody>
                         {% for regulation in regulations %}
-                        <tr class="regulation-table-row">
+                        <tr class="regulation-table-row" data-item-id="{{ regulation.id }}">
                             <td class="level-cell">
                                 <span class="jurisdiction-badge 
                                     {% if regulation.jurisdiction_level == 'National' %}jurisdiction-national
@@ -164,7 +164,13 @@
                                 </span>
                             </td>
                             <td class="updated-cell">
-                                <div class="regulation-update-date">{{ regulation.last_updated.strftime('%b %d, %Y') }}</div>
+                                <div class="regulation-update-date">
+                                    {% if regulation.last_updated %}
+                                        {{ regulation.last_updated.strftime('%b %d, %Y') }}
+                                    {% else %}
+                                        Not specified
+                                    {% endif %}
+                                </div>
                             </td>
                             <td class="actions-cell">
                                 <div class="regulation-actions">
@@ -816,9 +822,9 @@ function exportToCSV() {
         
         rowData.push('"' + cells[0].textContent.trim() + '"');
         rowData.push('"' + cells[1].textContent.trim() + '"');
-        rowData.push('"' + cells[2].querySelector('.regulation-title').textContent.trim() + '"');
+        rowData.push('"' + cells[2].querySelector('.regulation-title-text').textContent.trim() + '"');
         rowData.push('"' + cells[3].textContent.trim() + '"');
-        rowData.push('"' + cells[4].querySelector('.update-date').textContent.trim() + '"');
+        rowData.push('"' + cells[4].querySelector('.regulation-update-date').textContent.trim() + '"');
         
         csvContent.push(rowData.join(','));
     });
@@ -842,4 +848,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/admin-bulk-operations.js') }}"></script>
 {% endblock %}

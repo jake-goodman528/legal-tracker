@@ -2,7 +2,7 @@
 <html lang="en" data-bs-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=yes">
     <title>{% block title %}Short-Term Rental Compliance{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -10,6 +10,28 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Yantramanav:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Touch-friendly navigation styles -->
+    <style>
+    .navbar-toggler {
+        border: none;
+        padding: 0.5rem;
+    }
+
+    .navbar-toggler:focus {
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+    }
+
+    @media (max-width: 991px) {
+        .navbar-collapse {
+            background: rgba(255,255,255,0.95);
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+    }
+    </style>
 </head>
 <body>
     <!-- Kaystreet Management Professional Header -->
@@ -205,6 +227,9 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/loading-states.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/search-enhancements.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/performance-optimizations.js') }}"></script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

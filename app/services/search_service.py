@@ -125,8 +125,9 @@ class SearchService:
             results = query.order_by(Regulation.last_updated.desc()).all()
             
             # Update search suggestions if there was a text query
-            if search_params.get('query'):
-                SearchService.update_search_suggestions(search_params['query'], results)
+            # Temporarily disabled to prevent database constraint errors
+            # if search_params.get('query'):
+            #     SearchService.update_search_suggestions(search_params['query'], results)
             
             return results
             
@@ -374,62 +375,74 @@ class SearchService:
             over time by learning from successful search patterns.
         """
         try:
-            # Update or create search suggestion for the query
-            suggestion = SearchSuggestion.query.filter_by(
-                suggestion_text=query_text,
-                suggestion_type='query'
-            ).first()
-            
-            if suggestion:
-                suggestion.frequency += 1
-                suggestion.last_used = datetime.utcnow()
-            else:
-                suggestion = SearchSuggestion(
+            # Use a separate transaction for suggestions to avoid rolling back the main search
+            with db.session.begin_nested():
+                # Update or create search suggestion for the query
+                suggestion = SearchSuggestion.query.filter_by(
                     suggestion_text=query_text,
-                    suggestion_type='query',
-                    frequency=1
-                )
-                db.session.add(suggestion)
-            
-            # Add suggestions based on successful results
-            for result in results[:5]:  # Limit to top 5 results
-                # Add location suggestions
-                if result.location:
-                    loc_suggestion = SearchSuggestion.query.filter_by(
-                        suggestion_text=result.location,
-                        suggestion_type='location'
-                    ).first()
-                    
-                    if loc_suggestion:
-                        loc_suggestion.frequency += 1
-                        loc_suggestion.last_used = datetime.utcnow()
-                    else:
-                        loc_suggestion = SearchSuggestion(
-                            suggestion_text=result.location,
-                            suggestion_type='location',
-                            frequency=1
-                        )
-                        db.session.add(loc_suggestion)
+                    suggestion_type='query'
+                ).first()
                 
-                # Add category suggestions
-                if result.category:
-                    cat_suggestion = SearchSuggestion.query.filter_by(
-                        suggestion_text=result.category,
-                        suggestion_type='category'
-                    ).first()
+                if suggestion:
+                    suggestion.frequency += 1
+                    suggestion.last_used = datetime.utcnow()
+                else:
+                    # Use merge() to handle potential duplicates gracefully
+                    suggestion = SearchSuggestion(
+                        suggestion_text=query_text,
+                        suggestion_type='query',
+                        frequency=1,
+                        created_at=datetime.utcnow(),
+                        last_used=datetime.utcnow()
+                    )
+                    db.session.merge(suggestion)
+                
+                # Add suggestions based on successful results
+                for result in results[:5]:  # Limit to top 5 results
+                    # Add location suggestions
+                    if result.location:
+                        loc_suggestion = SearchSuggestion.query.filter_by(
+                            suggestion_text=result.location,
+                            suggestion_type='location'
+                        ).first()
+                        
+                        if loc_suggestion:
+                            loc_suggestion.frequency += 1
+                            loc_suggestion.last_used = datetime.utcnow()
+                        else:
+                            loc_suggestion = SearchSuggestion(
+                                suggestion_text=result.location,
+                                suggestion_type='location',
+                                frequency=1,
+                                created_at=datetime.utcnow(),
+                                last_used=datetime.utcnow()
+                            )
+                            db.session.merge(loc_suggestion)
                     
-                    if cat_suggestion:
-                        cat_suggestion.frequency += 1
-                        cat_suggestion.last_used = datetime.utcnow()
-                    else:
-                        cat_suggestion = SearchSuggestion(
+                    # Add category suggestions
+                    if result.category:
+                        cat_suggestion = SearchSuggestion.query.filter_by(
                             suggestion_text=result.category,
-                            suggestion_type='category',
-                            frequency=1
-                        )
-                        db.session.add(cat_suggestion)
+                            suggestion_type='category'
+                        ).first()
+                        
+                        if cat_suggestion:
+                            cat_suggestion.frequency += 1
+                            cat_suggestion.last_used = datetime.utcnow()
+                        else:
+                            cat_suggestion = SearchSuggestion(
+                                suggestion_text=result.category,
+                                suggestion_type='category',
+                                frequency=1,
+                                created_at=datetime.utcnow(),
+                                last_used=datetime.utcnow()
+                            )
+                            db.session.merge(cat_suggestion)
             
             db.session.commit()
             
         except Exception as e:
-            logging.error(f"Error updating search suggestions: {str(e)}") 
+            # Log the error but don't let it break the search functionality
+            logging.error(f"Error updating search suggestions: {str(e)}")
+            # Rollback only the suggestion updates, not the main search
+            db.session.rollback() 

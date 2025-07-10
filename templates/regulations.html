@@ -33,7 +33,7 @@
                     <div class="col-lg-8">
                         <div class="position-relative">
                             <input type="text" 
-                                   class="form-control form-control-lg regulations-search-input" 
+                                   class="form-control regulations-search-input" 
                                    id="searchInput"
                                    placeholder="Search regulations by title, location, or keywords..."
                                    value="{{ current_search }}"
@@ -265,7 +265,7 @@
                             </label>
                             <select class="form-select" id="locationFilter">
                                 <option value="">All Locations</option>
-                                {% for location in locations %}
+                                {% for location in all_locations %}
                                 <option value="{{ location }}" {% if location == current_location %}selected{% endif %}>
                                     {{ location }}
                                 </option>
@@ -279,7 +279,7 @@
                             </label>
                             <select class="form-select" id="jurisdictionFilter">
                                 <option value="">All Jurisdictions</option>
-                                {% for jurisdiction in jurisdictions %}
+                                {% for jurisdiction in all_jurisdictions %}
                                 <option value="{{ jurisdiction }}" {% if jurisdiction == current_jurisdiction %}selected{% endif %}>
                                     {{ jurisdiction }}
                                 </option>
@@ -294,7 +294,7 @@
                             </label>
                             <select class="form-select" id="categoryFilter">
                                 <option value="">All Categories</option>
-                                {% for category in categories %}
+                                {% for category in all_categories %}
                                 <option value="{{ category }}" {% if category == current_category %}selected{% endif %}>
                                     {{ category }}
                                 </option>
@@ -403,6 +403,111 @@
 
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/advanced-search.js') }}"></script>
+<script>
+// Store original regulations data for restoration after clearing filters
+window.originalRegulationsData = [
+    {% for regulation in regulations %}
+    {
+        id: "{{ regulation.id }}",
+        jurisdiction_level: "{{ regulation.jurisdiction_level }}",
+        location: "{{ regulation.location }}",
+        title: "{{ regulation.title|e }}",
+        category: "{{ regulation.category }}",
+        compliance_level: "{{ regulation.compliance_level }}",
+        last_updated: "{{ regulation.last_updated.strftime('%Y-%m-%d') }}",
+        key_requirements: "{{ regulation.key_requirements|e if regulation.key_requirements else '' }}"
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+];
+
+// Clear any error notifications that are not relevant to this page
+function clearIrrelevantErrorNotifications() {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        const alertText = alert.textContent.toLowerCase();
+        // Remove admin-related error messages that shouldn't appear on public pages
+        if (alertText.includes('error loading regulations') || 
+            alertText.includes('error loading updates') ||
+            alertText.includes('please log in to access admin panel')) {
+            alert.remove();
+        }
+    });
+}
+
+// Initialize page with proper loading sequence and error handling
+async function initializeRegulationsPage() {
+    try {
+        // Clear irrelevant error notifications first
+        clearIrrelevantErrorNotifications();
+        
+        // Show loading state initially
+        if (typeof window.showLoadingState === 'function') {
+            window.showLoadingState();
+        }
+        
+        // Load data with retry mechanism
+        const regulations = await window.loadRegulationsWithRetry();
+        
+        // Initialize AdvancedSearch specifically for regulations page
+        if (typeof AdvancedSearch !== 'undefined') {
+            window.advancedSearch = new AdvancedSearch();
+                            if (window.STR_DEBUG) console.log('✅ AdvancedSearch initialized for regulations page');
+        } else {
+            console.error('❌ AdvancedSearch class not found');
+        }
+        
+        // Display regulations and update interface
+        if (regulations) {
+            if (typeof window.displayRegulations === 'function') {
+                window.displayRegulations(regulations);
+            }
+        }
+        
+        // Hide loading state
+        if (typeof window.hideLoadingState === 'function') {
+            window.hideLoadingState();
+        }
+        
+        // Clear any error notifications now that loading is complete
+        setTimeout(clearIrrelevantErrorNotifications, 500);
+        
+    } catch (error) {
+        console.error('Error initializing regulations page:', error);
+        
+        // Hide loading state
+        if (typeof window.hideLoadingState === 'function') {
+            window.hideLoadingState();
+        }
+        
+        // Only show user-friendly error if the data actually failed to load
+        const regulationRows = document.querySelectorAll('.regulation-row');
+        if (regulationRows.length === 0 && (!window.originalRegulationsData || window.originalRegulationsData.length === 0)) {
+            showUserFriendlyError('Unable to load regulations. Please refresh the page.');
+        }
+    }
+}
+
+// Show user-friendly error message
+function showUserFriendlyError(message) {
+    const container = document.getElementById('regulationsContainer');
+    if (container) {
+        container.innerHTML = `
+            <div class="alert alert-warning text-center" role="alert">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Loading Issue:</strong> ${message}
+                <div class="mt-2">
+                    <button class="btn btn-outline-primary btn-sm" onclick="location.reload()">
+                        <i class="fas fa-refresh"></i> Refresh Page
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', initializeRegulationsPage);
+</script>
 {% endblock %}
 
 
