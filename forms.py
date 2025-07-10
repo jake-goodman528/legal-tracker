@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, SelectField, DateField, PasswordField, SubmitField, BooleanField
 from wtforms.validators import DataRequired, Length, Optional
+from datetime import datetime
 
 
 class LoginForm(FlaskForm):
@@ -11,29 +12,166 @@ class LoginForm(FlaskForm):
 
 
 class RegulationForm(FlaskForm):
-    """Form for creating/editing regulations"""
-    jurisdiction_level = SelectField('Jurisdiction Level', 
-                                   choices=[('National', 'National'), 
-                                          ('State', 'State'), 
-                                          ('Local', 'Local')],
-                                   validators=[DataRequired()])
+    """Enhanced form for creating/editing regulations with comprehensive fields"""
     
-    location = StringField('Location', validators=[DataRequired(), Length(max=100)])
-    title = StringField('Title', validators=[DataRequired(), Length(max=200)])
-    key_requirements = TextAreaField('Key Requirements', validators=[DataRequired()])
-    last_updated = DateField('Last Updated', validators=[DataRequired()])
+    # Core Information
+    jurisdiction_level = SelectField(
+        'Jurisdiction Level', 
+        choices=[
+            ('National', 'National'),
+            ('State', 'State'), 
+            ('Local', 'Local')
+        ],
+        validators=[DataRequired()],
+        default='Local',
+        description="Select the governmental level for this regulation"
+    )
     
-    # Optional fields
-    category = StringField('Category', validators=[Optional(), Length(max=100)])
-    compliance_level = SelectField('Compliance Level',
-                                 choices=[('Required', 'Required'),
-                                        ('Recommended', 'Recommended'),
-                                        ('Optional', 'Optional')],
-                                 validators=[Optional()])
-    property_type = StringField('Property Type', validators=[Optional(), Length(max=100)])
-    effective_date = DateField('Effective Date', validators=[Optional()])
-    expiry_date = DateField('Expiry Date', validators=[Optional()])
-    keywords = StringField('Keywords', validators=[Optional(), Length(max=200)])
+    location = StringField(
+        'Location', 
+        validators=[DataRequired(), Length(min=2, max=100)],
+        render_kw={"placeholder": "e.g., USA, Florida, Tampa"},
+        description="Geographic area where this regulation applies"
+    )
+    
+    title = StringField(
+        'Regulation Title', 
+        validators=[DataRequired(), Length(min=5, max=200)],
+        render_kw={"placeholder": "Enter a descriptive regulation title"},
+        description="Clear, concise title describing the regulation"
+    )
+    
+    key_requirements = TextAreaField(
+        'Key Requirements', 
+        validators=[DataRequired()],
+        render_kw={
+            "placeholder": "Describe the key requirements and compliance obligations in detail...",
+            "rows": 6
+        },
+        description="Detailed description of what property owners must do to comply"
+    )
+    
+    # Compliance Details
+    compliance_level = SelectField(
+        'Compliance Level',
+        choices=[
+            ('Mandatory', 'Mandatory - Required by law'),
+            ('Recommended', 'Recommended - Best practice'),
+            ('Optional', 'Optional - Additional guidance')
+        ],
+        validators=[DataRequired()],
+        default='Mandatory',
+        description="How critical is compliance with this regulation?"
+    )
+    
+    property_types = StringField(
+        'Property Types',
+        validators=[Optional()],
+        render_kw={"placeholder": "Residential, Commercial, Mixed-use (comma-separated)"},
+        description="Types of properties this regulation applies to (separate multiple with commas)"
+    )
+    
+    status = SelectField(
+        'Regulation Status',
+        choices=[
+            ('Current & Active', 'Current & Active'),
+            ('Upcoming', 'Upcoming - Not yet effective'),
+            ('Expired', 'Expired - No longer active')
+        ],
+        validators=[DataRequired()],
+        default='Current & Active',
+        description="Current enforcement status of this regulation"
+    )
+    
+    # Metadata & Classification
+    category = SelectField(
+        'Regulation Category',
+        choices=[
+            ('Zoning', 'Zoning - Land use restrictions'),
+            ('Registration', 'Registration - Property/business registration'),
+            ('Tax', 'Tax - Tax obligations and collection'),
+            ('Licensing', 'Licensing - Required permits and licenses'),
+            ('Safety', 'Safety - Safety requirements and inspections'),
+            ('Environmental', 'Environmental - Environmental compliance'),
+            ('General', 'General - Other regulations')
+        ],
+        validators=[DataRequired()],
+        default='General',
+        description="Primary category that best describes this regulation"
+    )
+    
+    priority = SelectField(
+        'Priority Level',
+        choices=[
+            ('High', 'High - Critical compliance'),
+            ('Medium', 'Medium - Important compliance'),
+            ('Low', 'Low - Standard compliance')
+        ],
+        validators=[DataRequired()],
+        default='Medium',
+        description="Importance level for property owners and operators"
+    )
+    
+    related_keywords = StringField(
+        'Related Keywords',
+        validators=[Optional()],
+        render_kw={"placeholder": "short-term rental, vacation rental, licensing, permits (comma-separated)"},
+        description="Keywords and tags to improve searchability (separate with commas)"
+    )
+    
+    compliance_checklist = TextAreaField(
+        'Compliance Checklist',
+        validators=[Optional()],
+        render_kw={
+            "placeholder": "• Obtain business license\n• Register property with city\n• Install safety equipment\n• Maintain insurance coverage",
+            "rows": 6
+        },
+        description="Specific actionable items property owners must complete"
+    )
+    
+    # Contact Information
+    local_authority_contact = TextAreaField(
+        'Local Authority Contact Information',
+        validators=[Optional()],
+        render_kw={
+            "placeholder": "Department: City Planning Office\nPhone: (555) 123-4567\nEmail: planning@city.gov\nAddress: 123 City Hall Dr",
+            "rows": 4
+        },
+        description="Contact details for relevant local government offices or departments"
+    )
+    
+    # Date Information
+    last_updated = DateField(
+        'Last Updated',
+        validators=[Optional()],
+        default=datetime.today,
+        description="Date when this regulation information was last verified or updated"
+    )
+    
+    effective_date = DateField(
+        'Effective Date',
+        validators=[Optional()],
+        description="Date when this regulation becomes/became effective"
+    )
+    
+    expiry_date = DateField(
+        'Expiry Date',
+        validators=[Optional()],
+        description="Date when this regulation expires (leave blank if permanent)"
+    )
+    
+    # Legacy fields for backward compatibility (collapsed by default in UI)
+    property_type = StringField(
+        'Property Type (Legacy)', 
+        validators=[Optional(), Length(max=100)],
+        description="Legacy single property type field - use 'Property Types' instead"
+    )
+    
+    keywords = StringField(
+        'Keywords (Legacy)', 
+        validators=[Optional(), Length(max=200)],
+        description="Legacy keywords field - use 'Related Keywords' instead"
+    )
     
     submit = SubmitField('Save Regulation')
 

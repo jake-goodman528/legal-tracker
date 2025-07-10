@@ -174,12 +174,12 @@
                             </td>
                             <td class="actions-cell">
                                 <div class="regulation-actions">
-                                    <a href="{{ url_for('main.regulation_detail', id=regulation.id) }}" 
+                                    <a href="{{ url_for('main.regulation_detail', regulation_id=regulation.id) }}" 
                                        class="action-btn view-btn" 
                                        title="View Details">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="{{ url_for('admin.edit_regulation', id=regulation.id) }}" 
+                                    <a href="{{ url_for('admin.edit_regulation', regulation_id=regulation.id) }}" 
                                        class="action-btn edit-btn" 
                                        title="Edit Regulation">
                                         <i class="fas fa-edit"></i>

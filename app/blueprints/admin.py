@@ -216,14 +216,32 @@ def new_regulation():
     
     if form.validate_on_submit():
         try:
-            # Prepare regulation data
+            # Prepare regulation data with comprehensive fields
             regulation_data = {
+                # Core Information
                 'jurisdiction_level': form.jurisdiction_level.data,
                 'location': form.location.data,
                 'title': form.title.data,
                 'key_requirements': form.key_requirements.data,
-                'category': form.category.data,
+                
+                # Compliance Details
                 'compliance_level': form.compliance_level.data,
+                'property_types': form.property_types.data,
+                'status': form.status.data,
+                
+                # Metadata
+                'category': form.category.data,
+                'priority': form.priority.data,
+                'related_keywords': form.related_keywords.data,
+                'compliance_checklist': form.compliance_checklist.data,
+                
+                # Contact Information
+                'local_authority_contact': form.local_authority_contact.data,
+                
+                # Timestamps
+                'last_updated': form.last_updated.data,
+                
+                # Legacy fields for backward compatibility
                 'property_type': form.property_type.data,
                 'effective_date': form.effective_date.data,
                 'expiry_date': form.expiry_date.data,
@@ -261,14 +279,32 @@ def edit_regulation(regulation_id):
         logger.info(f"Editing regulation - ID: {regulation_id} | Title: {regulation.title}")
         
         if form.validate_on_submit():
-            # Update regulation data
+            # Update regulation data with comprehensive fields
             update_data = {
+                # Core Information
                 'jurisdiction_level': form.jurisdiction_level.data,
                 'location': form.location.data,
                 'title': form.title.data,
                 'key_requirements': form.key_requirements.data,
-                'category': form.category.data,
+                
+                # Compliance Details
                 'compliance_level': form.compliance_level.data,
+                'property_types': form.property_types.data,
+                'status': form.status.data,
+                
+                # Metadata
+                'category': form.category.data,
+                'priority': form.priority.data,
+                'related_keywords': form.related_keywords.data,
+                'compliance_checklist': form.compliance_checklist.data,
+                
+                # Contact Information
+                'local_authority_contact': form.local_authority_contact.data,
+                
+                # Timestamps
+                'last_updated': form.last_updated.data,
+                
+                # Legacy fields for backward compatibility
                 'property_type': form.property_type.data,
                 'effective_date': form.effective_date.data,
                 'expiry_date': form.expiry_date.data,

@@ -274,28 +274,43 @@ class UpdateService:
         Get statistics for admin dashboard
         
         Returns:
-            dict: Dictionary containing update statistics
+            dict: Dictionary containing update statistics matching expected interface
         """
         try:
+            from datetime import datetime, timedelta
+            
             total_updates = Update.query.count()
-            recent_updates = Update.query.filter(Update.status == 'Recent').count()
-            upcoming_updates = Update.query.filter(Update.status == 'Upcoming').count()
+            
+            # Recent updates (last 30 days)
+            thirty_days_ago = datetime.now() - timedelta(days=30)
+            recent_updates = Update.query.filter(
+                Update.update_date >= thirty_days_ago
+            ).count()
+            
+            # Upcoming updates (future effective dates)
+            upcoming_updates = Update.query.filter(
+                Update.effective_date > datetime.now()
+            ).count()
+            
+            # Proposed updates
             proposed_updates = Update.query.filter(Update.status == 'Proposed').count()
             
             return {
-                'total_updates': total_updates,
-                'recent_updates': recent_updates,
-                'upcoming_updates': upcoming_updates,
-                'proposed_updates': proposed_updates
+                'total': total_updates,
+                'recent': recent_updates,
+                'upcoming': upcoming_updates,
+                'proposed': proposed_updates,
+                'last_updated': datetime.now().isoformat()
             }
             
         except Exception as e:
             logging.error(f"Error getting admin statistics: {str(e)}")
             return {
-                'total_updates': 0,
-                'recent_updates': 0,
-                'upcoming_updates': 0,
-                'proposed_updates': 0
+                'total': 0,
+                'recent': 0,
+                'upcoming': 0,
+                'proposed': 0,
+                'last_updated': datetime.now().isoformat()
             }
     
     @staticmethod

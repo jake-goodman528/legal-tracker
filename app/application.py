@@ -365,6 +365,16 @@ def create_app():
         app.register_blueprint(api_bp)
         app.register_blueprint(admin_bp)
         
+        # Add custom template filters
+        @app.template_filter('nl2br')
+        def nl2br_filter(text):
+            """Convert newlines to HTML line breaks"""
+            if not text:
+                return text
+            return text.replace('\n', '<br>\n')
+        
+        app_logger.info("Custom template filters registered")
+        
         app_logger.info("Flask app created successfully")
         return app
         

@@ -54,24 +54,27 @@ def regulations():
                          saved_searches=saved_searches)
 
 
-@main_bp.route('/regulations/<int:id>')
-def regulation_detail(id):
+@main_bp.route('/regulations/<int:regulation_id>')
+def regulation_detail(regulation_id):
     """Individual regulation detail page"""
-    # Get regulation using RegulationService
-    regulation = RegulationService.get_regulation_by_id(id)
-    if not regulation:
-        return "Regulation not found", 404
-    
-    # Get related regulations
-    related_regulations = RegulationService.get_related_regulations(regulation)
-    
-    # Get detailed content sections
-    content_sections = RegulationService.get_regulation_detailed_content(regulation)
-    
-    return render_template('regulation_detail.html',
-                         regulation=regulation,
-                         related_regulations=related_regulations,
-                         content_sections=content_sections)
+    try:
+        # Get regulation using RegulationService
+        regulation = RegulationService.get_regulation_by_id(regulation_id)
+        if not regulation:
+            return "Regulation not found", 404
+        
+        # Get related regulations
+        related_regulations = RegulationService.get_related_regulations(regulation)
+        
+        # Get detailed content sections
+        content_sections = RegulationService.get_regulation_detailed_content(regulation)
+        
+        return render_template('regulation_detail.html',
+                             regulation=regulation,
+                             related_regulations=related_regulations,
+                             content_sections=content_sections)
+    except Exception as e:
+        return f"Error loading regulation: {str(e)}", 500
 
 
 @main_bp.route('/updates')

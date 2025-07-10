@@ -24,19 +24,40 @@ class Base(DeclarativeBase):
 db = SQLAlchemy(model_class=Base)
 
 class Regulation(db.Model):
+    __tablename__ = 'regulations'
+    
     id = db.Column(db.Integer, primary_key=True)
-    jurisdiction_level = db.Column(db.String(50), nullable=False)  # National, State, Local
-    location = db.Column(db.String(100), nullable=False)
+    
+    # Core Information
+    jurisdiction_level = db.Column(db.String(20), nullable=False)  # National, State, Local
+    location = db.Column(db.String(100), nullable=False)  # USA, Florida, Tampa, etc.
     title = db.Column(db.String(200), nullable=False)
     key_requirements = db.Column(db.Text, nullable=False)
-    last_updated = db.Column(db.Date, nullable=False)
-    category = db.Column(db.String(50), nullable=False, default='Legal')  # Legal, Licensing, Taxes, Zoning, Occupancy, Registration, Discrimination
+    
+    # Compliance Details
     compliance_level = db.Column(db.String(20), nullable=False, default='Mandatory')  # Mandatory, Recommended, Optional
-    property_type = db.Column(db.String(50), nullable=False, default='Both')  # Residential, Commercial, Both
+    property_types = db.Column(db.String(200))  # Comma-separated: Residential, Commercial, Mixed-use
+    status = db.Column(db.String(20), default='Current & Active')  # Current & Active, Upcoming, Expired
+    
+    # Metadata
+    category = db.Column(db.String(50), nullable=False, default='General')  # Zoning, Registration, Tax, Licensing
+    priority = db.Column(db.String(10), default='Medium')  # High, Medium, Low
+    related_keywords = db.Column(db.Text)  # Comma-separated tags
+    compliance_checklist = db.Column(db.Text)  # JSON or structured text
+    
+    # Contact Information
+    local_authority_contact = db.Column(db.Text)  # Contact details for local authorities
+    
+    # Timestamps
+    last_updated = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Legacy fields for backward compatibility (to be migrated)
+    property_type = db.Column(db.String(50), nullable=True)  # Legacy field - will migrate to property_types
     effective_date = db.Column(db.Date, nullable=True)  # When regulation becomes effective
     expiry_date = db.Column(db.Date, nullable=True)  # When regulation expires (if applicable)
-    keywords = db.Column(db.Text, nullable=True)  # Comma-separated keywords for better search
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    keywords = db.Column(db.Text, nullable=True)  # Legacy field - will migrate to related_keywords
 
     def __repr__(self) -> str:
         return f'<Regulation {self.title}>'
@@ -54,9 +75,18 @@ class Regulation(db.Model):
             'location': self.location,
             'title': self.title,
             'key_requirements': self.key_requirements,
-            'last_updated': self.last_updated.isoformat() if self.last_updated else None,
-            'category': self.category,
             'compliance_level': self.compliance_level,
+            'property_types': self.property_types.split(',') if self.property_types else [],
+            'status': self.status,
+            'category': self.category,
+            'priority': self.priority,
+            'related_keywords': self.related_keywords.split(',') if self.related_keywords else [],
+            'compliance_checklist': self.compliance_checklist,
+            'local_authority_contact': self.local_authority_contact,
+            'last_updated': self.last_updated.isoformat() if self.last_updated else None,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
+            # Legacy fields for backward compatibility
             'property_type': self.property_type,
             'effective_date': self.effective_date.isoformat() if self.effective_date else None,
             'expiry_date': self.expiry_date.isoformat() if self.expiry_date else None,

@@ -53,6 +53,11 @@ class AdvancedSearch {
 
         // Table sorting
         document.addEventListener('click', (e) => {
+            // Skip if this is a navigation link
+            if (e.target.closest('.admin-nav-link, a[href*="/admin/"]')) {
+                return;
+            }
+            
             if (e.target.closest('.sortable')) {
                 this.handleSort(e.target.closest('.sortable'));
             }
@@ -60,6 +65,11 @@ class AdvancedSearch {
 
         // View switching
         document.addEventListener('click', (e) => {
+            // Skip if this is a navigation link
+            if (e.target.closest('.admin-nav-link, a[href*="/admin/"]')) {
+                return;
+            }
+            
             if (e.target.closest('[data-view]')) {
                 this.switchView(e.target.closest('[data-view]').dataset.view);
             }

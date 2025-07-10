@@ -165,7 +165,7 @@ class RegulationService:
         
         Transforms regulation data into formatted HTML sections suitable for
         web display. Creates organized sections for requirements, compliance
-        info, dates, and keywords with appropriate styling classes.
+        info, metadata, contact info, dates, and keywords with appropriate styling classes.
         
         Args:
             regulation: The regulation object to format for display.
@@ -178,6 +178,7 @@ class RegulationService:
                 
         Note:
             Generates responsive HTML with Bootstrap classes.
+            Handles both new comprehensive fields and legacy fields.
             Returns empty list if content generation fails.
         """
         try:
@@ -190,19 +191,53 @@ class RegulationService:
                 'type': 'requirements'
             })
             
-            # Compliance Information
+            # Compliance Information (Enhanced)
+            property_display = regulation.property_types or regulation.property_type or 'Not specified'
+            if regulation.property_types and ',' in regulation.property_types:
+                property_badges = [f"<span class='badge property-badge me-1'>{pt.strip()}</span>" 
+                                 for pt in regulation.property_types.split(',')]
+                property_display = ''.join(property_badges)
+            else:
+                property_display = f"<span class='badge property-badge'>{property_display}</span>"
+            
+            status_badge_class = {
+                'Current & Active': 'bg-success',
+                'Upcoming': 'bg-warning text-dark',
+                'Expired': 'bg-secondary'
+            }.get(regulation.status, 'bg-info')
+            
+            priority_badge_class = {
+                'High': 'bg-danger',
+                'Medium': 'bg-warning text-dark',
+                'Low': 'bg-info'
+            }.get(regulation.priority, 'bg-secondary')
+            
             compliance_info = f"""
             <div class="compliance-summary">
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <strong>Compliance Level:</strong><br>
-                        <span class="badge compliance-badge">{regulation.compliance_level}</span>
+                        <span class="badge compliance-badge bg-primary">{regulation.compliance_level}</span>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <strong>Property Types:</strong><br>
-                        <span class="badge property-badge">{regulation.property_type}</span>
+                        {property_display}
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
+                        <strong>Status:</strong><br>
+                        <span class="badge {status_badge_class}">{regulation.status}</span>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Priority:</strong><br>
+                        <span class="badge {priority_badge_class}">{regulation.priority}</span>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <strong>Category:</strong><br>
+                        <span class="badge category-badge bg-info">{regulation.category}</span>
+                    </div>
+                    <div class="col-md-6">
                         <strong>Last Updated:</strong><br>
                         {regulation.last_updated.strftime('%B %d, %Y') if regulation.last_updated else 'Not specified'}
                     </div>
@@ -215,6 +250,22 @@ class RegulationService:
                 'content': compliance_info,
                 'type': 'compliance'
             })
+            
+            # Compliance Checklist (New Field)
+            if regulation.compliance_checklist:
+                content_sections.append({
+                    'title': 'Compliance Checklist',
+                    'content': f"<div class='checklist-content'>{regulation.compliance_checklist}</div>",
+                    'type': 'checklist'
+                })
+            
+            # Contact Information (New Field)
+            if regulation.local_authority_contact:
+                content_sections.append({
+                    'title': 'Local Authority Contact',
+                    'content': f"<div class='contact-info'>{regulation.local_authority_contact.replace(chr(10), '<br>')}</div>",
+                    'type': 'contact'
+                })
             
             # Effective Dates section
             if regulation.effective_date or regulation.expiry_date:
@@ -231,12 +282,13 @@ class RegulationService:
                     'type': 'dates'
                 })
             
-            # Keywords section
-            if regulation.keywords:
+            # Keywords section (Handle both new and legacy fields)
+            keywords_source = regulation.related_keywords or regulation.keywords
+            if keywords_source:
                 keywords_html = "<div class='keywords-section'>"
-                keywords = [k.strip() for k in regulation.keywords.split(',')]
+                keywords = [k.strip() for k in keywords_source.split(',') if k.strip()]
                 for keyword in keywords:
-                    keywords_html += f"<span class='badge keyword-badge'>{keyword}</span> "
+                    keywords_html += f"<span class='badge keyword-badge bg-light text-dark me-1'>{keyword}</span> "
                 keywords_html += "</div>"
                 
                 content_sections.append({
@@ -265,12 +317,17 @@ class RegulationService:
                 - location (str): Geographic location/jurisdiction name
                 - title (str): Regulation title/name
                 - key_requirements (str): Main compliance requirements
-                - category (str): Regulation category (Legal, Licensing, etc.)
-                - compliance_level (str): Required compliance level
-                - property_type (str): Applicable property types
+                - compliance_level (str): Mandatory, Recommended, Optional
+                - property_types (str): Comma-separated property types
+                - status (str): Current & Active, Upcoming, Expired
+                - category (str): Regulation category (Zoning, Registration, etc.)
+                - priority (str): High, Medium, Low
+                - related_keywords (str): Comma-separated keywords
+                - compliance_checklist (str): Actionable items for compliance
+                - local_authority_contact (str): Contact information
                 - effective_date (datetime, optional): When regulation takes effect
                 - expiry_date (datetime, optional): When regulation expires
-                - keywords (str, optional): Comma-separated keywords
+                - Legacy fields for backward compatibility
                 
         Returns:
             Tuple containing:
@@ -282,14 +339,35 @@ class RegulationService:
             Automatically rolls back database transaction on failure.
         """
         try:
+            from datetime import datetime
+            
             regulation = Regulation(
+                # Core Information
                 jurisdiction_level=regulation_data.get('jurisdiction_level'),
                 location=regulation_data.get('location'),
                 title=regulation_data.get('title'),
                 key_requirements=regulation_data.get('key_requirements'),
-                last_updated=regulation_data.get('last_updated'),
-                category=regulation_data.get('category'),
-                compliance_level=regulation_data.get('compliance_level'),
+                
+                # Compliance Details
+                compliance_level=regulation_data.get('compliance_level', 'Mandatory'),
+                property_types=regulation_data.get('property_types'),
+                status=regulation_data.get('status', 'Current & Active'),
+                
+                # Metadata
+                category=regulation_data.get('category', 'General'),
+                priority=regulation_data.get('priority', 'Medium'),
+                related_keywords=regulation_data.get('related_keywords'),
+                compliance_checklist=regulation_data.get('compliance_checklist'),
+                
+                # Contact Information
+                local_authority_contact=regulation_data.get('local_authority_contact'),
+                
+                # Timestamps
+                last_updated=regulation_data.get('last_updated', datetime.utcnow()),
+                created_at=datetime.utcnow(),
+                updated_at=datetime.utcnow(),
+                
+                # Legacy fields for backward compatibility
                 property_type=regulation_data.get('property_type'),
                 effective_date=regulation_data.get('effective_date'),
                 expiry_date=regulation_data.get('expiry_date'),
@@ -327,15 +405,21 @@ class RegulationService:
                 
         Note:
             Only updates fields present in regulation_data dictionary.
+            Automatically updates the updated_at timestamp.
             Automatically rolls back database transaction on failure.
         """
         try:
+            from datetime import datetime
+            
             regulation = Regulation.query.get_or_404(regulation_id)
             
             # Update fields
             for field, value in regulation_data.items():
                 if hasattr(regulation, field):
                     setattr(regulation, field, value)
+            
+            # Always update the updated_at timestamp
+            regulation.updated_at = datetime.utcnow()
             
             db.session.commit()
             

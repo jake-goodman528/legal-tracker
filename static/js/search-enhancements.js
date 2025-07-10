@@ -112,6 +112,11 @@ class SearchEnhancer {
         
         // Hide dropdown when clicking outside
         document.addEventListener('click', (e) => {
+            // Skip if this is a navigation link
+            if (e.target.closest('.admin-nav-link, a[href*="/admin/"]')) {
+                return;
+            }
+            
             if (!input.contains(e.target) && !dropdown.contains(e.target)) {
                 dropdown.style.display = 'none';
             }
