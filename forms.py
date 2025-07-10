@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, SelectField, DateField, PasswordField, SubmitField
+from wtforms import StringField, TextAreaField, SelectField, DateField, PasswordField, SubmitField, BooleanField
 from wtforms.validators import DataRequired, Length, Optional
 
 
@@ -49,5 +49,51 @@ class UpdateForm(FlaskForm):
                                ('Upcoming', 'Upcoming'),
                                ('Proposed', 'Proposed')],
                         validators=[DataRequired()])
+    
+    # Add missing required fields
+    category = SelectField('Category',
+                          choices=[('Regulatory Changes', 'Regulatory Changes'),
+                                 ('Tax Updates', 'Tax Updates'),
+                                 ('Licensing Changes', 'Licensing Changes'),
+                                 ('Court Decisions', 'Court Decisions'),
+                                 ('Industry News', 'Industry News')],
+                          validators=[DataRequired()],
+                          default='Regulatory Changes')
+    
+    impact_level = SelectField('Impact Level',
+                              choices=[('High', 'High'),
+                                     ('Medium', 'Medium'),
+                                     ('Low', 'Low')],
+                              validators=[DataRequired()],
+                              default='Medium')
+    
+    effective_date = DateField('Effective Date', validators=[Optional()])
+    deadline_date = DateField('Deadline Date', validators=[Optional()])
+    
+    action_required = SelectField('Action Required',
+                                 choices=[('True', 'Yes'),
+                                        ('False', 'No')],
+                                 validators=[DataRequired()],
+                                 default='False')
+    
+    action_description = TextAreaField('Action Description', validators=[Optional()])
+    
+    property_types = SelectField('Property Types',
+                                choices=[('Residential', 'Residential'),
+                                       ('Commercial', 'Commercial'),
+                                       ('Both', 'Both')],
+                                validators=[DataRequired()],
+                                default='Both')
+    
+    related_regulation_ids = StringField('Related Regulation IDs (comma-separated)', validators=[Optional()])
+    tags = StringField('Tags (comma-separated)', validators=[Optional()])
+    source_url = StringField('Source URL', validators=[Optional(), Length(max=500)])
+    
+    priority = SelectField('Priority',
+                          choices=[('1', 'High'),
+                                 ('2', 'Medium'),
+                                 ('3', 'Low')],
+                          validators=[DataRequired()],
+                          default='3')
     
     submit = SubmitField('Save Update') 

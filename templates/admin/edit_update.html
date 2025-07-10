@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "admin/admin_base.html" %}
 
 {% block title %}{{ title }} - Admin{% endblock %}
 
@@ -178,11 +178,16 @@
                         </div>
                         
                         <div class="mb-3">
-                            <div class="form-check">
-                                {{ form.action_required(class="form-check-input", id="actionRequiredCheck") }}
-                                {{ form.action_required.label(class="form-check-label", for="actionRequiredCheck") }}
-                            </div>
-                            <div class="form-text">Check if this update requires immediate action from property operators</div>
+                            {{ form.action_required.label(class="form-label") }}
+                            {{ form.action_required(class="form-select", id="actionRequiredSelect") }}
+                            {% if form.action_required.errors %}
+                                <div class="text-danger small">
+                                    {% for error in form.action_required.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Select if this update requires immediate action from property operators</div>
                         </div>
                         
                         <div class="mb-3" id="actionDescriptionDiv" style="display: none;">
@@ -293,13 +298,13 @@ function deleteUpdate(id, title) {
     new bootstrap.Modal(document.getElementById('deleteModal')).show();
 }
 
-// Show/hide action description based on checkbox
+// Show/hide action description based on select field
 document.addEventListener('DOMContentLoaded', function() {
-    const actionRequiredCheck = document.getElementById('actionRequiredCheck');
+    const actionRequiredSelect = document.getElementById('actionRequiredSelect');
     const actionDescriptionDiv = document.getElementById('actionDescriptionDiv');
     
     function toggleActionDescription() {
-        if (actionRequiredCheck.checked) {
+        if (actionRequiredSelect.value === 'True') {
             actionDescriptionDiv.style.display = 'block';
         } else {
             actionDescriptionDiv.style.display = 'none';
@@ -310,7 +315,7 @@ document.addEventListener('DOMContentLoaded', function() {
     toggleActionDescription();
     
     // Listen for changes
-    actionRequiredCheck.addEventListener('change', toggleActionDescription);
+    actionRequiredSelect.addEventListener('change', toggleActionDescription);
 });
 </script>
 {% endif %}
