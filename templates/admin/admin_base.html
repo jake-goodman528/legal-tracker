@@ -277,7 +277,7 @@
                     <i class="fas fa-user-shield"></i>
                     <span>Administrator</span>
                 </div>
-                <a href="{{ url_for('main.admin_logout') }}" class="admin-logout-btn">
+                <a href="{{ url_for('admin.logout') }}" class="admin-logout-btn">
                     <i class="fas fa-sign-out-alt"></i>
                     Logout
                 </a>
@@ -291,19 +291,19 @@
         <nav class="admin-sidebar" id="adminSidebar">
             <div class="admin-nav">
                 <div class="admin-nav-item">
-                    <a href="{{ url_for('main.admin_dashboard') }}" class="admin-nav-link {% if request.endpoint == 'main.admin_dashboard' %}active{% endif %}">
+                    <a href="{{ url_for('admin.dashboard') }}" class="admin-nav-link {% if request.endpoint == 'admin.dashboard' %}active{% endif %}">
                         <i class="fas fa-tachometer-alt admin-nav-icon"></i>
                         <span>Dashboard</span>
                     </a>
                 </div>
                 <div class="admin-nav-item">
-                    <a href="{{ url_for('main.admin_manage_regulations') }}" class="admin-nav-link {% if 'regulation' in request.endpoint %}active{% endif %}">
+                    <a href="{{ url_for('admin.manage_regulations') }}" class="admin-nav-link {% if 'regulation' in request.endpoint %}active{% endif %}">
                         <i class="fas fa-book admin-nav-icon"></i>
                         <span>Regulations</span>
                     </a>
                 </div>
                 <div class="admin-nav-item">
-                    <a href="{{ url_for('main.admin_manage_updates') }}" class="admin-nav-link {% if 'update' in request.endpoint %}active{% endif %}">
+                    <a href="{{ url_for('admin.manage_updates') }}" class="admin-nav-link {% if 'update' in request.endpoint %}active{% endif %}">
                         <i class="fas fa-newspaper admin-nav-icon"></i>
                         <span>Updates</span>
                     </a>

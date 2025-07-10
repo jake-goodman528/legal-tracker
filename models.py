@@ -1,3 +1,18 @@
+"""
+Database Models
+
+Defines all SQLAlchemy models for the STR Compliance Toolkit including:
+- Regulation: Core regulation and compliance data
+- Update: Regulatory updates and announcements  
+- UserUpdateInteraction: User interaction tracking (bookmarks, read status)
+- UpdateReminder: User-set reminders for deadlines
+- NotificationPreference: User notification settings
+- AdminUser: Administrative user accounts
+- SavedSearch: Saved search configurations
+- SearchSuggestion: Search suggestion tracking
+"""
+
+from typing import Dict, List, Optional, Any
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 from datetime import datetime
@@ -23,10 +38,16 @@ class Regulation(db.Model):
     keywords = db.Column(db.Text, nullable=True)  # Comma-separated keywords for better search
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<Regulation {self.title}>'
     
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Any]:
+        """
+        Convert regulation object to dictionary for JSON serialization.
+        
+        Returns:
+            Dictionary containing all regulation fields with proper type conversion.
+        """
         return {
             'id': self.id,
             'jurisdiction_level': self.jurisdiction_level,

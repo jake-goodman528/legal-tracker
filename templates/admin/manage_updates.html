@@ -15,7 +15,7 @@
                 <p class="admin-page-subtitle">Track and publish industry updates, regulatory changes, and important news for compliance tracking.</p>
             </div>
             <div class="admin-header-actions">
-                <a href="{{ url_for('main.admin_new_update') }}" class="btn btn-admin-primary">
+                <a href="{{ url_for('admin.new_update') }}" class="btn btn-admin-primary">
                     <i class="fas fa-plus me-2"></i>
                     Add New Update
                 </a>
@@ -93,7 +93,7 @@
                             </td>
                             <td class="actions-cell">
                                 <div class="update-actions">
-                                    <a href="{{ url_for('main.admin_edit_update', id=update.id) }}" 
+                                    <a href="{{ url_for('admin.edit_update', id=update.id) }}" 
                                        class="action-btn edit-btn" 
                                        title="Edit Update">
                                         <i class="fas fa-edit"></i>
@@ -122,7 +122,7 @@
                 <ul class="pagination justify-content-center mb-0">
                     {% if updates.has_prev %}
                     <li class="page-item">
-                        <a class="page-link" href="{{ url_for('main.admin_manage_updates', page=updates.prev_num) }}">Previous</a>
+                        <a class="page-link" href="{{ url_for('admin.manage_updates', page=updates.prev_num) }}">Previous</a>
                     </li>
                     {% endif %}
                     
@@ -130,7 +130,7 @@
                         {% if page_num %}
                             {% if page_num != updates.page %}
                             <li class="page-item">
-                                <a class="page-link" href="{{ url_for('main.admin_manage_updates', page=page_num) }}">{{ page_num }}</a>
+                                <a class="page-link" href="{{ url_for('admin.manage_updates', page=page_num) }}">{{ page_num }}</a>
                             </li>
                             {% else %}
                             <li class="page-item active">
@@ -146,7 +146,7 @@
                     
                     {% if updates.has_next %}
                     <li class="page-item">
-                        <a class="page-link" href="{{ url_for('main.admin_manage_updates', page=updates.next_num) }}">Next</a>
+                        <a class="page-link" href="{{ url_for('admin.manage_updates', page=updates.next_num) }}">Next</a>
                     </li>
                     {% endif %}
                 </ul>
@@ -162,7 +162,7 @@
         </div>
         <h3 class="empty-state-title">No updates found</h3>
         <p class="empty-state-description">Start building your updates database by adding your first regulatory update or industry news.</p>
-        <a href="{{ url_for('main.admin_new_update') }}" class="btn btn-admin-primary">
+        <a href="{{ url_for('admin.new_update') }}" class="btn btn-admin-primary">
             <i class="fas fa-plus me-2"></i> Add First Update
         </a>
         <div class="mt-4">

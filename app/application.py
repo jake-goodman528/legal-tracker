@@ -6,16 +6,29 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 import traceback
 import sys
 
-# Add the current directory to Python path to ensure imports work
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# Add the parent directory to Python path to ensure imports work (models.py is in parent dir)
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Set up logging
-logging.basicConfig(level=logging.DEBUG)
+# Set up logging - configurable via environment
+log_level = os.environ.get("LOG_LEVEL", "INFO").upper()
+logging.basicConfig(
+    level=getattr(logging, log_level, logging.INFO),
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 
 def create_app():
-    # create the app
-    app = Flask(__name__)
-    app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key-change-in-production")
+    # create the app with correct template and static directories
+    # Since we're in app/ subdirectory, templates and static are in parent directory
+    app = Flask(__name__, 
+                template_folder='../templates',
+                static_folder='../static')
+    
+    # Require secure session secret - no insecure fallback
+    session_secret = os.environ.get("SESSION_SECRET")
+    if not session_secret:
+        raise ValueError("SESSION_SECRET environment variable is required for security")
+    app.secret_key = session_secret
+    
     app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
     # configure the database
@@ -44,16 +57,21 @@ def create_app():
             
             # Create default admin user if none exists
             if not AdminUser.query.first():
+                admin_username = os.environ.get("ADMIN_USERNAME", "admin")
+                admin_password = os.environ.get("ADMIN_PASSWORD")
+                if not admin_password:
+                    raise ValueError("ADMIN_PASSWORD environment variable is required for initial admin setup")
+                
                 admin = AdminUser(
-                    username='admin',
-                    password_hash=generate_password_hash('admin123', method='pbkdf2:sha256')
+                    username=admin_username,
+                    password_hash=generate_password_hash(admin_password, method='pbkdf2:sha256')
                 )
                 db.session.add(admin)
                 db.session.commit()
-                logging.info("Default admin user created: admin/admin123")
+                logging.info(f"Default admin user created: {admin_username}")
             
-            # Add sample data if tables are empty
-            if not Regulation.query.first():
+            # Add sample data if tables are empty (unless skipped for testing)
+            if not Regulation.query.first() and not os.environ.get("SKIP_SAMPLE_DATA"):
                 sample_regulations = [
                     Regulation(
                         jurisdiction_level='National',
@@ -133,7 +151,7 @@ def create_app():
                 db.session.commit()
                 logging.info("Sample regulations added")
             
-            if not Update.query.first():
+            if not Update.query.first() and not os.environ.get("SKIP_SAMPLE_DATA"):
                 sample_updates = [
                     Update(
                         title='Tampa Zoning Ordinance Amendment',
@@ -178,9 +196,14 @@ def create_app():
                 db.session.commit()
                 logging.info("Sample updates added")
         
-        # Import routes after everything is set up
-        from routes import bp
-        app.register_blueprint(bp)
+        # Import and register blueprints
+        from app.blueprints.main import main_bp
+        from app.blueprints.api import api_bp
+        from app.blueprints.admin import admin_bp
+        
+        app.register_blueprint(main_bp)
+        app.register_blueprint(api_bp)
+        app.register_blueprint(admin_bp)
         
         logging.info("Flask app created successfully")
         return app
@@ -192,4 +215,6 @@ def create_app():
 
 if __name__ == '__main__':
     application = create_app()
-    application.run(host='0.0.0.0', port=9000, debug=True)
+    # Only enable debug mode if explicitly set via environment variable
+    debug_mode = os.environ.get("FLASK_DEBUG", "False").lower() == "true"
+    application.run(host='0.0.0.0', port=9000, debug=debug_mode)

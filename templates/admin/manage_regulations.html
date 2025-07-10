@@ -15,7 +15,7 @@
                 <p class="admin-page-subtitle">Add, edit, and manage regulatory requirements across all jurisdictions and compliance areas.</p>
             </div>
             <div class="admin-header-actions">
-                <a href="{{ url_for('main.admin_new_regulation') }}" class="btn btn-admin-primary">
+                <a href="{{ url_for('admin.new_regulation') }}" class="btn btn-admin-primary">
                     <i class="fas fa-plus me-2"></i>
                     Add New Regulation
                 </a>
@@ -173,7 +173,7 @@
                                        title="View Details">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="{{ url_for('main.admin_edit_regulation', id=regulation.id) }}" 
+                                    <a href="{{ url_for('admin.edit_regulation', id=regulation.id) }}" 
                                        class="action-btn edit-btn" 
                                        title="Edit Regulation">
                                         <i class="fas fa-edit"></i>
@@ -210,7 +210,7 @@
                     <ul class="pagination pagination-sm mb-0">
                         {% if regulations.has_prev %}
                         <li class="page-item">
-                            <a class="page-link" href="{{ url_for('main.admin_manage_regulations', page=regulations.prev_num) }}">
+                            <a class="page-link" href="{{ url_for('admin.manage_regulations', page=regulations.prev_num) }}">
                                 <i class="fas fa-chevron-left"></i>
                             </a>
                         </li>
@@ -220,7 +220,7 @@
                             {% if page_num %}
                                 {% if page_num != regulations.page %}
                                 <li class="page-item">
-                                    <a class="page-link" href="{{ url_for('main.admin_manage_regulations', page=page_num) }}">{{ page_num }}</a>
+                                    <a class="page-link" href="{{ url_for('admin.manage_regulations', page=page_num) }}">{{ page_num }}</a>
                                 </li>
                                 {% else %}
                                 <li class="page-item active">
@@ -236,7 +236,7 @@
                         
                         {% if regulations.has_next %}
                         <li class="page-item">
-                            <a class="page-link" href="{{ url_for('main.admin_manage_regulations', page=regulations.next_num) }}">
+                            <a class="page-link" href="{{ url_for('admin.manage_regulations', page=regulations.next_num) }}">
                                 <i class="fas fa-chevron-right"></i>
                             </a>
                         </li>
@@ -257,7 +257,7 @@
                 </div>
                 <h3 class="mb-3">No regulations found</h3>
                 <p class="text-muted mb-4">Start building your regulatory database by adding your first regulation.</p>
-                <a href="{{ url_for('main.admin_new_regulation') }}" class="btn btn-success btn-lg">
+                <a href="{{ url_for('admin.new_regulation') }}" class="btn btn-success btn-lg">
                     <i class="fas fa-plus me-2"></i> Add First Regulation
                 </a>
                 <div class="mt-4">

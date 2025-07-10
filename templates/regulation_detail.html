@@ -69,73 +69,54 @@
                 <p class="regulation-subtitle">{{ regulation.key_requirements }}</p>
             </div>
 
-            <!-- Overview Section -->
-            <div class="regulation-overview-section mb-4">
-                <h3 class="section-title">
-                    <i class="fas fa-info-circle me-2"></i>
-                    Overview
-                </h3>
-                <div class="overview-content">
-                    {% if detailed_content.overview %}
-                        <p class="overview-text">{{ detailed_content.overview }}</p>
-                    {% else %}
+            <!-- Dynamic Content Sections -->
+            {% if content_sections %}
+                {% for section in content_sections %}
+                <div class="regulation-content-section mb-4">
+                    <h3 class="section-title">
+                        {% if section.type == 'requirements' %}
+                        <i class="fas fa-list-check me-2"></i>
+                        {% elif section.type == 'compliance' %}
+                        <i class="fas fa-shield-alt me-2"></i>
+                        {% elif section.type == 'dates' %}
+                        <i class="fas fa-calendar me-2"></i>
+                        {% elif section.type == 'keywords' %}
+                        <i class="fas fa-tags me-2"></i>
+                        {% else %}
+                        <i class="fas fa-info-circle me-2"></i>
+                        {% endif %}
+                        {{ section.title }}
+                    </h3>
+                    <div class="section-content">
+                        {{ section.content|safe }}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <!-- Default Overview Section -->
+                <div class="regulation-overview-section mb-4">
+                    <h3 class="section-title">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Overview
+                    </h3>
+                    <div class="overview-content">
                         <p class="overview-text">This regulation governs short-term rental operations in {{ regulation.location }}, establishing key requirements for compliance with local laws and regulations. Property owners and managers must understand and implement these requirements to operate legally within this jurisdiction.</p>
-                    {% endif %}
+                    </div>
                 </div>
-            </div>
 
-            <!-- Detailed Requirements Section -->
-            <div class="regulation-requirements-section mb-4">
-                <h3 class="section-title">
-                    <i class="fas fa-list-check me-2"></i>
-                    Detailed Requirements
-                </h3>
-                <div class="requirements-content">
-                    {% if detailed_content.requirements %}
-                        <ul class="requirements-list">
-                            {% for req in detailed_content.requirements %}
-                            <li class="requirement-item">{{ req }}</li>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        <ul class="requirements-list">
-                            <li class="requirement-item">Property registration and licensing requirements</li>
-                            <li class="requirement-item">Occupancy limits and safety standards compliance</li>
-                            <li class="requirement-item">Tax obligations and reporting requirements</li>
-                            <li class="requirement-item">Zoning compliance and permitted use verification</li>
-                            <li class="requirement-item">Insurance and liability coverage requirements</li>
-                            <li class="requirement-item">Guest screening and documentation procedures</li>
-                        </ul>
-                    {% endif %}
+                <!-- Default Requirements Section -->
+                <div class="regulation-requirements-section mb-4">
+                    <h3 class="section-title">
+                        <i class="fas fa-list-check me-2"></i>
+                        Key Requirements
+                    </h3>
+                    <div class="requirements-content">
+                        <div class="regulation-requirements">
+                            {{ regulation.key_requirements|safe }}
+                        </div>
+                    </div>
                 </div>
-            </div>
-
-            <!-- Implementation Process Section -->
-            <div class="regulation-process-section mb-4">
-                <h3 class="section-title">
-                    <i class="fas fa-cogs me-2"></i>
-                    Implementation Process
-                </h3>
-                <div class="process-content">
-                    {% if detailed_content.process_details %}
-                        <ol class="process-steps">
-                            {% for step in detailed_content.process_details %}
-                            <li class="process-step">{{ step }}</li>
-                            {% endfor %}
-                        </ol>
-                    {% else %}
-                        <ol class="process-steps">
-                            <li class="process-step">Review all applicable regulations and requirements for your jurisdiction</li>
-                            <li class="process-step">Complete necessary registration and licensing applications</li>
-                            <li class="process-step">Ensure property meets all safety and zoning requirements</li>
-                            <li class="process-step">Implement required insurance coverage and liability protections</li>
-                            <li class="process-step">Establish tax collection and reporting procedures</li>
-                            <li class="process-step">Create guest screening and documentation processes</li>
-                            <li class="process-step">Maintain ongoing compliance monitoring and reporting</li>
-                        </ol>
-                    {% endif %}
-                </div>
-            </div>
+            {% endif %}
 
             <!-- Compliance Checklist Section -->
             <div class="regulation-checklist-section mb-4">
@@ -181,23 +162,9 @@
                     Official Government Sources
                 </h3>
                 <div class="sources-content">
-                    {% if detailed_content.official_links %}
-                        {% for link in detailed_content.official_links %}
-                        <a href="{{ link }}" class="official-source-link" target="_blank" rel="noopener noreferrer">
-                            <div class="source-icon">
-                                <i class="fas fa-link"></i>
-                            </div>
-                            <div class="source-text">{{ link }}</div>
-                            <div class="external-icon">
-                                <i class="fas fa-external-link-alt"></i>
-                            </div>
-                        </a>
-                        {% endfor %}
-                    {% else %}
-                        <div class="sources-placeholder">
-                            <p>Official government sources and documentation links will be added as they become available. Please check back regularly for updates.</p>
-                        </div>
-                    {% endif %}
+                    <div class="sources-placeholder">
+                        <p>Official government sources and documentation links will be added as they become available. Please check back regularly for updates.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -269,64 +236,9 @@
                     </h4>
                 </div>
                 <div class="sidebar-card-body">
-                    {% if detailed_content.contact_info %}
-                        {% if detailed_content.contact_info.agency %}
-                        <div class="contact-item">
-                            <div class="contact-label">
-                                <i class="fas fa-building me-2"></i>
-                                Agency
-                            </div>
-                            <div class="contact-value">{{ detailed_content.contact_info.agency }}</div>
-                        </div>
-                        {% endif %}
-                        
-                        {% if detailed_content.contact_info.phone %}
-                        <div class="contact-item">
-                            <div class="contact-label">
-                                <i class="fas fa-phone me-2"></i>
-                                Phone
-                            </div>
-                            <div class="contact-value">
-                                <a href="tel:{{ detailed_content.contact_info.phone }}" class="contact-link">
-                                    {{ detailed_content.contact_info.phone }}
-                                </a>
-                            </div>
-                        </div>
-                        {% endif %}
-                        
-                        {% if detailed_content.contact_info.email %}
-                        <div class="contact-item">
-                            <div class="contact-label">
-                                <i class="fas fa-envelope me-2"></i>
-                                Email
-                            </div>
-                            <div class="contact-value">
-                                <a href="mailto:{{ detailed_content.contact_info.email }}" class="contact-link">
-                                    {{ detailed_content.contact_info.email }}
-                                </a>
-                            </div>
-                        </div>
-                        {% endif %}
-                        
-                        {% if detailed_content.contact_info.website %}
-                        <div class="contact-item">
-                            <div class="contact-label">
-                                <i class="fas fa-globe me-2"></i>
-                                Website
-                            </div>
-                            <div class="contact-value">
-                                <a href="{{ detailed_content.contact_info.website }}" target="_blank" rel="noopener noreferrer" class="contact-link">
-                                    Official Website
-                                    <i class="fas fa-external-link-alt ms-1"></i>
-                                </a>
-                            </div>
-                        </div>
-                        {% endif %}
-                    {% else %}
-                        <div class="contact-placeholder">
-                            <p>Contact information for local authorities will be updated as available. Please check official government websites for current contact details.</p>
-                        </div>
-                    {% endif %}
+                    <div class="contact-placeholder">
+                        <p>Contact information for local authorities will be updated as available. Please check official government websites for current contact details.</p>
+                    </div>
                 </div>
             </div>
 

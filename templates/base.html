@@ -167,23 +167,23 @@
                                 <i class="fas fa-user-shield me-1"></i>Admin Panel
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="{{ url_for('main.admin_dashboard') }}">
+                                <li><a class="dropdown-item" href="{{ url_for('admin.dashboard') }}">
                                     <i class="fas fa-tachometer-alt me-2"></i>Dashboard
                                 </a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('main.admin_manage_regulations') }}">
+                                <li><a class="dropdown-item" href="{{ url_for('admin.manage_regulations') }}">
                                     <i class="fas fa-list-check me-2"></i>Manage Regulations
                                 </a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('main.admin_manage_updates') }}">
+                                <li><a class="dropdown-item" href="{{ url_for('admin.manage_updates') }}">
                                     <i class="fas fa-bell me-2"></i>Manage Updates
                                 </a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-danger" href="{{ url_for('main.admin_logout') }}">
+                                <li><a class="dropdown-item text-danger" href="{{ url_for('admin.logout') }}">
                                     <i class="fas fa-sign-out-alt me-2"></i>Sign Out
                                 </a></li>
                             </ul>
                         </div>
                         {% else %}
-                        <a href="{{ url_for('main.admin_login') }}" class="footer-link">
+                        <a href="{{ url_for('admin.login') }}" class="footer-link">
                             <i class="fas fa-user-shield me-1"></i>Admin Login
                         </a>
                         {% endif %}
