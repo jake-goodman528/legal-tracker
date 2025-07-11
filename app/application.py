@@ -280,7 +280,7 @@ def create_app():
                         recent_changes='<p>Recent DOJ guidance emphasizes digital accessibility for booking platforms and clear communication of accessibility features.</p>'
                     ),
                     Regulation(
-                        jurisdiction='Florida State',
+                        jurisdiction='State',
                         jurisdiction_level='State',
                         location='Florida',
                         title='State Licensing Requirements',
@@ -293,7 +293,7 @@ def create_app():
                         recent_changes='<p>Recent updates include enhanced enforcement of tourist development tax collection and new online registration requirements effective January 2024.</p>'
                     ),
                     Regulation(
-                        jurisdiction='Tampa City',
+                        jurisdiction='Local',
                         jurisdiction_level='Local',
                         location='Tampa',
                         title='Registration and Safety Requirements',
@@ -306,7 +306,7 @@ def create_app():
                         recent_changes='<p>New requirements effective April 2024 include enhanced parking regulations and stricter noise ordinance enforcement during peak tourist seasons.</p>'
                     ),
                     Regulation(
-                        jurisdiction='St. Petersburg City',
+                        jurisdiction='Local',
                         jurisdiction_level='Local',
                         location='St. Petersburg',
                         title='Registration Requirements',
@@ -319,7 +319,7 @@ def create_app():
                         recent_changes='<p>Recent updates include mandatory local contact person requirements and enhanced inspection protocols effective May 2024.</p>'
                     ),
                     Regulation(
-                        jurisdiction='Clearwater City',
+                        jurisdiction='Local',
                         jurisdiction_level='Local',
                         location='Clearwater',
                         title='31-Day Minimum in Residential Areas',
@@ -332,7 +332,7 @@ def create_app():
                         recent_changes='<p>New enforcement protocols implemented June 2024 include automated monitoring of rental listings and enhanced penalty structure for repeat violations.</p>'
                     ),
                     Regulation(
-                        jurisdiction='Sarasota City',
+                        jurisdiction='Local',
                         jurisdiction_level='Local',
                         location='Sarasota',
                         title='Minimum 7-Day Stay and Registration',

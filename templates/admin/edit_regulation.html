@@ -52,7 +52,7 @@
                                 <div class="col-md-4">
                                     <div class="mb-4">
                                         {{ form.jurisdiction_level.label(class="form-label required") }}
-                                        {{ form.jurisdiction_level(class="form-select form-control-lg", id="jurisdictionLevelSelect") }}
+                                        {{ form.jurisdiction_level(class="form-select form-control-lg", id="jurisdictionSelect") }}
                                         {% if form.jurisdiction_level.errors %}
                                             <div class="invalid-feedback d-block">
                                                 {% for error in form.jurisdiction_level.errors %}
@@ -431,11 +431,11 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Dynamic location filtering based on jurisdiction level
-    const jurisdictionLevelSelect = document.getElementById('jurisdictionLevelSelect');
+    const jurisdictionSelect = document.getElementById('jurisdictionSelect');
     const locationSelect = document.getElementById('locationSelect');
     
-    if (jurisdictionLevelSelect && locationSelect) {
-        jurisdictionLevelSelect.addEventListener('change', function() {
+    if (jurisdictionSelect && locationSelect) {
+        jurisdictionSelect.addEventListener('change', function() {
             const jurisdictionLevel = this.value;
             
             // Clear current options
@@ -466,8 +466,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         // Initialize location options if jurisdiction level is already selected
-        if (jurisdictionLevelSelect.value) {
-            jurisdictionLevelSelect.dispatchEvent(new Event('change'));
+        if (jurisdictionSelect.value) {
+            jurisdictionSelect.dispatchEvent(new Event('change'));
         }
     }
 });

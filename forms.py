@@ -15,11 +15,11 @@ class RegulationForm(FlaskForm):
     """Enhanced form for creating/editing regulations with new template structure"""
     
     # Core Information
-    jurisdiction = StringField(
+    jurisdiction = SelectField(
         'Jurisdiction', 
-        validators=[DataRequired(), Length(min=2, max=100)],
-        render_kw={"placeholder": "e.g., National, Florida State, Tampa City"},
-        description="The governmental jurisdiction (e.g., National, State, Local authority)"
+        choices=[('National', 'National'), ('State', 'State'), ('Local', 'Local')],
+        validators=[DataRequired()],
+        description="The level of government jurisdiction"
     )
     
     jurisdiction_level = SelectField(
@@ -123,7 +123,13 @@ class RegulationForm(FlaskForm):
 class UpdateForm(FlaskForm):
     """Form for creating/editing updates"""
     title = StringField('Title', validators=[DataRequired(), Length(max=200)])
-    jurisdiction_affected = StringField('Jurisdiction Affected', validators=[DataRequired(), Length(max=100)])
+    jurisdiction = SelectField(
+        'Jurisdiction',
+        choices=[('National', 'National'), ('State', 'State'), ('Local', 'Local')],
+        validators=[DataRequired()],
+        description="Level of government jurisdiction"
+    )
+    jurisdiction_affected = StringField('Location', validators=[DataRequired(), Length(max=100)])
     jurisdiction_level = SelectField(
         'Jurisdiction Level',
         choices=[('National', 'National'), ('State', 'State'), ('Local', 'Local')],

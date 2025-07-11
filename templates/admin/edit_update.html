@@ -152,8 +152,25 @@
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="mb-4">
+                                        {{ form.jurisdiction.label(class="form-label required") }}
+                                        {{ form.jurisdiction(class="form-select", id="jurisdictionSelect") }}
+                                        {% if form.jurisdiction.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.jurisdiction.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-text">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            {{ form.jurisdiction.description }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-4">
                                         {{ form.jurisdiction_affected.label(class="form-label required") }}
-                                        {{ form.jurisdiction_affected(class="form-control", placeholder="e.g., Tampa, Florida, USA") }}
+                                        {{ form.jurisdiction_affected(class="form-select", id="locationSelect") }}
                                         {% if form.jurisdiction_affected.errors %}
                                             <div class="invalid-feedback d-block">
                                                 {% for error in form.jurisdiction_affected.errors %}
@@ -164,23 +181,6 @@
                                         <div class="form-text">
                                             <i class="fas fa-info-circle me-1"></i>
                                             Specify the geographic area where this update applies
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="mb-4">
-                                        {{ form.jurisdiction_level.label(class="form-label required") }}
-                                        {{ form.jurisdiction_level(class="form-select", id="jurisdictionLevelSelect") }}
-                                        {% if form.jurisdiction_level.errors %}
-                                            <div class="invalid-feedback d-block">
-                                                {% for error in form.jurisdiction_level.errors %}
-                                                    <div>{{ error }}</div>
-                                                {% endfor %}
-                                            </div>
-                                        {% endif %}
-                                        <div class="form-text">
-                                            <i class="fas fa-info-circle me-1"></i>
-                                            {{ form.jurisdiction_level.description }}
                                         </div>
                                     </div>
                                 </div>
@@ -1042,6 +1042,47 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+    
+    // Dynamic location filtering based on jurisdiction level
+    const jurisdictionSelect = document.getElementById('jurisdictionSelect');
+    const locationSelect = document.getElementById('locationSelect');
+    
+    if (jurisdictionSelect && locationSelect) {
+        jurisdictionSelect.addEventListener('change', function() {
+            const jurisdiction = this.value;
+            
+            // Clear current options
+            locationSelect.innerHTML = '<option value="">Loading...</option>';
+            
+            if (jurisdiction) {
+                // Fetch location options from API
+                fetch(`/api/locations/${jurisdiction}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        locationSelect.innerHTML = '<option value="">Select Location</option>';
+                        if (data.success && data.locations) {
+                            data.locations.forEach(location => {
+                                const option = document.createElement('option');
+                                option.value = location;
+                                option.textContent = location;
+                                locationSelect.appendChild(option);
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching locations:', error);
+                        locationSelect.innerHTML = '<option value="">Error loading locations</option>';
+                    });
+            } else {
+                locationSelect.innerHTML = '<option value="">Select Jurisdiction First</option>';
+            }
+        });
+        
+        // Initialize location options if jurisdiction is already selected
+        if (jurisdictionSelect.value) {
+            jurisdictionSelect.dispatchEvent(new Event('change'));
+        }
+    }
 });
 
 {% if update %}
