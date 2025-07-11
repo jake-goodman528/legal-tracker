@@ -43,12 +43,15 @@
                     </div>
                     <div class="col-lg-4">
                         <div class="d-flex gap-2">
-                            <button class="btn btn-outline-primary" onclick="toggleAdvancedFilters()">
+                            <button type="button" class="btn btn-outline-primary" onclick="toggleAdvancedFilters()">
                                 <i class="fas fa-sliders-h"></i> Filters
                             </button>
-                            <button class="btn btn-outline-secondary" id="clearFiltersBtn" onclick="clearAllFilters()">
+                            <button type="button" class="btn btn-outline-secondary" id="clearFiltersBtn">
                                 <i class="fas fa-times"></i> Clear
                             </button>
+                            <span id="filterStatus" class="badge bg-info ms-2" style="display: none;">
+                                <i class="fas fa-filter"></i> Filtered
+                            </span>
                             {% if session.admin_id %}
                             <a href="{{ url_for('admin.manage_regulations') }}" class="btn btn-outline-primary">
                                 <i class="fas fa-cog"></i> Manage
@@ -60,25 +63,34 @@
 
                 <!-- Enhanced Filter Row -->
                 <div class="row g-3 advanced-filters" id="advancedFilters" style="display: none;">
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label for="jurisdictionFilter" class="form-label small">Jurisdiction Level</label>
-                        <select class="form-select form-select-sm" id="jurisdictionFilter">
+                        <select class="form-select form-select-sm filter-select" id="jurisdictionFilter" name="jurisdiction_level">
                             <option value="">All Levels</option>
                             <option value="National">National</option>
                             <option value="State">State</option>
                             <option value="Local">Local</option>
                         </select>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
+                        <label for="jurisdictionSpecificFilter" class="form-label small">Jurisdiction</label>
+                        <select class="form-select form-select-sm filter-select" id="jurisdictionSpecificFilter" name="jurisdiction">
+                            <option value="">All Jurisdictions</option>
+                            {% for jurisdiction in all_jurisdictions %}
+                            <option value="{{ jurisdiction }}">{{ jurisdiction }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
                         <label for="locationFilter" class="form-label small">Location</label>
-                        <select class="form-select form-select-sm" id="locationFilter">
+                        <select class="form-select form-select-sm filter-select" id="locationFilter" name="location">
                             <option value="">All Locations</option>
                             {% for location in all_locations %}
                             <option value="{{ location }}">{{ location }}</option>
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label for="categoryFilter" class="form-label small">Category</label>
                         <select class="form-select form-select-sm" id="categoryFilter">
                             <option value="">All Categories</option>
@@ -91,7 +103,7 @@
                             <option value="General">General</option>
                         </select>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label for="priorityFilter" class="form-label small">Priority Level</label>
                         <select class="form-select form-select-sm" id="priorityFilter">
                             <option value="">All Priorities</option>
@@ -100,7 +112,7 @@
                             <option value="Low">Low Priority</option>
                         </select>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label for="statusFilter" class="form-label small">Status</label>
                         <select class="form-select form-select-sm" id="statusFilter">
                             <option value="">All Status</option>
@@ -145,20 +157,14 @@
             <span class="text-muted">regulation(s)</span>
             <span id="filterStatus" class="badge bg-primary ms-2" style="display: none;">Filtered</span>
         </div>
-        <div class="view-options">
-            <div class="btn-group btn-group-sm" role="group">
-                <button type="button" class="btn btn-outline-secondary" data-view="cards" id="cardsViewBtn">
-                    <i class="fas fa-th-large"></i> Cards
-                </button>
-                <button type="button" class="btn btn-outline-secondary active" data-view="table" id="tableViewBtn">
-                    <i class="fas fa-table"></i> Table
-                </button>
-            </div>
+        <div class="section-summary">
+            <span class="badge bg-success me-2">{{ regulations|length }} Current & Active</span>
+            <span class="badge bg-info">0 Upcoming Changes</span>
         </div>
     </div>
 
     <!-- Loading State -->
-    <div class="search-loading" id="searchLoading" style="display: none;">
+    <div class="search-loading" id="loadingSpinner" style="display: none;">
         <div class="text-center py-4">
             <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Searching...</span>
@@ -167,109 +173,45 @@
         </div>
     </div>
 
-    <!-- Enhanced Cards View -->
+    <!-- Enhanced Regulations Container -->
     <div class="regulations-container" id="regulationsContainer">
-        <div class="cards-view" id="cardsView" style="display: none;">
-            <div class="row" id="regulationsCards">
-                {% for regulation in regulations %}
-                <div class="col-lg-6 mb-4 regulation-card" data-regulation-id="{{ regulation.id }}">
-                    <div class="card h-100 regulation-card-enhanced shadow-sm">
-                        <div class="card-header d-flex justify-content-between align-items-center bg-light">
-                            <div class="header-badges">
-                                <span class="badge bg-{{ 'success' if regulation.jurisdiction == 'Local' else 'primary' if regulation.jurisdiction == 'State' else 'warning' }}">
-                                    {{ regulation.jurisdiction.upper() }}
-                                </span>
-                                <span class="badge bg-secondary ms-2">General</span>
-                            </div>
-                            <small class="text-muted">
-                                <i class="fas fa-map-marker-alt"></i> {{ regulation.location }}
-                            </small>
-                        </div>
-                        <div class="card-body">
-                            <h5 class="card-title">
-                                <a href="{{ url_for('main.regulation_detail', regulation_id=regulation.id) }}" 
-                                   class="text-decoration-none text-dark">
-                                    {{ regulation.title }}
-                                </a>
-                            </h5>
-                            <p class="card-text text-muted">
-                                {{ regulation.overview[:150] if regulation.overview else 'No overview available' }}{% if regulation.overview and regulation.overview|length > 150 %}...{% endif %}
-                            </p>
-                            
-                            <!-- Status Indicators Row -->
-                            <div class="row text-center mb-3 status-indicators">
-                                <div class="col-4">
-                                    <small class="text-muted d-block">Jurisdiction</small>
-                                    <span class="badge bg-primary">
-                                        {{ regulation.jurisdiction }}
-                                    </span>
-                                </div>
-                                <div class="col-4">
-                                    <small class="text-muted d-block">Location</small>
-                                    <span class="badge bg-secondary">
-                                        {{ regulation.location }}
-                                    </span>
-                                </div>
-                                <div class="col-4">
-                                    <small class="text-muted d-block">Status</small>
-                                    <span class="badge bg-success">
-                                        Active
-                                    </span>
-                                </div>
-                            </div>
-
-                            <!-- Additional Info -->
-                            <div class="mb-2">
-                                <small class="text-muted">
-                                    <i class="fas fa-calendar-alt"></i> 
-                                    Last Updated: {{ regulation.last_updated.strftime('%m/%d/%Y') if regulation.last_updated else 'N/A' }}
-                                </small>
-                            </div>
-                        </div>
-                        <div class="card-footer d-flex justify-content-between align-items-center bg-transparent">
-                            <small class="text-muted">
-                                <i class="fas fa-calendar-alt"></i>
-                                Updated: {{ regulation.last_updated.strftime('%m/%d/%Y') if regulation.last_updated else 'N/A' }}
-                            </small>
-                            <div class="card-actions">
-                                <a href="{{ url_for('main.regulation_detail', regulation_id=regulation.id) }}" 
-                                   class="btn btn-primary btn-sm">
-                                    <i class="fas fa-eye"></i> View Details
-                                </a>
-                                {% if session.admin_id %}
-                                <a href="{{ url_for('admin.edit_regulation', regulation_id=regulation.id) }}" 
-                                   class="btn btn-outline-secondary btn-sm ms-1">
-                                    <i class="fas fa-edit"></i> Edit
-                                </a>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
 
         <!-- Enhanced Table View -->
         <div class="table-view" id="tableView">
             <div class="table-responsive">
                 <table class="table table-hover regulations-table" id="regulationsTable">
-                    <thead>
+                    <thead class="table-light">
                         <tr>
-                            <th class="sortable" data-sort="jurisdiction">
-                                <i class="fas fa-university"></i> Jurisdiction
+                            <th class="sortable" data-sort="status">
+                                <i class="fas fa-clock"></i> Type
+                                <i class="fas fa-sort sort-icon"></i>
+                            </th>
+                            <th class="sortable" data-sort="jurisdiction_level">
+                                <i class="fas fa-layer-group"></i> Level
                                 <i class="fas fa-sort sort-icon"></i>
                             </th>
                             <th class="sortable" data-sort="location">
-                                <i class="fas fa-map-marker-alt"></i> Location
+                                <i class="fas fa-map-marker-alt"></i> Jurisdiction
                                 <i class="fas fa-sort sort-icon"></i>
                             </th>
                             <th class="sortable" data-sort="title">
-                                <i class="fas fa-file-text"></i> Title
+                                <i class="fas fa-gavel"></i> Regulation
+                                <i class="fas fa-sort sort-icon"></i>
+                            </th>
+                            <th class="sortable" data-sort="category">
+                                <i class="fas fa-tags"></i> Category
+                                <i class="fas fa-sort sort-icon"></i>
+                            </th>
+                            <th class="sortable" data-sort="impact">
+                                <i class="fas fa-exclamation-triangle"></i> Impact
+                                <i class="fas fa-sort sort-icon"></i>
+                            </th>
+                            <th class="sortable" data-sort="priority">
+                                <i class="fas fa-flag"></i> Priority
                                 <i class="fas fa-sort sort-icon"></i>
                             </th>
                             <th class="sortable" data-sort="last_updated">
-                                <i class="fas fa-calendar-alt"></i> Updated
+                                <i class="fas fa-calendar-alt"></i> Date
                                 <i class="fas fa-sort sort-icon"></i>
                             </th>
                             <th>Actions</th>
@@ -279,16 +221,36 @@
                         {% for regulation in regulations %}
                         <tr class="regulation-row" data-regulation-id="{{ regulation.id }}">
                             <td>
-                                <span class="badge bg-primary">
-                                    {{ regulation.jurisdiction }}
+                                <span class="badge bg-success">Current</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if regulation.jurisdiction_level == 'Local' else 'primary' if regulation.jurisdiction_level == 'State' else 'warning' }}">
+                                    {{ regulation.jurisdiction_level }}
                                 </span>
                             </td>
-                            <td class="location-cell">{{ regulation.location }}</td>
+                            <td class="jurisdiction-cell">
+                                {{ regulation.location }}
+                            </td>
                             <td class="title-cell">
                                 <a href="{{ url_for('main.regulation_detail', regulation_id=regulation.id) }}" 
                                    class="regulation-title-link text-decoration-none">
                                     {{ regulation.title }}
                                 </a>
+                            </td>
+                            <td>
+                                <span class="badge category-badge category-general">
+                                    General
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-warning">
+                                    Medium Impact
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-success">
+                                    Low Priority
+                                </span>
                             </td>
                             <td class="date-cell">
                                 {{ regulation.last_updated.strftime('%Y-%m-%d') if regulation.last_updated else 'N/A' }}
@@ -296,7 +258,7 @@
                             <td>
                                 <a href="{{ url_for('main.regulation_detail', regulation_id=regulation.id) }}" 
                                    class="btn btn-sm btn-outline-primary">
-                                    <i class="fas fa-eye"></i> View Details
+                                    <i class="fas fa-eye"></i> Details
                                 </a>
                             </td>
                         </tr>
@@ -384,36 +346,35 @@
 </div>
 
 <style>
-/* Enhanced Cards Styling */
-.regulation-card-enhanced {
-    transition: all 0.3s ease;
-    border: 1px solid #e0e0e0;
+/* Enhanced Regulations Styling */
+.regulations-title {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
 }
 
-.regulation-card-enhanced:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
-    border-color: #007bff;
+.regulations-subtitle {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
 }
 
-.header-badges .badge {
-    font-size: 0.75rem;
+.filter-card {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.status-indicators {
-    background: #f8f9fa;
+.regulations-search-input {
     border-radius: 6px;
-    padding: 0.75rem 0.5rem;
-    margin: 1rem -0.5rem;
+    border: 1px solid #ced4da;
+    padding: 0.75rem 1rem;
 }
 
-.status-indicators .badge {
-    font-size: 0.7rem;
-    min-width: 60px;
-}
-
-.card-actions .btn {
-    font-size: 0.8rem;
+.regulations-search-input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
 /* Enhanced Filter Styling */
@@ -441,19 +402,43 @@
     font-size: 0.75rem;
 }
 
+.regulations-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+}
+
+.regulations-table th.sortable:hover {
+    background: #e9ecef !important;
+}
+
+.sort-icon {
+    font-size: 0.8rem;
+    margin-left: 0.5rem;
+    opacity: 0.5;
+}
+
+.regulation-title-link {
+    color: #007bff;
+    font-weight: 500;
+}
+
+.regulation-title-link:hover {
+    color: #0056b3;
+    text-decoration: underline !important;
+}
+
+.category-badge {
+    font-size: 0.75rem;
+}
+
 /* Results and View Options */
 .results-count {
     font-size: 0.9rem;
 }
 
-.view-options .btn-group .btn {
-    border-color: #dee2e6;
-}
-
-.view-options .btn-group .btn.active {
-    background-color: #007bff;
-    border-color: #007bff;
-    color: white;
+.section-summary .badge {
+    font-size: 0.8rem;
+    padding: 0.5rem 0.75rem;
 }
 
 /* Category Badge Colors */
@@ -465,19 +450,29 @@
 .category-environmental { background-color: #20c997; }
 .category-general { background-color: #6c757d; }
 
-/* Responsive Improvements */
+/* Category-specific colors matching industry updates */
+.category-regulatory-changes { background-color: #007bff; color: white; }
+.category-general { background-color: #6c757d; color: white; }
+
+/* No Results State */
+.no-results {
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 2px dashed #dee2e6;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
-    .status-indicators {
-        margin: 0.5rem -0.25rem;
+    .filter-card {
+        padding: 1rem;
     }
     
-    .status-indicators .col-4 {
-        padding: 0.25rem;
+    .regulations-table {
+        font-size: 0.9rem;
     }
     
-    .card-actions .btn {
+    .regulations-table .badge {
         font-size: 0.7rem;
-        padding: 0.25rem 0.5rem;
     }
     
     .advanced-filters {
@@ -505,25 +500,10 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/advanced-search.js') }}"></script>
-<script src="{{ url_for('static', filename='js/search-enhancements.js') }}"></script>
+<script src="{{ url_for('static', filename='js/filter-manager.js') }}"></script>
+<script src="{{ url_for('static', filename='js/regulations-filter.js') }}"></script>
 <script>
-// Enhanced regulations data with new model structure
-window.originalRegulationsData = [
-    {% for regulation in regulations %}
-    {
-        id: "{{ regulation.id }}",
-        jurisdiction: "{{ regulation.jurisdiction }}",
-        jurisdiction_level: "{{ regulation.jurisdiction_level }}",
-        location: "{{ regulation.location }}",
-        title: "{{ regulation.title|e }}",
-        last_updated: "{{ regulation.last_updated.strftime('%Y-%m-%d') if regulation.last_updated else '' }}",
-        overview: "{{ regulation.overview|e if regulation.overview else '' }}"
-    }{% if not loop.last %},{% endif %}
-    {% endfor %}
-];
-
-// Enhanced filter functionality
+// Enhanced filter toggle function
 function toggleAdvancedFilters() {
     const advancedFilters = document.getElementById('advancedFilters');
     const additionalFilters = document.getElementById('additionalFilters');
@@ -536,177 +516,6 @@ function toggleAdvancedFilters() {
         additionalFilters.style.display = 'none';
     }
 }
-
-// Enhanced view switching
-function switchView(viewType) {
-    const cardsView = document.getElementById('cardsView');
-    const tableView = document.getElementById('tableView');
-    const cardsBtn = document.getElementById('cardsViewBtn');
-    const tableBtn = document.getElementById('tableViewBtn');
-    
-    if (viewType === 'cards') {
-        cardsView.style.display = 'block';
-        tableView.style.display = 'none';
-        cardsBtn.classList.add('active');
-        tableBtn.classList.remove('active');
-    } else {
-        cardsView.style.display = 'none';
-        tableView.style.display = 'block';
-        tableBtn.classList.add('active');
-        cardsBtn.classList.remove('active');
-    }
-    
-    // Save preference
-    localStorage.setItem('regulationsViewType', viewType);
-}
-
-// Enhanced filtering function
-function applyEnhancedFilters() {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    const jurisdictionFilter = document.getElementById('jurisdictionFilter').value;
-    const locationFilter = document.getElementById('locationFilter').value;
-    
-    let filteredCount = 0;
-    let hasActiveFilters = searchTerm || jurisdictionFilter || locationFilter;
-    
-    // Show/hide filter status
-    const filterStatus = document.getElementById('filterStatus');
-    if (hasActiveFilters) {
-        filterStatus.style.display = 'inline';
-    } else {
-        filterStatus.style.display = 'none';
-    }
-    
-    // Filter cards
-    const cards = document.querySelectorAll('.regulation-card');
-    cards.forEach(card => {
-        const data = window.originalRegulationsData.find(reg => reg.id === card.dataset.regulationId);
-        let show = true;
-        
-        if (searchTerm && !data.title.toLowerCase().includes(searchTerm) && 
-            !data.location.toLowerCase().includes(searchTerm) &&
-            !data.overview.toLowerCase().includes(searchTerm)) {
-            show = false;
-        }
-        
-        if (jurisdictionFilter && data.jurisdiction_level !== jurisdictionFilter) show = false;
-        if (locationFilter && data.location !== locationFilter) show = false;
-        
-        card.style.display = show ? 'block' : 'none';
-        if (show) filteredCount++;
-    });
-    
-    // Filter table rows
-    const rows = document.querySelectorAll('.regulation-row');
-    rows.forEach(row => {
-        const data = window.originalRegulationsData.find(reg => reg.id === row.dataset.regulationId);
-        let show = true;
-        
-        if (searchTerm && !data.title.toLowerCase().includes(searchTerm) && 
-            !data.location.toLowerCase().includes(searchTerm) &&
-            !data.overview.toLowerCase().includes(searchTerm)) {
-            show = false;
-        }
-        
-        if (jurisdictionFilter && data.jurisdiction_level !== jurisdictionFilter) show = false;
-        if (locationFilter && data.location !== locationFilter) show = false;
-        
-        row.style.display = show ? 'table-row' : 'none';
-    });
-    
-    // Update results count
-    document.getElementById('resultCount').textContent = filteredCount;
-    
-    // Show/hide no results message
-    const noResults = document.getElementById('noResults');
-    if (filteredCount === 0) {
-        noResults.style.display = 'block';
-        document.getElementById('regulationsContainer').style.display = 'none';
-    } else {
-        noResults.style.display = 'none';
-        document.getElementById('regulationsContainer').style.display = 'block';
-    }
-}
-
-// Clear all filters
-function clearAllFilters() {
-    document.getElementById('searchInput').value = '';
-    document.getElementById('jurisdictionFilter').value = '';
-    document.getElementById('locationFilter').value = '';
-    
-    applyEnhancedFilters();
-    
-    // Hide advanced filters
-    document.getElementById('advancedFilters').style.display = 'none';
-    document.getElementById('additionalFilters').style.display = 'none';
-}
-
-// Initialize page
-document.addEventListener('DOMContentLoaded', function() {
-    // Set up view switching
-    document.getElementById('cardsViewBtn').addEventListener('click', () => switchView('cards'));
-    document.getElementById('tableViewBtn').addEventListener('click', () => switchView('table'));
-    
-    // Load saved view preference
-    const savedView = localStorage.getItem('regulationsViewType') || 'table';
-    switchView(savedView);
-    
-    // Set up filter event listeners
-    const filterElements = ['searchInput', 'categoryFilter', 'priorityFilter', 
-                           'statusFilter', 'complianceFilter', 'propertyTypeFilter'];
-    
-    filterElements.forEach(id => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.addEventListener('input', applyEnhancedFilters);
-            element.addEventListener('change', applyEnhancedFilters);
-        }
-    });
-    
-    // Special handling for jurisdiction filter to update location options
-    document.getElementById('jurisdictionFilter').addEventListener('change', function() {
-        updateLocationOptions();
-        applyEnhancedFilters();
-    });
-    
-    // Location filter
-    document.getElementById('locationFilter').addEventListener('change', applyEnhancedFilters);
-    
-    // Dynamic location filtering based on jurisdiction level
-    function updateLocationOptions() {
-        const jurisdictionFilter = document.getElementById('jurisdictionFilter');
-        const locationFilter = document.getElementById('locationFilter');
-        const jurisdictionLevel = jurisdictionFilter.value;
-        
-        // Clear current options
-        locationFilter.innerHTML = '<option value="">All Locations</option>';
-        
-        if (jurisdictionLevel) {
-            // Fetch location options from API
-            fetch(`/api/locations/${jurisdictionLevel}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success && data.locations) {
-                        data.locations.forEach(location => {
-                            const option = document.createElement('option');
-                            option.value = location;
-                            option.textContent = location;
-                            locationFilter.appendChild(option);
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching locations:', error);
-                });
-        }
-    }
-    
-    // Set up clear filters button
-    document.getElementById('clearFiltersBtn').addEventListener('click', clearAllFilters);
-    
-    // Apply initial filters if any
-    applyEnhancedFilters();
-});
 </script>
 {% endblock %}
 
