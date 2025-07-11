@@ -70,6 +70,15 @@
                         </select>
                     </div>
                     <div class="col-md-3">
+                        <label for="locationFilter" class="form-label small">Location</label>
+                        <select class="form-select form-select-sm" id="locationFilter">
+                            <option value="">All Locations</option>
+                            {% for location in all_locations %}
+                            <option value="{{ location }}">{{ location }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
                         <label for="categoryFilter" class="form-label small">Category</label>
                         <select class="form-select form-select-sm" id="categoryFilter">
                             <option value="">All Categories</option>
@@ -113,15 +122,7 @@
                             <option value="Optional">Optional</option>
                         </select>
                     </div>
-                    <div class="col-md-4">
-                        <label for="locationFilter" class="form-label small">Location</label>
-                        <select class="form-select form-select-sm" id="locationFilter">
-                            <option value="">All Locations</option>
-                            {% for location in all_locations %}
-                            <option value="{{ location }}">{{ location }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
+
                     <div class="col-md-4">
                         <label for="propertyTypeFilter" class="form-label small">Property Types</label>
                         <select class="form-select form-select-sm" id="propertyTypeFilter">
@@ -513,6 +514,7 @@ window.originalRegulationsData = [
     {
         id: "{{ regulation.id }}",
         jurisdiction: "{{ regulation.jurisdiction }}",
+        jurisdiction_level: "{{ regulation.jurisdiction_level }}",
         location: "{{ regulation.location }}",
         title: "{{ regulation.title|e }}",
         last_updated: "{{ regulation.last_updated.strftime('%Y-%m-%d') if regulation.last_updated else '' }}",
@@ -587,7 +589,7 @@ function applyEnhancedFilters() {
             show = false;
         }
         
-        if (jurisdictionFilter && data.jurisdiction !== jurisdictionFilter) show = false;
+        if (jurisdictionFilter && data.jurisdiction_level !== jurisdictionFilter) show = false;
         if (locationFilter && data.location !== locationFilter) show = false;
         
         card.style.display = show ? 'block' : 'none';
@@ -606,7 +608,7 @@ function applyEnhancedFilters() {
             show = false;
         }
         
-        if (jurisdictionFilter && data.jurisdiction !== jurisdictionFilter) show = false;
+        if (jurisdictionFilter && data.jurisdiction_level !== jurisdictionFilter) show = false;
         if (locationFilter && data.location !== locationFilter) show = false;
         
         row.style.display = show ? 'table-row' : 'none';
@@ -650,8 +652,8 @@ document.addEventListener('DOMContentLoaded', function() {
     switchView(savedView);
     
     // Set up filter event listeners
-    const filterElements = ['searchInput', 'jurisdictionFilter', 'categoryFilter', 'priorityFilter', 
-                           'statusFilter', 'complianceFilter', 'locationFilter', 'propertyTypeFilter'];
+    const filterElements = ['searchInput', 'categoryFilter', 'priorityFilter', 
+                           'statusFilter', 'complianceFilter', 'propertyTypeFilter'];
     
     filterElements.forEach(id => {
         const element = document.getElementById(id);
@@ -660,6 +662,44 @@ document.addEventListener('DOMContentLoaded', function() {
             element.addEventListener('change', applyEnhancedFilters);
         }
     });
+    
+    // Special handling for jurisdiction filter to update location options
+    document.getElementById('jurisdictionFilter').addEventListener('change', function() {
+        updateLocationOptions();
+        applyEnhancedFilters();
+    });
+    
+    // Location filter
+    document.getElementById('locationFilter').addEventListener('change', applyEnhancedFilters);
+    
+    // Dynamic location filtering based on jurisdiction level
+    function updateLocationOptions() {
+        const jurisdictionFilter = document.getElementById('jurisdictionFilter');
+        const locationFilter = document.getElementById('locationFilter');
+        const jurisdictionLevel = jurisdictionFilter.value;
+        
+        // Clear current options
+        locationFilter.innerHTML = '<option value="">All Locations</option>';
+        
+        if (jurisdictionLevel) {
+            // Fetch location options from API
+            fetch(`/api/locations/${jurisdictionLevel}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.locations) {
+                        data.locations.forEach(location => {
+                            const option = document.createElement('option');
+                            option.value = location;
+                            option.textContent = location;
+                            locationFilter.appendChild(option);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching locations:', error);
+                });
+        }
+    }
     
     // Set up clear filters button
     document.getElementById('clearFiltersBtn').addEventListener('click', clearAllFilters);

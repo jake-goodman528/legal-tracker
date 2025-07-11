@@ -58,12 +58,15 @@ def regulations():
         regulations = Regulation.query.all()
         logger.info(f"DEBUG: Found {len(regulations)} regulations in database")
         
-        # Hardcode everything to eliminate variables
+        # Get distinct jurisdiction levels and locations from database
+        from app.services.regulation_service import RegulationService
+        filter_options = RegulationService.get_filter_options()
+        
         return render_template('regulations.html',
                              regulations=regulations,
-                             all_jurisdictions=['State', 'Local'],
-                             all_locations=['California', 'San Francisco'], 
-                             all_categories=[],
+                             all_jurisdictions=filter_options.get('jurisdiction_levels', ['National', 'State', 'Local']),
+                             all_locations=filter_options.get('locations', []), 
+                             all_categories=filter_options.get('categories', []),
                              current_jurisdiction='',
                              current_location='',
                              current_category='',
@@ -75,7 +78,7 @@ def regulations():
         flash('Error loading regulations. Please try again later.', 'error')
         return render_template('regulations.html',
                              regulations=[],
-                             all_jurisdictions=[],
+                             all_jurisdictions=['National', 'State', 'Local'],
                              all_locations=[], 
                              all_categories=[],
                              current_jurisdiction='',

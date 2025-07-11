@@ -22,10 +22,17 @@ class RegulationForm(FlaskForm):
         description="The governmental jurisdiction (e.g., National, State, Local authority)"
     )
     
-    location = StringField(
+    jurisdiction_level = SelectField(
+        'Jurisdiction Level',
+        choices=[('National', 'National'), ('State', 'State'), ('Local', 'Local')],
+        validators=[DataRequired()],
+        description="Level of government jurisdiction"
+    )
+    
+    location = SelectField(
         'Location', 
-        validators=[DataRequired(), Length(min=2, max=100)],
-        render_kw={"placeholder": "e.g., USA, Florida, Tampa"},
+        choices=[],  # Will be populated dynamically based on jurisdiction_level
+        validators=[DataRequired()],
         description="Geographic area where this regulation applies"
     )
     
@@ -117,6 +124,12 @@ class UpdateForm(FlaskForm):
     """Form for creating/editing updates"""
     title = StringField('Title', validators=[DataRequired(), Length(max=200)])
     jurisdiction_affected = StringField('Jurisdiction Affected', validators=[DataRequired(), Length(max=100)])
+    jurisdiction_level = SelectField(
+        'Jurisdiction Level',
+        choices=[('National', 'National'), ('State', 'State'), ('Local', 'Local')],
+        validators=[DataRequired()],
+        description="Level of government jurisdiction"
+    )
     update_date = DateField('Update Date', validators=[DataRequired()])
     status = SelectField('Status',
                         choices=[('Recent', 'Recent'),

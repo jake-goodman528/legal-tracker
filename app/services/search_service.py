@@ -105,7 +105,7 @@ class SearchService:
                 ]
                 query = query.filter(or_(*location_conditions))
             
-            # Jurisdiction filtering
+            # Jurisdiction level filtering
             if search_params.get('jurisdictions'):
                 query = query.filter(Regulation.jurisdiction_level.in_(search_params['jurisdictions']))
             

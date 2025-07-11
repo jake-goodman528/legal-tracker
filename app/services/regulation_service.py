@@ -9,7 +9,7 @@ Handles all regulation-related business logic:
 """
 
 from typing import Dict, List, Optional, Tuple, Any, Union
-from models import db, Regulation, SavedSearch
+from models import db, Regulation, SavedSearch, get_location_options_by_jurisdiction
 import logging
 
 
@@ -52,6 +52,9 @@ class RegulationService:
             if filters.get('jurisdiction'):
                 query = query.filter(Regulation.jurisdiction.ilike(f'%{filters["jurisdiction"]}%'))
             
+            if filters.get('jurisdiction_level'):
+                query = query.filter(Regulation.jurisdiction_level == filters['jurisdiction_level'])
+            
             if filters.get('location'):
                 query = query.filter(Regulation.location.ilike(f'%{filters["location"]}%'))
             
@@ -64,7 +67,7 @@ class RegulationService:
                     )
                 )
             
-            return query.order_by(Regulation.jurisdiction, Regulation.location).all()
+            return query.order_by(Regulation.jurisdiction_level, Regulation.jurisdiction, Regulation.location).all()
             
         except Exception as e:
             logging.error(f"Error filtering regulations: {str(e)}")
@@ -91,10 +94,12 @@ class RegulationService:
         try:
             logging.info("DEBUG: get_filter_options called")
             jurisdictions = db.session.query(Regulation.jurisdiction).distinct().all()
+            jurisdiction_levels = db.session.query(Regulation.jurisdiction_level).distinct().all()
             locations = db.session.query(Regulation.location).distinct().all()
             
             result = {
                 'jurisdictions': [j[0] for j in jurisdictions if j[0]],
+                'jurisdiction_levels': [jl[0] for jl in jurisdiction_levels if jl[0]],
                 'locations': [l[0] for l in locations if l[0]],
                 'categories': []  # Empty for now since Regulation model doesn't have category field
             }
@@ -103,9 +108,22 @@ class RegulationService:
             
         except Exception as e:
             logging.error(f"Error getting filter options: {str(e)}")
-            result = {'jurisdictions': [], 'locations': [], 'categories': []}
+            result = {'jurisdictions': [], 'jurisdiction_levels': [], 'locations': [], 'categories': []}
             logging.info(f"DEBUG: get_filter_options error fallback returning: {result}")
             return result
+    
+    @staticmethod
+    def get_location_options_by_jurisdiction_level(jurisdiction_level: str) -> List[str]:
+        """
+        Get location options based on jurisdiction level.
+        
+        Args:
+            jurisdiction_level: 'National', 'State', or 'Local'
+            
+        Returns:
+            List of location options appropriate for the jurisdiction level
+        """
+        return get_location_options_by_jurisdiction(jurisdiction_level)
     
     @staticmethod
     def get_regulation_by_id(regulation_id: int) -> Optional[Regulation]:
@@ -277,6 +295,7 @@ class RegulationService:
             regulation = Regulation(
                 # Core Information
                 jurisdiction=regulation_data.get('jurisdiction'),
+                jurisdiction_level=regulation_data.get('jurisdiction_level', 'Local'),
                 location=regulation_data.get('location'),
                 title=regulation_data.get('title'),
                 last_updated=regulation_data.get('last_updated', datetime.utcnow()),

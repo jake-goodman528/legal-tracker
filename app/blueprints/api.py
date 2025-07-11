@@ -102,6 +102,7 @@ def advanced_search():
         'property_types': request.args.getlist('property_types[]'),
         'locations': request.args.getlist('locations[]'),
         'jurisdictions': request.args.getlist('jurisdictions[]'),
+        'jurisdiction_levels': request.args.getlist('jurisdiction_levels[]'),
         'date_from': request.args.get('date_from'),
         'date_to': request.args.get('date_to'),
         'date_range_days': request.args.get('date_range_days')
@@ -123,6 +124,29 @@ def advanced_search():
         'count': len(regulations_data),
         'search_criteria': search_params
     })
+
+
+@api_bp.route('/locations/<jurisdiction_level>')
+@log_api_call('get_locations_by_jurisdiction')
+def get_locations_by_jurisdiction(jurisdiction_level):
+    """Get location options based on jurisdiction level"""
+    try:
+        from app.services.regulation_service import RegulationService
+        
+        locations = RegulationService.get_location_options_by_jurisdiction_level(jurisdiction_level)
+        
+        return jsonify({
+            'success': True,
+            'jurisdiction_level': jurisdiction_level,
+            'locations': locations
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting locations for jurisdiction {jurisdiction_level}: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 
 @api_bp.route('/search/suggestions')

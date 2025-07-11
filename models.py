@@ -30,6 +30,7 @@ class Regulation(db.Model):
     
     # Core Information - Required fields
     jurisdiction = db.Column(db.String(100), nullable=False)  # Jurisdiction (combines level and location)
+    jurisdiction_level = db.Column(db.String(20), nullable=False, default='Local')  # National, State, Local
     location = db.Column(db.String(100), nullable=False)  # Location
     title = db.Column(db.String(200), nullable=False)  # Title
     last_updated = db.Column(db.DateTime, default=datetime.utcnow)  # Last Updated
@@ -59,6 +60,7 @@ class Regulation(db.Model):
         return {
             'id': self.id,
             'jurisdiction': self.jurisdiction,
+            'jurisdiction_level': self.jurisdiction_level,
             'location': self.location,
             'title': self.title,
             'last_updated': self.last_updated.isoformat() if self.last_updated else None,
@@ -77,6 +79,7 @@ class Update(db.Model):
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text, nullable=False)
     jurisdiction_affected = db.Column(db.String(100), nullable=False)
+    jurisdiction_level = db.Column(db.String(20), nullable=False, default='Local')  # National, State, Local
     update_date = db.Column(db.Date, nullable=False)
     status = db.Column(db.String(20), nullable=False)  # Recent, Upcoming, Proposed
     
@@ -122,6 +125,7 @@ class Update(db.Model):
             'title': self.title,
             'description': self.description,
             'jurisdiction_affected': self.jurisdiction_affected,
+            'jurisdiction_level': self.jurisdiction_level,
             'update_date': self.update_date.isoformat() if self.update_date else None,
             'status': self.status,
             'category': self.category,
@@ -265,3 +269,84 @@ class SearchSuggestion(db.Model):
 
     def __repr__(self):
         return f'<SearchSuggestion {self.suggestion_text}>'
+
+def get_location_options_by_jurisdiction(jurisdiction_level):
+    """
+    Get location options based on jurisdiction level.
+    
+    Args:
+        jurisdiction_level (str): 'National', 'State', or 'Local'
+        
+    Returns:
+        list: List of location options appropriate for the jurisdiction level
+    """
+    if jurisdiction_level == 'National':
+        return [
+            'USA',
+            'Canada',
+            'Mexico',
+            'United Kingdom',
+            'Australia',
+            'European Union'
+        ]
+    elif jurisdiction_level == 'State':
+        return [
+            'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado',
+            'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho',
+            'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana',
+            'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota',
+            'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada',
+            'New Hampshire', 'New Jersey', 'New Mexico', 'New York',
+            'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon',
+            'Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota',
+            'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington',
+            'West Virginia', 'Wisconsin', 'Wyoming'
+        ]
+    elif jurisdiction_level == 'Local':
+        return [
+            'Tampa', 'St. Petersburg', 'Clearwater', 'Sarasota', 'Orlando',
+            'Miami', 'Fort Lauderdale', 'Jacksonville', 'Tallahassee',
+            'Gainesville', 'Naples', 'Key West', 'Pensacola', 'Daytona Beach',
+            'New York City', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix',
+            'Philadelphia', 'San Antonio', 'San Diego', 'Dallas', 'San Jose',
+            'Austin', 'Fort Worth', 'Columbus', 'Charlotte', 'San Francisco',
+            'Indianapolis', 'Seattle', 'Denver', 'Washington DC', 'Boston',
+            'Nashville', 'Baltimore', 'Louisville', 'Portland', 'Oklahoma City',
+            'Milwaukee', 'Las Vegas', 'Albuquerque', 'Tucson', 'Fresno',
+            'Sacramento', 'Kansas City', 'Mesa', 'Virginia Beach', 'Atlanta',
+            'Colorado Springs', 'Raleigh', 'Omaha', 'Miami Beach', 'Long Beach',
+            'Minneapolis', 'Tulsa', 'Cleveland', 'Wichita', 'Arlington'
+        ]
+    else:
+        return []
+
+def get_jurisdiction_level_from_location(location):
+    """
+    Determine jurisdiction level based on location name.
+    
+    Args:
+        location (str): The location name
+        
+    Returns:
+        str: 'National', 'State', or 'Local'
+    """
+    national_locations = ['USA', 'Canada', 'Mexico', 'United Kingdom', 'Australia', 'European Union']
+    state_locations = [
+        'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado',
+        'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho',
+        'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana',
+        'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota',
+        'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada',
+        'New Hampshire', 'New Jersey', 'New Mexico', 'New York',
+        'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon',
+        'Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota',
+        'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington',
+        'West Virginia', 'Wisconsin', 'Wyoming'
+    ]
+    
+    if location in national_locations:
+        return 'National'
+    elif location in state_locations:
+        return 'State'
+    else:
+        return 'Local'

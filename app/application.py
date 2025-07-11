@@ -255,6 +255,7 @@ def create_app():
                 sample_regulations = [
                     Regulation(
                         jurisdiction='National',
+                        jurisdiction_level='National',
                         location='USA',
                         title='Fair Housing Act Compliance',
                         last_updated=date(2024, 1, 15),
@@ -267,6 +268,7 @@ def create_app():
                     ),
                     Regulation(
                         jurisdiction='National',
+                        jurisdiction_level='National',
                         location='USA',
                         title='ADA Accessibility Requirements',
                         last_updated=date(2024, 2, 1),
@@ -279,6 +281,7 @@ def create_app():
                     ),
                     Regulation(
                         jurisdiction='Florida State',
+                        jurisdiction_level='State',
                         location='Florida',
                         title='State Licensing Requirements',
                         last_updated=date(2024, 3, 10),
@@ -291,6 +294,7 @@ def create_app():
                     ),
                     Regulation(
                         jurisdiction='Tampa City',
+                        jurisdiction_level='Local',
                         location='Tampa',
                         title='Registration and Safety Requirements',
                         last_updated=date(2024, 4, 15),
@@ -303,6 +307,7 @@ def create_app():
                     ),
                     Regulation(
                         jurisdiction='St. Petersburg City',
+                        jurisdiction_level='Local',
                         location='St. Petersburg',
                         title='Registration Requirements',
                         last_updated=date(2024, 5, 10),
@@ -315,6 +320,7 @@ def create_app():
                     ),
                     Regulation(
                         jurisdiction='Clearwater City',
+                        jurisdiction_level='Local',
                         location='Clearwater',
                         title='31-Day Minimum in Residential Areas',
                         last_updated=date(2024, 6, 1),
@@ -327,6 +333,7 @@ def create_app():
                     ),
                     Regulation(
                         jurisdiction='Sarasota City',
+                        jurisdiction_level='Local',
                         location='Sarasota',
                         title='Minimum 7-Day Stay and Registration',
                         last_updated=date(2024, 6, 15),
@@ -351,6 +358,7 @@ def create_app():
                         title='Tampa Zoning Ordinance Amendment',
                         description='City Council approved amendments to zoning ordinances affecting short-term rentals in downtown districts. New regulations will require additional permits for properties in historic zones.',
                         jurisdiction_affected='Tampa',
+                        jurisdiction_level='Local',
                         update_date=date(2024, 7, 1),
                         status='Recent'
                     ),
@@ -358,6 +366,7 @@ def create_app():
                         title='Florida State Tax Collection Changes',
                         description='New legislation proposed to modify tourist development tax rates and collection procedures. Would affect all short-term rental operators statewide.',
                         jurisdiction_affected='Florida',
+                        jurisdiction_level='State',
                         update_date=date(2024, 8, 15),
                         status='Upcoming'
                     ),
@@ -365,6 +374,7 @@ def create_app():
                         title='Federal Fair Housing Enforcement Guidelines',
                         description='Department of Housing and Urban Development released updated enforcement guidelines for short-term rental platforms and operators regarding fair housing compliance.',
                         jurisdiction_affected='USA',
+                        jurisdiction_level='National',
                         update_date=date(2024, 6, 20),
                         status='Recent'
                     ),
@@ -372,6 +382,7 @@ def create_app():
                         title='St. Petersburg Registration Fee Increase',
                         description='Proposed increase in annual registration fees for short-term rental properties from $150 to $300. Public hearing scheduled for next month.',
                         jurisdiction_affected='St. Petersburg',
+                        jurisdiction_level='Local',
                         update_date=date(2024, 9, 1),
                         status='Proposed'
                     ),
@@ -379,6 +390,7 @@ def create_app():
                         title='Sarasota Noise Ordinance Review',
                         description='City commission considering stricter noise regulations for short-term rentals following increased complaints from residents.',
                         jurisdiction_affected='Sarasota',
+                        jurisdiction_level='Local',
                         update_date=date(2024, 8, 30),
                         status='Proposed'
                     )

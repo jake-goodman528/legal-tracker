@@ -150,7 +150,7 @@
                             </div>
                             
                             <div class="row">
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <div class="mb-4">
                                         {{ form.jurisdiction_affected.label(class="form-label required") }}
                                         {{ form.jurisdiction_affected(class="form-control", placeholder="e.g., Tampa, Florida, USA") }}
@@ -167,7 +167,24 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-4">
+                                    <div class="mb-4">
+                                        {{ form.jurisdiction_level.label(class="form-label required") }}
+                                        {{ form.jurisdiction_level(class="form-select", id="jurisdictionLevelSelect") }}
+                                        {% if form.jurisdiction_level.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.jurisdiction_level.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-text">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            {{ form.jurisdiction_level.description }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
                                     <div class="mb-4">
                                         {{ form.property_types.label(class="form-label required") }}
                                         {{ form.property_types(class="form-select") }}

@@ -157,6 +157,12 @@ class NotificationService:
                         if not any(loc in update.jurisdiction_affected.lower() for loc in user_locations):
                             should_notify = False
                     
+                    # Filter by user's jurisdiction level preferences if available
+                    if hasattr(prefs, 'jurisdiction_levels') and prefs.jurisdiction_levels:
+                        user_jurisdiction_levels = [jl.strip() for jl in prefs.jurisdiction_levels.split(',')]
+                        if update.jurisdiction_level not in user_jurisdiction_levels:
+                            should_notify = False
+                    
                     # Filter by user's category preferences  
                     if prefs.categories and should_notify:
                         user_categories = [cat.strip() for cat in prefs.categories.split(',')]
@@ -202,6 +208,12 @@ class NotificationService:
                     if prefs.locations:
                         user_locations = [loc.strip().lower() for loc in prefs.locations.split(',')]
                         if not any(loc in update.jurisdiction_affected.lower() for loc in user_locations):
+                            should_notify = False
+                    
+                    # Filter by user's jurisdiction level preferences if available
+                    if hasattr(prefs, 'jurisdiction_levels') and prefs.jurisdiction_levels:
+                        user_jurisdiction_levels = [jl.strip() for jl in prefs.jurisdiction_levels.split(',')]
+                        if update.jurisdiction_level not in user_jurisdiction_levels:
                             should_notify = False
                     
                     if prefs.categories and should_notify:

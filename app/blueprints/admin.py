@@ -246,7 +246,7 @@ def manage_regulations():
         if load_time > 1.0:
             performance_logger.warning(f"Slow regulation loading - Duration: {load_time:.3f}s | Count: {len(regulations)}")
         
-        return render_template('admin/manage_regulations_temp.html', regulations=regulations)
+        return render_template('admin/manage_regulations.html', regulations=regulations)
         
     except Exception as e:
         logger.error(f"Error in manage_regulations: {str(e)}", exc_info=True)
@@ -267,6 +267,7 @@ def new_regulation():
             regulation_data = {
                 # Core Information
                 'jurisdiction': form.jurisdiction.data,
+                'jurisdiction_level': form.jurisdiction_level.data,
                 'location': form.location.data,
                 'title': form.title.data,
                 'last_updated': form.last_updated.data,
@@ -315,6 +316,7 @@ def edit_regulation(regulation_id):
             update_data = {
                 # Core Information
                 'jurisdiction': form.jurisdiction.data,
+                'jurisdiction_level': form.jurisdiction_level.data,
                 'location': form.location.data,
                 'title': form.title.data,
                 'last_updated': form.last_updated.data,
@@ -414,6 +416,7 @@ def new_update():
                 'title': form.title.data,
                 'description': form.description.data,
                 'jurisdiction_affected': form.jurisdiction_affected.data,
+                'jurisdiction_level': form.jurisdiction_level.data,
                 'update_date': form.update_date.data,
                 'status': form.status.data,
                 'category': form.category.data,
@@ -487,6 +490,7 @@ def edit_update(update_id):
                 'title': form.title.data,
                 'description': form.description.data,
                 'jurisdiction_affected': form.jurisdiction_affected.data,
+                'jurisdiction_level': form.jurisdiction_level.data,
                 'update_date': form.update_date.data,
                 'status': form.status.data,
                 'category': form.category.data,

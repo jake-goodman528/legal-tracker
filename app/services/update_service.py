@@ -41,6 +41,9 @@ class UpdateService:
             if filters.get('jurisdiction'):
                 query = query.filter(Update.jurisdiction_affected.ilike(f'%{filters["jurisdiction"]}%'))
             
+            if filters.get('jurisdiction_level'):
+                query = query.filter(Update.jurisdiction_level == filters['jurisdiction_level'])
+            
             if filters.get('category'):
                 query = query.filter(Update.category == filters['category'])
             
@@ -150,6 +153,9 @@ class UpdateService:
             if search_params.get('jurisdiction'):
                 query = query.filter(Update.jurisdiction_affected.ilike(f'%{search_params["jurisdiction"]}%'))
             
+            if search_params.get('jurisdiction_level'):
+                query = query.filter(Update.jurisdiction_level == search_params['jurisdiction_level'])
+            
             has_deadline = search_params.get('has_deadline')
             if has_deadline == 'true':
                 query = query.filter(Update.deadline_date.isnot(None))
@@ -201,6 +207,7 @@ class UpdateService:
                 title=update_data.get('title'),
                 description=update_data.get('description'),
                 jurisdiction_affected=update_data.get('jurisdiction_affected'),
+                jurisdiction_level=update_data.get('jurisdiction_level', 'Local'),
                 update_date=update_data.get('update_date'),
                 status=update_data.get('status'),
                 category=update_data.get('category'),
@@ -445,6 +452,9 @@ class UpdateService:
         """
         if filters.get('jurisdiction'):
             query = query.filter(Update.jurisdiction_affected.ilike(f'%{filters["jurisdiction"]}%'))
+        
+        if filters.get('jurisdiction_level'):
+            query = query.filter(Update.jurisdiction_level == filters['jurisdiction_level'])
         
         if filters.get('category'):
             query = query.filter(Update.category == filters['category'])

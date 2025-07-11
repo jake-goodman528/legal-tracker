@@ -72,16 +72,16 @@ python3 -m pytest tests/test_api_endpoints.py
 python3 -m pytest tests/test_search_service.py::TestSearchService::test_advanced_search_text_query -v
 ```
 
-### Using the Test Runner Script
+### Using pytest with Markers
 ```bash
 # Run all tests with coverage
-python3 run_tests.py --coverage --verbose
+python3 -m pytest --cov=app --cov=models --cov-report=html --cov-report=term
 
 # Run only unit tests
-python3 run_tests.py --type unit
+python3 -m pytest -m unit
 
 # Run API tests only
-python3 run_tests.py --type api
+python3 -m pytest -m api
 ```
 
 ## 🏗 Test Architecture

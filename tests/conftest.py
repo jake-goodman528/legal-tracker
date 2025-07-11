@@ -58,6 +58,7 @@ def sample_regulation(app):
     with app.app_context():
         regulation = Regulation(
             jurisdiction='California State',
+            jurisdiction_level='State',
             location='California',
             title='Test STR Licensing Requirements',
             last_updated=date(2024, 1, 15),
@@ -81,6 +82,7 @@ def sample_update(app):
             title='New Tax Requirements for STR',
             description='Updated tax collection requirements for short-term rentals.',
             jurisdiction_affected='San Francisco, CA',
+            jurisdiction_level='Local',
             update_date=date(2024, 1, 10),
             status='Recent',
             category='Tax Updates',
@@ -166,6 +168,7 @@ def multiple_regulations(app):
         regulations = [
             Regulation(
                 jurisdiction='National',
+                jurisdiction_level='National',
                 location='United States',
                 title='Federal STR Tax Reporting',
                 last_updated=date(2024, 1, 1),
@@ -178,6 +181,7 @@ def multiple_regulations(app):
             ),
             Regulation(
                 jurisdiction='Texas State',
+                jurisdiction_level='State',
                 location='Texas',
                 title='Texas STR Registration',
                 last_updated=date(2024, 1, 5),
@@ -190,6 +194,7 @@ def multiple_regulations(app):
             ),
             Regulation(
                 jurisdiction='Austin City',
+                jurisdiction_level='Local',
                 location='Austin, TX',
                 title='Austin STR Zoning Requirements',
                 last_updated=date(2024, 1, 10),
@@ -217,6 +222,7 @@ def multiple_updates(app):
                 title='California Tourism Tax Changes',
                 description='New tourism tax rates effective next quarter',
                 jurisdiction_affected='California',
+                jurisdiction_level='State',
                 update_date=date(2024, 1, 15),
                 status='Recent',
                 category='Tax Updates',
@@ -229,6 +235,7 @@ def multiple_updates(app):
                 title='New York Licensing Updates',
                 description='Updated licensing requirements for NYC',
                 jurisdiction_affected='New York',
+                jurisdiction_level='State',
                 update_date=date(2024, 1, 12),
                 status='Recent',
                 category='Licensing Changes',
@@ -240,6 +247,7 @@ def multiple_updates(app):
                 title='Federal Court Decision on STR',
                 description='Supreme Court ruling affects all jurisdictions',
                 jurisdiction_affected='United States',
+                jurisdiction_level='National',
                 update_date=date(2024, 1, 8),
                 status='Recent',
                 category='Court Decisions',
