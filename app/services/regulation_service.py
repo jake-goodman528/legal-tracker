@@ -29,20 +29,19 @@ class RegulationService:
         """
         Retrieve regulations filtered by multiple criteria.
         
-        Applies filtering logic across jurisdiction, location, category, and text search.
+        Applies filtering logic across jurisdiction, location, and text search.
         Supports partial matching for location and full-text search across titles
-        and key requirements.
+        and overview content.
         
         Args:
             filters: Dictionary containing filter criteria:
-                - jurisdiction (str, optional): Exact jurisdiction level match
+                - jurisdiction (str, optional): Partial jurisdiction match
                 - location (str, optional): Partial location name match
-                - category (str, optional): Exact category match
-                - search (str, optional): Text search across title and requirements
+                - search (str, optional): Text search across title and overview
         
         Returns:
             List of Regulation objects matching all specified criteria,
-            ordered by jurisdiction level and location.
+            ordered by jurisdiction and location.
             
         Note:
             Returns empty list if database query fails. Logs errors automatically.
@@ -51,24 +50,21 @@ class RegulationService:
             query = Regulation.query
             
             if filters.get('jurisdiction'):
-                query = query.filter(Regulation.jurisdiction_level == filters['jurisdiction'])
+                query = query.filter(Regulation.jurisdiction.ilike(f'%{filters["jurisdiction"]}%'))
             
             if filters.get('location'):
                 query = query.filter(Regulation.location.ilike(f'%{filters["location"]}%'))
-            
-            if filters.get('category'):
-                query = query.filter(Regulation.category == filters['category'])
             
             if filters.get('search'):
                 search_term = f'%{filters["search"]}%'
                 query = query.filter(
                     db.or_(
                         Regulation.title.ilike(search_term),
-                        Regulation.key_requirements.ilike(search_term)
+                        Regulation.overview.ilike(search_term)
                     )
                 )
             
-            return query.order_by(Regulation.jurisdiction_level, Regulation.location).all()
+            return query.order_by(Regulation.jurisdiction, Regulation.location).all()
             
         except Exception as e:
             logging.error(f"Error filtering regulations: {str(e)}")
@@ -84,28 +80,32 @@ class RegulationService:
         
         Returns:
             Dictionary containing lists of available filter values:
-                - jurisdictions (List[str]): All unique jurisdiction levels
+                - jurisdictions (List[str]): All unique jurisdictions
                 - locations (List[str]): All unique location names
-                - categories (List[str]): All unique regulation categories
+                - categories (List[str]): All unique categories (empty for now)
                 
         Note:
             Filters out null/empty values automatically. Returns empty lists
             for each category if database query fails.
         """
         try:
-            jurisdictions = db.session.query(Regulation.jurisdiction_level).distinct().all()
+            logging.info("DEBUG: get_filter_options called")
+            jurisdictions = db.session.query(Regulation.jurisdiction).distinct().all()
             locations = db.session.query(Regulation.location).distinct().all()
-            categories = db.session.query(Regulation.category).distinct().all()
             
-            return {
+            result = {
                 'jurisdictions': [j[0] for j in jurisdictions if j[0]],
                 'locations': [l[0] for l in locations if l[0]],
-                'categories': [c[0] for c in categories if c[0]]
+                'categories': []  # Empty for now since Regulation model doesn't have category field
             }
+            logging.info(f"DEBUG: get_filter_options returning: {result}")
+            return result
             
         except Exception as e:
             logging.error(f"Error getting filter options: {str(e)}")
-            return {'jurisdictions': [], 'locations': [], 'categories': []}
+            result = {'jurisdictions': [], 'locations': [], 'categories': []}
+            logging.info(f"DEBUG: get_filter_options error fallback returning: {result}")
+            return result
     
     @staticmethod
     def get_regulation_by_id(regulation_id: int) -> Optional[Regulation]:
@@ -130,32 +130,31 @@ class RegulationService:
     @staticmethod
     def get_related_regulations(regulation: Regulation) -> List[Regulation]:
         """
-        Discover regulations related to the given regulation.
+        Find regulations related to the given regulation.
         
-        Finds related regulations based on location and category similarity.
-        Useful for providing contextual recommendations and related content discovery.
+        Finds related regulations based on jurisdiction and location matching.
         
         Args:
-            regulation: The regulation object to find related items for.
+            regulation: The regulation to find related items for.
             
         Returns:
-            List of up to 5 related Regulation objects, excluding the input regulation.
+            List of related Regulation objects (excluding the input regulation).
+            Limited to 5 results for display optimization.
             
         Note:
-            Matches regulations with same location OR same category.
-            Returns empty list if database query fails.
+            Returns empty list if no related regulations found or on error.
         """
         try:
             return Regulation.query.filter(
+                Regulation.id != regulation.id,
                 db.or_(
-                    Regulation.location == regulation.location,
-                    Regulation.category == regulation.category
-                ),
-                Regulation.id != regulation.id
+                    Regulation.jurisdiction.ilike(f'%{regulation.jurisdiction}%'),
+                    Regulation.location.ilike(f'%{regulation.location}%')
+                )
             ).limit(5).all()
             
         except Exception as e:
-            logging.error(f"Error getting related regulations: {str(e)}")
+            logging.error(f"Error finding related regulations: {str(e)}")
             return []
     
     @staticmethod
@@ -164,8 +163,8 @@ class RegulationService:
         Generate structured content sections for regulation detail display.
         
         Transforms regulation data into formatted HTML sections suitable for
-        web display. Creates organized sections for requirements, compliance
-        info, metadata, contact info, dates, and keywords with appropriate styling classes.
+        web display. Creates organized sections for overview, requirements, compliance
+        steps, forms, penalties, and recent changes with appropriate styling classes.
         
         Args:
             regulation: The regulation object to format for display.
@@ -178,123 +177,57 @@ class RegulationService:
                 
         Note:
             Generates responsive HTML with Bootstrap classes.
-            Handles both new comprehensive fields and legacy fields.
             Returns empty list if content generation fails.
         """
         try:
             content_sections = []
             
-            # Key Requirements section
-            content_sections.append({
-                'title': 'Key Requirements',
-                'content': regulation.key_requirements,
-                'type': 'requirements'
-            })
-            
-            # Compliance Information (Enhanced)
-            property_display = regulation.property_types or regulation.property_type or 'Not specified'
-            if regulation.property_types and ',' in regulation.property_types:
-                property_badges = [f"<span class='badge property-badge me-1'>{pt.strip()}</span>" 
-                                 for pt in regulation.property_types.split(',')]
-                property_display = ''.join(property_badges)
-            else:
-                property_display = f"<span class='badge property-badge'>{property_display}</span>"
-            
-            status_badge_class = {
-                'Current & Active': 'bg-success',
-                'Upcoming': 'bg-warning text-dark',
-                'Expired': 'bg-secondary'
-            }.get(regulation.status, 'bg-info')
-            
-            priority_badge_class = {
-                'High': 'bg-danger',
-                'Medium': 'bg-warning text-dark',
-                'Low': 'bg-info'
-            }.get(regulation.priority, 'bg-secondary')
-            
-            compliance_info = f"""
-            <div class="compliance-summary">
-                <div class="row">
-                    <div class="col-md-3">
-                        <strong>Compliance Level:</strong><br>
-                        <span class="badge compliance-badge bg-primary">{regulation.compliance_level}</span>
-                    </div>
-                    <div class="col-md-3">
-                        <strong>Property Types:</strong><br>
-                        {property_display}
-                    </div>
-                    <div class="col-md-3">
-                        <strong>Status:</strong><br>
-                        <span class="badge {status_badge_class}">{regulation.status}</span>
-                    </div>
-                    <div class="col-md-3">
-                        <strong>Priority:</strong><br>
-                        <span class="badge {priority_badge_class}">{regulation.priority}</span>
-                    </div>
-                </div>
-                <div class="row mt-3">
-                    <div class="col-md-6">
-                        <strong>Category:</strong><br>
-                        <span class="badge category-badge bg-info">{regulation.category}</span>
-                    </div>
-                    <div class="col-md-6">
-                        <strong>Last Updated:</strong><br>
-                        {regulation.last_updated.strftime('%B %d, %Y') if regulation.last_updated else 'Not specified'}
-                    </div>
-                </div>
-            </div>
-            """
-            
-            content_sections.append({
-                'title': 'Compliance Information',
-                'content': compliance_info,
-                'type': 'compliance'
-            })
-            
-            # Compliance Checklist (New Field)
-            if regulation.compliance_checklist:
+            # Overview section
+            if regulation.overview:
                 content_sections.append({
-                    'title': 'Compliance Checklist',
-                    'content': f"<div class='checklist-content'>{regulation.compliance_checklist}</div>",
-                    'type': 'checklist'
+                    'title': 'Overview',
+                    'content': regulation.overview,
+                    'type': 'overview'
                 })
             
-            # Contact Information (New Field)
-            if regulation.local_authority_contact:
+            # Detailed Requirements section
+            if regulation.detailed_requirements:
                 content_sections.append({
-                    'title': 'Local Authority Contact',
-                    'content': f"<div class='contact-info'>{regulation.local_authority_contact.replace(chr(10), '<br>')}</div>",
-                    'type': 'contact'
+                    'title': 'Detailed Requirements',
+                    'content': regulation.detailed_requirements,
+                    'type': 'detailed_requirements'
                 })
             
-            # Effective Dates section
-            if regulation.effective_date or regulation.expiry_date:
-                dates_info = "<div class='dates-info'>"
-                if regulation.effective_date:
-                    dates_info += f"<p><strong>Effective Date:</strong> {regulation.effective_date.strftime('%B %d, %Y')}</p>"
-                if regulation.expiry_date:
-                    dates_info += f"<p><strong>Expiry Date:</strong> {regulation.expiry_date.strftime('%B %d, %Y')}</p>"
-                dates_info += "</div>"
-                
+            # Compliance Steps section
+            if regulation.compliance_steps:
                 content_sections.append({
-                    'title': 'Important Dates',
-                    'content': dates_info,
-                    'type': 'dates'
+                    'title': 'Compliance Steps',
+                    'content': regulation.compliance_steps,
+                    'type': 'compliance_steps'
                 })
             
-            # Keywords section (Handle both new and legacy fields)
-            keywords_source = regulation.related_keywords or regulation.keywords
-            if keywords_source:
-                keywords_html = "<div class='keywords-section'>"
-                keywords = [k.strip() for k in keywords_source.split(',') if k.strip()]
-                for keyword in keywords:
-                    keywords_html += f"<span class='badge keyword-badge bg-light text-dark me-1'>{keyword}</span> "
-                keywords_html += "</div>"
-                
+            # Required Forms section
+            if regulation.required_forms:
                 content_sections.append({
-                    'title': 'Related Keywords',
-                    'content': keywords_html,
-                    'type': 'keywords'
+                    'title': 'Required Forms',
+                    'content': regulation.required_forms,
+                    'type': 'required_forms'
+                })
+            
+            # Penalties for Non Compliance section
+            if regulation.penalties_non_compliance:
+                content_sections.append({
+                    'title': 'Penalties for Non Compliance',
+                    'content': regulation.penalties_non_compliance,
+                    'type': 'penalties_non_compliance'
+                })
+            
+            # Recent Changes section
+            if regulation.recent_changes:
+                content_sections.append({
+                    'title': 'Recent Changes',
+                    'content': regulation.recent_changes,
+                    'type': 'recent_changes'
                 })
             
             return content_sections
@@ -343,35 +276,22 @@ class RegulationService:
             
             regulation = Regulation(
                 # Core Information
-                jurisdiction_level=regulation_data.get('jurisdiction_level'),
+                jurisdiction=regulation_data.get('jurisdiction'),
                 location=regulation_data.get('location'),
                 title=regulation_data.get('title'),
-                key_requirements=regulation_data.get('key_requirements'),
+                last_updated=regulation_data.get('last_updated', datetime.utcnow()),
                 
-                # Compliance Details
-                compliance_level=regulation_data.get('compliance_level', 'Mandatory'),
-                property_types=regulation_data.get('property_types'),
-                status=regulation_data.get('status', 'Current & Active'),
-                
-                # Metadata
-                category=regulation_data.get('category', 'General'),
-                priority=regulation_data.get('priority', 'Medium'),
-                related_keywords=regulation_data.get('related_keywords'),
-                compliance_checklist=regulation_data.get('compliance_checklist'),
-                
-                # Contact Information
-                local_authority_contact=regulation_data.get('local_authority_contact'),
+                # Rich Text Content Fields
+                overview=regulation_data.get('overview'),
+                detailed_requirements=regulation_data.get('detailed_requirements'),
+                compliance_steps=regulation_data.get('compliance_steps'),
+                required_forms=regulation_data.get('required_forms'),
+                penalties_non_compliance=regulation_data.get('penalties_non_compliance'),
+                recent_changes=regulation_data.get('recent_changes'),
                 
                 # Timestamps
-                last_updated=regulation_data.get('last_updated', datetime.utcnow()),
                 created_at=datetime.utcnow(),
-                updated_at=datetime.utcnow(),
-                
-                # Legacy fields for backward compatibility
-                property_type=regulation_data.get('property_type'),
-                effective_date=regulation_data.get('effective_date'),
-                expiry_date=regulation_data.get('expiry_date'),
-                keywords=regulation_data.get('keywords')
+                updated_at=datetime.utcnow()
             )
             
             db.session.add(regulation)
@@ -491,16 +411,14 @@ class RegulationService:
         Get comprehensive statistics for admin dashboard.
         
         Returns various metrics and counts for regulation management,
-        including totals, recent activity, and breakdowns by category.
+        including totals, recent activity, and breakdowns by jurisdiction and location.
         
         Returns:
             Dictionary containing:
                 - total: Total number of regulations
                 - recent: Recently updated regulations count
-                - by_category: Count by category
-                - by_jurisdiction: Count by jurisdiction level
+                - by_jurisdiction: Count by jurisdiction
                 - by_location: Count by location
-                - by_compliance_level: Count by compliance level
                 
         Note:
             Returns safe defaults if database query fails.
@@ -519,21 +437,13 @@ class RegulationService:
                 Regulation.last_updated >= thirty_days_ago
             ).count()
             
-            # Category breakdown
-            category_stats = db.session.query(
-                Regulation.category,
-                func.count(Regulation.id).label('count')
-            ).group_by(Regulation.category).all()
-            
-            by_category = {stat.category or 'Unspecified': stat.count for stat in category_stats}
-            
-            # Jurisdiction level breakdown
+            # Jurisdiction breakdown
             jurisdiction_stats = db.session.query(
-                Regulation.jurisdiction_level,
+                Regulation.jurisdiction,
                 func.count(Regulation.id).label('count')
-            ).group_by(Regulation.jurisdiction_level).all()
+            ).group_by(Regulation.jurisdiction).all()
             
-            by_jurisdiction = {stat.jurisdiction_level or 'Unspecified': stat.count for stat in jurisdiction_stats}
+            by_jurisdiction = {stat.jurisdiction or 'Unspecified': stat.count for stat in jurisdiction_stats}
             
             # Location breakdown (top 10)
             location_stats = db.session.query(
@@ -543,21 +453,11 @@ class RegulationService:
             
             by_location = {stat.location or 'Unspecified': stat.count for stat in location_stats}
             
-            # Compliance level breakdown
-            compliance_stats = db.session.query(
-                Regulation.compliance_level,
-                func.count(Regulation.id).label('count')
-            ).group_by(Regulation.compliance_level).all()
-            
-            by_compliance_level = {stat.compliance_level or 'Unspecified': stat.count for stat in compliance_stats}
-            
             return {
                 'total': total_regulations,
                 'recent': recent_count,
-                'by_category': by_category,
                 'by_jurisdiction': by_jurisdiction,
                 'by_location': by_location,
-                'by_compliance_level': by_compliance_level,
                 'last_updated': datetime.now().isoformat()
             }
             
@@ -566,9 +466,7 @@ class RegulationService:
             return {
                 'total': 0,
                 'recent': 0,
-                'by_category': {},
                 'by_jurisdiction': {},
                 'by_location': {},
-                'by_compliance_level': {},
                 'last_updated': datetime.now().isoformat()
             } 

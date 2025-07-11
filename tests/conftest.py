@@ -57,16 +57,16 @@ def sample_regulation(app):
     """Create a sample regulation for testing."""
     with app.app_context():
         regulation = Regulation(
-            jurisdiction_level='State',
+            jurisdiction='California State',
             location='California',
             title='Test STR Licensing Requirements',
-            key_requirements='All STR properties must obtain a license from the state.',
             last_updated=date(2024, 1, 15),
-            category='Licensing',
-            compliance_level='Mandatory',
-            property_type='Both',
-            effective_date=date(2024, 3, 1),
-            keywords='licensing, permit, registration'
+            overview='<p>California requires all short-term rental properties to obtain appropriate licenses from the state.</p>',
+            detailed_requirements='<p><strong>All STR properties must:</strong></p><ul><li>Obtain a license from the state</li><li>Register with local authorities</li><li>Comply with safety standards</li></ul>',
+            compliance_steps='<p><strong>Follow these steps:</strong></p><ol><li>Apply for state license</li><li>Complete safety inspection</li><li>Register with local jurisdiction</li></ol>',
+            required_forms='<p><strong>Required forms:</strong></p><ul><li>State License Application</li><li>Safety Inspection Report</li><li>Local Registration Form</li></ul>',
+            penalties_non_compliance='<p><strong>Penalties:</strong></p><ul><li>Fines up to $1,000</li><li>License suspension</li><li>Legal action</li></ul>',
+            recent_changes='<p>New licensing requirements effective January 2024.</p>'
         )
         db.session.add(regulation)
         db.session.commit()
@@ -165,37 +165,40 @@ def multiple_regulations(app):
     with app.app_context():
         regulations = [
             Regulation(
-                jurisdiction_level='National',
+                jurisdiction='National',
                 location='United States',
                 title='Federal STR Tax Reporting',
-                key_requirements='Report STR income to IRS',
                 last_updated=date(2024, 1, 1),
-                category='Taxes',
-                compliance_level='Mandatory',
-                property_type='Both',
-                keywords='tax, federal, reporting'
+                overview='<p>Federal requirements for reporting STR income to the IRS.</p>',
+                detailed_requirements='<p><strong>All STR operators must:</strong></p><ul><li>Report STR income to IRS</li><li>Maintain detailed records</li><li>File appropriate tax forms</li></ul>',
+                compliance_steps='<p><strong>Steps:</strong></p><ol><li>Track all rental income</li><li>Maintain expense records</li><li>File Schedule E</li></ol>',
+                required_forms='<p><strong>Forms:</strong></p><ul><li>Schedule E</li><li>Form 1040</li><li>Income documentation</li></ul>',
+                penalties_non_compliance='<p><strong>Penalties:</strong></p><ul><li>Tax penalties</li><li>Interest charges</li><li>Criminal prosecution for evasion</li></ul>',
+                recent_changes='<p>No recent changes to federal tax reporting requirements.</p>'
             ),
             Regulation(
-                jurisdiction_level='State',
+                jurisdiction='Texas State',
                 location='Texas',
                 title='Texas STR Registration',
-                key_requirements='Register with state tourism board',
                 last_updated=date(2024, 1, 5),
-                category='Registration',
-                compliance_level='Mandatory',
-                property_type='Residential',
-                keywords='registration, tourism, permit'
+                overview='<p>Texas requires STR operators to register with the state tourism board.</p>',
+                detailed_requirements='<p><strong>Texas requirements:</strong></p><ul><li>Register with state tourism board</li><li>Obtain business permit</li><li>Collect state taxes</li></ul>',
+                compliance_steps='<p><strong>Steps:</strong></p><ol><li>Submit registration form</li><li>Pay registration fees</li><li>Obtain permit certificate</li></ol>',
+                required_forms='<p><strong>Forms:</strong></p><ul><li>Tourism Board Registration</li><li>Business Permit Application</li><li>Tax Registration</li></ul>',
+                penalties_non_compliance='<p><strong>Penalties:</strong></p><ul><li>Registration violations: $500</li><li>Tax violations: Interest and penalties</li><li>Permit revocation</li></ul>',
+                recent_changes='<p>New online registration system launched January 2024.</p>'
             ),
             Regulation(
-                jurisdiction_level='Local',
+                jurisdiction='Austin City',
                 location='Austin, TX',
                 title='Austin STR Zoning Requirements',
-                key_requirements='Comply with local zoning restrictions',
                 last_updated=date(2024, 1, 10),
-                category='Zoning',
-                compliance_level='Mandatory',
-                property_type='Both',
-                keywords='zoning, local, restrictions'
+                overview='<p>Austin has specific zoning restrictions for short-term rental operations.</p>',
+                detailed_requirements='<p><strong>Austin zoning rules:</strong></p><ul><li>Comply with local zoning restrictions</li><li>Obtain special use permits where required</li><li>Meet parking requirements</li></ul>',
+                compliance_steps='<p><strong>Steps:</strong></p><ol><li>Check zoning designation</li><li>Apply for permits if needed</li><li>Ensure parking compliance</li></ol>',
+                required_forms='<p><strong>Forms:</strong></p><ul><li>Zoning Compliance Application</li><li>Special Use Permit</li><li>Parking Plan</li></ul>',
+                penalties_non_compliance='<p><strong>Penalties:</strong></p><ul><li>Zoning violations: $1,000 per day</li><li>Cease and desist orders</li><li>Legal action</li></ul>',
+                recent_changes='<p>Updated zoning restrictions effective January 2024.</p>'
             )
         ]
         

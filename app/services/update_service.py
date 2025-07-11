@@ -220,7 +220,15 @@ class UpdateService:
                 decision_status=update_data.get('decision_status'),
                 change_type=update_data.get('change_type'),
                 compliance_deadline=update_data.get('compliance_deadline'),
-                affected_operators=update_data.get('affected_operators')
+                affected_operators=update_data.get('affected_operators'),
+                # New template fields
+                summary=update_data.get('summary'),
+                full_text=update_data.get('full_text'),
+                compliance_requirements=update_data.get('compliance_requirements'),
+                implementation_timeline=update_data.get('implementation_timeline'),
+                official_sources=update_data.get('official_sources'),
+                expert_analysis=update_data.get('expert_analysis'),
+                kaystreet_commitment=update_data.get('kaystreet_commitment')
             )
             
             db.session.add(update)
@@ -312,8 +320,13 @@ class UpdateService:
                 Update.effective_date > datetime.now()
             ).count()
             
-            # Proposed updates
-            proposed_updates = Update.query.filter(Update.status == 'Proposed').count()
+            # Proposed updates (check both status and change_type for consistency)
+            proposed_updates = Update.query.filter(
+                db.or_(
+                    Update.status == 'Proposed',
+                    Update.change_type == 'Proposed'
+                )
+            ).count()
             
             return {
                 'total': total_updates,
@@ -366,7 +379,13 @@ class UpdateService:
             list: List of filtered Update objects with status 'Recent' or 'Upcoming'
         """
         try:
-            query = Update.query.filter(Update.change_type.in_(['Recent', 'Upcoming']))
+            # Filter by both change_type and status fields for backward compatibility
+            query = Update.query.filter(
+                db.or_(
+                    Update.change_type.in_(['Recent', 'Upcoming']),
+                    Update.status.in_(['Recent', 'Upcoming'])
+                )
+            )
             
             # Apply filters
             query = UpdateService._apply_filters(query, filters)
@@ -390,7 +409,13 @@ class UpdateService:
             list: List of filtered Update objects with status 'Proposed'
         """
         try:
-            query = Update.query.filter(Update.change_type == 'Proposed')
+            # Filter by both change_type and status fields for backward compatibility
+            query = Update.query.filter(
+                db.or_(
+                    Update.change_type == 'Proposed',
+                    Update.status == 'Proposed'
+                )
+            )
             
             # Apply filters
             query = UpdateService._apply_filters(query, filters)

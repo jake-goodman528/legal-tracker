@@ -34,25 +34,25 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-4">
-                                        {{ form.jurisdiction_level.label(class="form-label required") }}
-                                        {{ form.jurisdiction_level(class="form-select form-select-lg") }}
-                                        {% if form.jurisdiction_level.errors %}
+                                        {{ form.jurisdiction.label(class="form-label required") }}
+                                        {{ form.jurisdiction(class="form-control form-control-lg") }}
+                                        {% if form.jurisdiction.errors %}
                                             <div class="invalid-feedback d-block">
-                                                {% for error in form.jurisdiction_level.errors %}
+                                                {% for error in form.jurisdiction.errors %}
                                                     <div>{{ error }}</div>
                                                 {% endfor %}
                                             </div>
                                         {% endif %}
                                         <div class="form-text">
                                             <i class="fas fa-info-circle me-1"></i>
-                                            Select the governmental level for this regulation
+                                            {{ form.jurisdiction.description }}
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-4">
                                         {{ form.location.label(class="form-label required") }}
-                                        {{ form.location(class="form-control form-control-lg", placeholder="e.g., USA, Florida, Tampa") }}
+                                        {{ form.location(class="form-control form-control-lg") }}
                                         {% if form.location.errors %}
                                             <div class="invalid-feedback d-block">
                                                 {% for error in form.location.errors %}
@@ -62,7 +62,7 @@
                                         {% endif %}
                                         <div class="form-text">
                                             <i class="fas fa-info-circle me-1"></i>
-                                            Geographic area where this regulation applies
+                                            {{ form.location.description }}
                                         </div>
                                     </div>
                                 </div>
@@ -70,7 +70,7 @@
                             
                             <div class="mb-4">
                                 {{ form.title.label(class="form-label required") }}
-                                {{ form.title(class="form-control form-control-lg", placeholder="Enter a descriptive regulation title") }}
+                                {{ form.title(class="form-control form-control-lg") }}
                                 {% if form.title.errors %}
                                     <div class="invalid-feedback d-block">
                                         {% for error in form.title.errors %}
@@ -80,362 +80,146 @@
                                 {% endif %}
                                 <div class="form-text">
                                     <i class="fas fa-info-circle me-1"></i>
-                                    Clear, concise title describing the regulation
+                                    {{ form.title.description }}
                                 </div>
                             </div>
                             
                             <div class="mb-4">
-                                {{ form.key_requirements.label(class="form-label required") }}
-                                {{ form.key_requirements(class="form-control", rows="5", placeholder="Describe the key requirements and compliance obligations in detail...") }}
-                                {% if form.key_requirements.errors %}
+                                {{ form.last_updated.label(class="form-label") }}
+                                {{ form.last_updated(class="form-control", type="date") }}
+                                {% if form.last_updated.errors %}
                                     <div class="invalid-feedback d-block">
-                                        {% for error in form.key_requirements.errors %}
+                                        {% for error in form.last_updated.errors %}
                                             <div>{{ error }}</div>
                                         {% endfor %}
                                     </div>
                                 {% endif %}
                                 <div class="form-text">
                                     <i class="fas fa-info-circle me-1"></i>
-                                    Detailed description of what property owners must do to comply
+                                    {{ form.last_updated.description }}
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Section 2: Compliance Details -->
+                    <!-- Section 2: Rich Text Content -->
                     <div class="form-section">
                         <div class="section-header">
                             <h3 class="section-title">
-                                <i class="fas fa-shield-alt me-2"></i>
-                                Compliance Details
+                                <i class="fas fa-file-text me-2"></i>
+                                Regulation Content
                             </h3>
-                            <p class="section-description">Compliance requirements, property applicability, and enforcement status</p>
+                            <p class="section-description">Detailed content sections with rich text formatting support</p>
                         </div>
                         
                         <div class="section-content">
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="mb-4">
-                                        {{ form.compliance_level.label(class="form-label required") }}
-                                        {{ form.compliance_level(class="form-select") }}
-                                        {% if form.compliance_level.errors %}
-                                            <div class="invalid-feedback d-block">
-                                                {% for error in form.compliance_level.errors %}
-                                                    <div>{{ error }}</div>
-                                                {% endfor %}
-                                            </div>
-                                        {% endif %}
-                                        <div class="form-text">
-                                            <i class="fas fa-info-circle me-1"></i>
-                                            Level of compliance required
-                                        </div>
+                            <div class="mb-4">
+                                {{ form.overview.label(class="form-label") }}
+                                {{ form.overview(class="form-control rich-text-editor") }}
+                                {% if form.overview.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.overview.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
                                     </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="mb-4">
-                                        {{ form.status.label(class="form-label required") }}
-                                        {{ form.status(class="form-select") }}
-                                        {% if form.status.errors %}
-                                            <div class="invalid-feedback d-block">
-                                                {% for error in form.status.errors %}
-                                                    <div>{{ error }}</div>
-                                                {% endfor %}
-                                            </div>
-                                        {% endif %}
-                                        <div class="form-text">
-                                            <i class="fas fa-info-circle me-1"></i>
-                                            Current status of this regulation
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="mb-4">
-                                        {{ form.last_updated.label(class="form-label") }}
-                                        {{ form.last_updated(class="form-control", type="date") }}
-                                        {% if form.last_updated.errors %}
-                                            <div class="invalid-feedback d-block">
-                                                {% for error in form.last_updated.errors %}
-                                                    <div>{{ error }}</div>
-                                                {% endfor %}
-                                            </div>
-                                        {% endif %}
-                                        <div class="form-text">
-                                            <i class="fas fa-info-circle me-1"></i>
-                                            Date when this regulation was last updated
-                                        </div>
-                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    {{ form.overview.description }}
                                 </div>
                             </div>
                             
                             <div class="mb-4">
-                                {{ form.property_types.label(class="form-label") }}
-                                {{ form.property_types(class="form-control", placeholder="e.g., Single-family homes, Condos, Apartments") }}
-                                {% if form.property_types.errors %}
+                                {{ form.detailed_requirements.label(class="form-label") }}
+                                {{ form.detailed_requirements(class="form-control rich-text-editor") }}
+                                {% if form.detailed_requirements.errors %}
                                     <div class="invalid-feedback d-block">
-                                        {% for error in form.property_types.errors %}
+                                        {% for error in form.detailed_requirements.errors %}
                                             <div>{{ error }}</div>
                                         {% endfor %}
                                     </div>
                                 {% endif %}
                                 <div class="form-text">
                                     <i class="fas fa-info-circle me-1"></i>
-                                    Types of properties this regulation applies to
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Section 3: Classification & Metadata -->
-                    <div class="form-section">
-                        <div class="section-header">
-                            <h3 class="section-title">
-                                <i class="fas fa-tags me-2"></i>
-                                Classification & Metadata
-                            </h3>
-                            <p class="section-description">Category classification, priority level, and searchability keywords</p>
-                        </div>
-                        
-                        <div class="section-content">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-4">
-                                        {{ form.category.label(class="form-label required") }}
-                                        {{ form.category(class="form-select") }}
-                                        {% if form.category.errors %}
-                                            <div class="invalid-feedback d-block">
-                                                {% for error in form.category.errors %}
-                                                    <div>{{ error }}</div>
-                                                {% endfor %}
-                                            </div>
-                                        {% endif %}
-                                        <div class="form-text">
-                                            <i class="fas fa-info-circle me-1"></i>
-                                            Primary category for this regulation
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-4">
-                                        {{ form.priority.label(class="form-label required") }}
-                                        {{ form.priority(class="form-select") }}
-                                        {% if form.priority.errors %}
-                                            <div class="invalid-feedback d-block">
-                                                {% for error in form.priority.errors %}
-                                                    <div>{{ error }}</div>
-                                                {% endfor %}
-                                            </div>
-                                        {% endif %}
-                                        <div class="form-text">
-                                            <i class="fas fa-info-circle me-1"></i>
-                                            Priority level for compliance attention
-                                        </div>
-                                    </div>
+                                    {{ form.detailed_requirements.description }}
                                 </div>
                             </div>
                             
                             <div class="mb-4">
-                                {{ form.related_keywords.label(class="form-label") }}
-                                {{ form.related_keywords(class="form-control", placeholder="e.g., registration, licensing, permits, safety") }}
-                                {% if form.related_keywords.errors %}
+                                {{ form.compliance_steps.label(class="form-label") }}
+                                {{ form.compliance_steps(class="form-control rich-text-editor") }}
+                                {% if form.compliance_steps.errors %}
                                     <div class="invalid-feedback d-block">
-                                        {% for error in form.related_keywords.errors %}
+                                        {% for error in form.compliance_steps.errors %}
                                             <div>{{ error }}</div>
                                         {% endfor %}
                                     </div>
                                 {% endif %}
                                 <div class="form-text">
                                     <i class="fas fa-info-circle me-1"></i>
-                                    Keywords to help users find this regulation (comma-separated)
+                                    {{ form.compliance_steps.description }}
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Section 4: Compliance Checklist -->
-                    <div class="form-section">
-                        <div class="section-header">
-                            <h3 class="section-title">
-                                <i class="fas fa-clipboard-check me-2"></i>
-                                Compliance Checklist
-                            </h3>
-                            <p class="section-description">Specific actionable items and compliance requirements for property owners</p>
-                        </div>
-                        
-                        <div class="section-content">
+                            
                             <div class="mb-4">
-                                {{ form.compliance_checklist.label(class="form-label") }}
-                                {{ form.compliance_checklist(class="form-control", rows="6", placeholder="• Step 1: Register property with local authority\n• Step 2: Obtain required permits\n• Step 3: Install safety equipment\n• Step 4: Submit compliance documentation") }}
-                                {% if form.compliance_checklist.errors %}
+                                {{ form.required_forms.label(class="form-label") }}
+                                {{ form.required_forms(class="form-control rich-text-editor") }}
+                                {% if form.required_forms.errors %}
                                     <div class="invalid-feedback d-block">
-                                        {% for error in form.compliance_checklist.errors %}
+                                        {% for error in form.required_forms.errors %}
                                             <div>{{ error }}</div>
                                         {% endfor %}
                                     </div>
                                 {% endif %}
                                 <div class="form-text">
                                     <i class="fas fa-info-circle me-1"></i>
-                                    Use bullet points (•) or numbered lists for better readability
+                                    {{ form.required_forms.description }}
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Section 5: Contact Information -->
-                    <div class="form-section">
-                        <div class="section-header">
-                            <h3 class="section-title">
-                                <i class="fas fa-address-book me-2"></i>
-                                Contact Information
-                            </h3>
-                            <p class="section-description">Local authority contact details for compliance questions and applications</p>
-                        </div>
-                        
-                        <div class="section-content">
+                            
                             <div class="mb-4">
-                                {{ form.local_authority_contact.label(class="form-label") }}
-                                {{ form.local_authority_contact(class="form-control", rows="4", placeholder="Department of Planning and Zoning\nPhone: (555) 123-4567\nEmail: planning@city.gov\nAddress: 123 City Hall Way, City, State 12345") }}
-                                {% if form.local_authority_contact.errors %}
+                                {{ form.penalties_non_compliance.label(class="form-label") }}
+                                {{ form.penalties_non_compliance(class="form-control rich-text-editor") }}
+                                {% if form.penalties_non_compliance.errors %}
                                     <div class="invalid-feedback d-block">
-                                        {% for error in form.local_authority_contact.errors %}
+                                        {% for error in form.penalties_non_compliance.errors %}
                                             <div>{{ error }}</div>
                                         {% endfor %}
                                     </div>
                                 {% endif %}
                                 <div class="form-text">
                                     <i class="fas fa-info-circle me-1"></i>
-                                    Format: Department name, phone, email, address (one per line)
+                                    {{ form.penalties_non_compliance.description }}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                {{ form.recent_changes.label(class="form-label") }}
+                                {{ form.recent_changes(class="form-control rich-text-editor") }}
+                                {% if form.recent_changes.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.recent_changes.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    {{ form.recent_changes.description }}
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Section 6: Date Information -->
-                    <div class="form-section">
-                        <div class="section-header">
-                            <h3 class="section-title">
-                                <i class="fas fa-calendar-alt me-2"></i>
-                                Date Information
-                            </h3>
-                            <p class="section-description">Important dates for regulation effectiveness and expiration</p>
-                        </div>
-                        
-                        <div class="section-content">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-4">
-                                        {{ form.effective_date.label(class="form-label") }}
-                                        {{ form.effective_date(class="form-control", type="date") }}
-                                        {% if form.effective_date.errors %}
-                                            <div class="invalid-feedback d-block">
-                                                {% for error in form.effective_date.errors %}
-                                                    <div>{{ error }}</div>
-                                                {% endfor %}
-                                            </div>
-                                        {% endif %}
-                                        <div class="form-text">
-                                            <i class="fas fa-info-circle me-1"></i>
-                                            Date when this regulation becomes effective
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-4">
-                                        {{ form.expiry_date.label(class="form-label") }}
-                                        {{ form.expiry_date(class="form-control", type="date") }}
-                                        {% if form.expiry_date.errors %}
-                                            <div class="invalid-feedback d-block">
-                                                {% for error in form.expiry_date.errors %}
-                                                    <div>{{ error }}</div>
-                                                {% endfor %}
-                                            </div>
-                                        {% endif %}
-                                        <div class="form-text">
-                                            <i class="fas fa-info-circle me-1"></i>
-                                            Date when this regulation expires (if applicable)
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Section 7: Legacy Fields (Collapsible) -->
-                    <div class="form-section legacy-section">
-                        <div class="section-header">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h3 class="section-title">
-                                        <i class="fas fa-archive me-2"></i>
-                                        Legacy Fields
-                                    </h3>
-                                    <p class="section-description">Legacy fields maintained for backward compatibility</p>
-                                </div>
-                                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#legacyFields" aria-expanded="false" aria-controls="legacyFields">
-                                    <i class="fas fa-chevron-down me-1"></i> Show/Hide
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="collapse" id="legacyFields">
-                            <div class="section-content">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-4">
-                                            {{ form.property_type.label(class="form-label") }}
-                                            {{ form.property_type(class="form-control") }}
-                                            {% if form.property_type.errors %}
-                                                <div class="invalid-feedback d-block">
-                                                    {% for error in form.property_type.errors %}
-                                                        <div>{{ error }}</div>
-                                                    {% endfor %}
-                                                </div>
-                                            {% endif %}
-                                            <div class="form-text">
-                                                <i class="fas fa-info-circle me-1"></i>
-                                                Legacy property type field
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-4">
-                                            {{ form.keywords.label(class="form-label") }}
-                                            {{ form.keywords(class="form-control") }}
-                                            {% if form.keywords.errors %}
-                                                <div class="invalid-feedback d-block">
-                                                    {% for error in form.keywords.errors %}
-                                                        <div>{{ error }}</div>
-                                                    {% endfor %}
-                                                </div>
-                                            {% endif %}
-                                            <div class="form-text">
-                                                <i class="fas fa-info-circle me-1"></i>
-                                                Legacy keywords field
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Form Actions -->
+                    <!-- Action Buttons -->
                     <div class="form-actions">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div class="form-help-text">
-                                <small class="text-muted">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Fields marked with <span class="text-danger">*</span> are required
-                                </small>
-                            </div>
-                            <div class="action-buttons">
-                                <a href="{{ url_for('admin.manage_regulations') }}" class="btn btn-secondary me-2">
-                                    <i class="fas fa-times me-1"></i> Cancel
-                                </a>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save me-1"></i> 
-                                    {% if regulation %}Update{% else %}Create{% endif %} Regulation
-                                </button>
-                            </div>
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('admin.manage_regulations') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save me-2"></i>Save Regulation
+                            </button>
                         </div>
                     </div>
                 </form>
@@ -444,28 +228,65 @@
     </div>
 </div>
 
+<!-- Rich Text Editor Styles -->
 <style>
-/* Enhanced form styling to match update form */
+.rich-text-toolbar {
+    border: 1px solid #dee2e6;
+    border-bottom: none;
+    padding: 8px;
+    background-color: #f8f9fa;
+    border-radius: 0.375rem 0.375rem 0 0;
+}
+
+.rich-text-toolbar button {
+    border: none;
+    background: none;
+    padding: 4px 8px;
+    margin-right: 4px;
+    border-radius: 3px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.rich-text-toolbar button:hover {
+    background-color: #e9ecef;
+}
+
+.rich-text-editor[contenteditable="true"] {
+    border: 1px solid #dee2e6;
+    border-top: none;
+    padding: 12px;
+    min-height: 120px;
+    border-radius: 0 0 0.375rem 0.375rem;
+    background-color: white;
+}
+
+.rich-text-editor[contenteditable="true"]:focus {
+    outline: none;
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
 .admin-form-container {
-    background: #fff;
+    background: white;
     border-radius: 12px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
+    padding: 2rem;
 }
 
 .form-section {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
     border-bottom: 1px solid #e9ecef;
-    padding: 2rem;
 }
 
 .form-section:last-of-type {
     border-bottom: none;
+    margin-bottom: 0;
 }
 
 .section-header {
     margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 2px solid #f8f9fa;
 }
 
 .section-title {
@@ -473,134 +294,124 @@
     font-size: 1.25rem;
     font-weight: 600;
     margin-bottom: 0.5rem;
-    display: flex;
-    align-items: center;
-}
-
-.section-title i {
-    color: #3498db;
 }
 
 .section-description {
     color: #6c757d;
-    font-size: 0.9rem;
     margin-bottom: 0;
-    font-style: italic;
-}
-
-.form-label.required::after {
-    content: " *";
-    color: #dc3545;
-    font-weight: bold;
-}
-
-.form-text {
-    color: #6c757d;
-    font-size: 0.875rem;
-    margin-top: 0.25rem;
-}
-
-.form-text i {
-    color: #17a2b8;
-}
-
-.legacy-section {
-    background-color: #f8f9fa;
-    border-left: 4px solid #6c757d;
-}
-
-.legacy-section .section-title {
-    color: #6c757d;
-}
-
-.legacy-section .section-title i {
-    color: #6c757d;
+    font-size: 0.95rem;
 }
 
 .form-actions {
-    background: #f8f9fa;
-    padding: 1.5rem 2rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
     border-top: 1px solid #e9ecef;
 }
 
-.admin-form-title {
-    color: #2c3e50;
-    font-size: 2rem;
-    font-weight: 600;
-    margin-bottom: 0;
+.btn-loading {
+    position: relative;
 }
 
-.admin-form-title i {
-    color: #3498db;
+.btn-loading::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin-left: -8px;
+    margin-top: -8px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
 }
 
-.form-control-lg {
-    font-size: 1.1rem;
-    padding: 0.75rem 1rem;
-}
-
-.form-select-lg {
-    font-size: 1.1rem;
-    padding: 0.75rem 1rem;
-}
-
-.invalid-feedback {
-    display: block;
-    color: #dc3545;
-    font-size: 0.875rem;
-    margin-top: 0.25rem;
-}
-
-.btn-primary {
-    background-color: #3498db;
-    border-color: #3498db;
-    font-weight: 500;
-}
-
-.btn-primary:hover {
-    background-color: #2980b9;
-    border-color: #2980b9;
-}
-
-.btn-secondary {
-    background-color: #6c757d;
-    border-color: #6c757d;
-    font-weight: 500;
-}
-
-.btn-outline-secondary {
-    border-color: #6c757d;
-    color: #6c757d;
-    font-weight: 500;
-}
-
-.btn-outline-secondary:hover {
-    background-color: #6c757d;
-    border-color: #6c757d;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .form-section {
-        padding: 1.5rem;
-    }
-    
-    .form-actions {
-        padding: 1rem 1.5rem;
-    }
-    
-    .admin-form-title {
-        font-size: 1.5rem;
-    }
-    
-    .action-buttons {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    
-    .action-buttons .btn {
-        width: 100%;
-    }
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Convert textareas to rich text editors
+    const textareas = document.querySelectorAll('.rich-text-editor');
+    
+    textareas.forEach(function(textarea) {
+        // Create toolbar
+        const toolbar = document.createElement('div');
+        toolbar.className = 'rich-text-toolbar';
+        toolbar.innerHTML = `
+            <button type="button" onclick="formatText(this, 'bold')" title="Bold"><b>B</b></button>
+            <button type="button" onclick="formatText(this, 'italic')" title="Italic"><i>I</i></button>
+            <button type="button" onclick="formatText(this, 'underline')" title="Underline"><u>U</u></button>
+            <button type="button" onclick="formatText(this, 'insertUnorderedList')" title="Bullet List">• List</button>
+            <button type="button" onclick="formatText(this, 'insertOrderedList')" title="Numbered List">1. List</button>
+            <button type="button" onclick="formatText(this, 'indent')" title="Indent">→</button>
+            <button type="button" onclick="formatText(this, 'outdent')" title="Outdent">←</button>
+        `;
+        
+        // Create contenteditable div
+        const editor = document.createElement('div');
+        editor.className = 'rich-text-editor';
+        editor.contentEditable = true;
+        editor.innerHTML = textarea.value || '';
+        editor.setAttribute('data-textarea', textarea.id);
+        
+        // Insert toolbar and editor
+        textarea.parentNode.insertBefore(toolbar, textarea);
+        textarea.parentNode.insertBefore(editor, textarea);
+        textarea.style.display = 'none';
+        
+        // Update textarea when content changes
+        editor.addEventListener('input', function() {
+            textarea.value = editor.innerHTML;
+        });
+        
+        // Update on form submit
+        const form = textarea.closest('form');
+        if (form) {
+            form.addEventListener('submit', function() {
+                textarea.value = editor.innerHTML;
+            });
+        }
+    });
+    
+    // Global formatting function
+    window.formatText = function(button, command) {
+        const toolbar = button.parentNode;
+        const editor = toolbar.nextElementSibling;
+        editor.focus();
+        document.execCommand(command, false, null);
+        
+        // Update the corresponding textarea
+        const textareaId = editor.getAttribute('data-textarea');
+        const textarea = document.getElementById(textareaId);
+        if (textarea) {
+            textarea.value = editor.innerHTML;
+        }
+    }
+    
+    // Form validation and loading state
+    const form = document.getElementById('regulationForm');
+    const submitButton = form.querySelector('button[type="submit"]');
+    
+    form.addEventListener('submit', function(e) {
+        // Save all rich text content before form submission
+        const editors = document.querySelectorAll('.rich-text-editor[contenteditable="true"]');
+        editors.forEach(function(editor) {
+            const textareaId = editor.getAttribute('data-textarea');
+            const textarea = document.getElementById(textareaId);
+            if (textarea) {
+                textarea.value = editor.innerHTML;
+            }
+        });
+        
+        // Add loading state to submit button
+        submitButton.classList.add('btn-loading');
+        submitButton.disabled = true;
+    });
+});
+</script>
 {% endblock %}

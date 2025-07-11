@@ -2,6 +2,8 @@
 
 {% block title %}{{ title }} - Admin{% endblock %}
 
+
+
 {% block content %}
 <div class="container my-4">
     <div class="row">
@@ -48,22 +50,6 @@
                             </div>
                             
                             <div class="mb-4">
-                                {{ form.description.label(class="form-label required") }}
-                                {{ form.description(class="form-control", rows="5", placeholder="Provide detailed information about this update, including what changed, why it matters, and how it affects property operators...") }}
-                                {% if form.description.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {% for error in form.description.errors %}
-                                            <div>{{ error }}</div>
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                                <div class="form-text">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Include specific details about what changed, background context, and implications for operators
-                                </div>
-                            </div>
-                            
-                            <div class="mb-4">
                                 {{ form.category.label(class="form-label required") }}
                                 {{ form.category(class="form-select form-select-lg") }}
                                 {% if form.category.errors %}
@@ -93,7 +79,24 @@
                         
                         <div class="section-content">
                             <div class="row">
-                                <div class="col-md-4">
+                                <div class="col-md-3">
+                                    <div class="mb-4">
+                                        {{ form.status.label(class="form-label required") }}
+                                        {{ form.status(class="form-select") }}
+                                        {% if form.status.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.status.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-text">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Current status of this update
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
                                     <div class="mb-4">
                                         {{ form.change_type.label(class="form-label required") }}
                                         {{ form.change_type(class="form-select", id="changeTypeSelect") }}
@@ -110,7 +113,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="mb-4">
                                         {{ form.priority.label(class="form-label required") }}
                                         {{ form.priority(class="form-select") }}
@@ -127,7 +130,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="mb-4">
                                         {{ form.impact_level.label(class="form-label required") }}
                                         {{ form.impact_level(class="form-select") }}
@@ -321,38 +324,6 @@
                         </div>
                         
                         <div class="section-content">
-                            <div class="mb-4">
-                                {{ form.potential_impact.label(class="form-label") }}
-                                {{ form.potential_impact(class="form-control", rows="4", placeholder="Describe the potential impact on property owners and operators. Include financial implications, operational changes, compliance requirements, etc.") }}
-                                {% if form.potential_impact.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {% for error in form.potential_impact.errors %}
-                                            <div>{{ error }}</div>
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                                <div class="form-text">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Provide a detailed assessment of how this change might affect short-term rental operators
-                                </div>
-                            </div>
-                            
-                            <div class="mb-4">
-                                {{ form.affected_operators.label(class="form-label") }}
-                                {{ form.affected_operators(class="form-control", rows="3", placeholder="Describe which types of operators are affected (e.g., all STR operators, only commercial operators, properties with >X units, etc.)") }}
-                                {% if form.affected_operators.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {% for error in form.affected_operators.errors %}
-                                            <div>{{ error }}</div>
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                                <div class="form-text">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Specify which operators or property types are affected by this change
-                                </div>
-                            </div>
-                            
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-4">
@@ -402,43 +373,6 @@
                         </div>
                         
                         <div class="section-content">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-4">
-                                        {{ form.related_regulation_ids.label(class="form-label") }}
-                                        {{ form.related_regulation_ids(class="form-control", placeholder="e.g., 1, 3, 5") }}
-                                        {% if form.related_regulation_ids.errors %}
-                                            <div class="invalid-feedback d-block">
-                                                {% for error in form.related_regulation_ids.errors %}
-                                                    <div>{{ error }}</div>
-                                                {% endfor %}
-                                            </div>
-                                        {% endif %}
-                                        <div class="form-text">
-                                            <i class="fas fa-info-circle me-1"></i>
-                                            Link to related regulations by ID (comma-separated)
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-4">
-                                        {{ form.tags.label(class="form-label") }}
-                                        {{ form.tags(class="form-control", placeholder="e.g., zoning, permits, taxes, licensing") }}
-                                        {% if form.tags.errors %}
-                                            <div class="invalid-feedback d-block">
-                                                {% for error in form.tags.errors %}
-                                                    <div>{{ error }}</div>
-                                                {% endfor %}
-                                            </div>
-                                        {% endif %}
-                                        <div class="form-text">
-                                            <i class="fas fa-info-circle me-1"></i>
-                                            Tags for better categorization and search (comma-separated)
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
                             <div class="mb-4">
                                 {{ form.source_url.label(class="form-label") }}
                                 {{ form.source_url(class="form-control", placeholder="https://example.com/official-announcement") }}
@@ -452,6 +386,132 @@
                                 <div class="form-text">
                                     <i class="fas fa-info-circle me-1"></i>
                                     Link to official source, announcement, or documentation
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 6: Public Template Fields -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <h3 class="section-title">
+                                <i class="fas fa-file-text me-2"></i>
+                                Public Template Content
+                            </h3>
+                            <p class="section-description">Structured content for public-facing display</p>
+                            <!-- Cache buster: 20250111-v2 -->
+                        </div>
+                        
+                        <div class="section-content">
+                            <div class="mb-4">
+                                {{ form.summary.label(class="form-label required") }}
+                                {{ form.summary(class="form-control rich-text-editor") }}
+                                {% if form.summary.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.summary.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Brief summary of the update for the Summary section
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                {{ form.full_text.label(class="form-label") }}
+                                {{ form.full_text(class="form-control rich-text-editor") }}
+                                {% if form.full_text.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.full_text.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Complete detailed text of the update with full context and information
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                {{ form.compliance_requirements.label(class="form-label") }}
+                                {{ form.compliance_requirements(class="form-control rich-text-editor") }}
+                                {% if form.compliance_requirements.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.compliance_requirements.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Specific compliance requirements and obligations for property operators
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                {{ form.implementation_timeline.label(class="form-label") }}
+                                {{ form.implementation_timeline(class="form-control rich-text-editor") }}
+                                {% if form.implementation_timeline.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.implementation_timeline.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Timeline and phases for implementing the regulatory changes
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                {{ form.official_sources.label(class="form-label") }}
+                                {{ form.official_sources(class="form-control rich-text-editor") }}
+                                {% if form.official_sources.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.official_sources.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Official sources, documents, and authoritative references
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                {{ form.expert_analysis.label(class="form-label") }}
+                                {{ form.expert_analysis(class="form-control rich-text-editor") }}
+                                {% if form.expert_analysis.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.expert_analysis.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Kaystreet Management's expert interpretation and analysis of the regulatory change
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                {{ form.kaystreet_commitment.label(class="form-label") }}
+                                {{ form.kaystreet_commitment(class="form-control rich-text-editor") }}
+                                {% if form.kaystreet_commitment.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.kaystreet_commitment.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Kaystreet Management's commitment statement regarding client support and guidance
                                 </div>
                             </div>
                         </div>
@@ -507,6 +567,65 @@
     </div>
 </div>
 {% endif %}
+
+<!-- Simple Rich Text Editor - No External Dependencies -->
+<style>
+.rich-text-editor {
+    min-height: 120px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    font-family: Arial, sans-serif;
+    line-height: 1.5;
+}
+
+.rich-text-editor:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.rich-text-toolbar {
+    margin-bottom: 5px;
+    padding: 5px;
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    display: flex;
+    gap: 5px;
+}
+
+.rich-text-toolbar button {
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    background: white;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.rich-text-toolbar button:hover {
+    background: #e9ecef;
+}
+
+.rich-text-toolbar button.active {
+    background: #007bff;
+    color: white;
+}
+
+/* Hide any Summernote notifications */
+*:has-text("SUMMERNOTE LOADED"),
+*:has-text("TinyMCE has been replaced"),
+[data-summernote-notification],
+.summernote-notification,
+.editor-notification {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+</style>
 
 <style>
 /* Enhanced Admin Form Styles */
@@ -725,6 +844,80 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Convert textareas to rich text editors
+    const textareas = document.querySelectorAll('.rich-text-editor');
+    
+    // Hide any Summernote notification that might be showing
+    const hideNotification = () => {
+        const elements = document.querySelectorAll('*');
+        elements.forEach(el => {
+            if (el.textContent && el.textContent.includes('SUMMERNOTE LOADED') && el.textContent.includes('TinyMCE has been replaced')) {
+                el.style.display = 'none';
+                el.remove();
+            }
+        });
+    };
+    
+    // Run immediately and after a short delay
+    hideNotification();
+    setTimeout(hideNotification, 100);
+    setTimeout(hideNotification, 500);
+    
+    textareas.forEach(function(textarea) {
+        // Create toolbar
+        const toolbar = document.createElement('div');
+        toolbar.className = 'rich-text-toolbar';
+        toolbar.innerHTML = `
+            <button type="button" onclick="formatText(this, 'bold')" title="Bold"><b>B</b></button>
+            <button type="button" onclick="formatText(this, 'italic')" title="Italic"><i>I</i></button>
+            <button type="button" onclick="formatText(this, 'underline')" title="Underline"><u>U</u></button>
+            <button type="button" onclick="formatText(this, 'insertUnorderedList')" title="Bullet List">• List</button>
+            <button type="button" onclick="formatText(this, 'insertOrderedList')" title="Numbered List">1. List</button>
+            <button type="button" onclick="formatText(this, 'indent')" title="Indent">→</button>
+            <button type="button" onclick="formatText(this, 'outdent')" title="Outdent">←</button>
+        `;
+        
+        // Create contenteditable div
+        const editor = document.createElement('div');
+        editor.className = 'rich-text-editor';
+        editor.contentEditable = true;
+        editor.innerHTML = textarea.value || '';
+        editor.setAttribute('data-textarea', textarea.id);
+        
+        // Insert toolbar and editor
+        textarea.parentNode.insertBefore(toolbar, textarea);
+        textarea.parentNode.insertBefore(editor, textarea);
+        textarea.style.display = 'none';
+        
+        // Update textarea when content changes
+        editor.addEventListener('input', function() {
+            textarea.value = editor.innerHTML;
+        });
+        
+        // Update on form submit
+        const form = textarea.closest('form');
+        if (form) {
+            form.addEventListener('submit', function() {
+                textarea.value = editor.innerHTML;
+            });
+        }
+    });
+    
+    // Global formatting function
+    window.formatText = function(button, command) {
+        const toolbar = button.parentNode;
+        const editor = toolbar.nextElementSibling;
+        editor.focus();
+        document.execCommand(command, false, null);
+        
+        // Update button state
+        const buttons = toolbar.querySelectorAll('button');
+        buttons.forEach(btn => btn.classList.remove('active'));
+        if (document.queryCommandState(command)) {
+            button.classList.add('active');
+        }
+         };
+    
     // Conditional field display logic
     const changeTypeSelect = document.getElementById('changeTypeSelect');
     const actionRequiredSelect = document.getElementById('actionRequiredSelect');
@@ -733,23 +926,27 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Show/hide proposed fields based on change type
     function toggleProposedFields() {
-        if (changeTypeSelect.value === 'Proposed') {
-            proposedFields.style.display = 'block';
-            proposedFields.classList.remove('hidden');
-        } else {
-            proposedFields.style.display = 'none';
-            proposedFields.classList.add('hidden');
+        if (changeTypeSelect && proposedFields) {
+            if (changeTypeSelect.value === 'Proposed') {
+                proposedFields.style.display = 'block';
+                proposedFields.classList.remove('hidden');
+            } else {
+                proposedFields.style.display = 'none';
+                proposedFields.classList.add('hidden');
+            }
         }
     }
     
     // Show/hide action description based on action required
     function toggleActionDescription() {
-        if (actionRequiredSelect.value === 'True') {
-            actionDescriptionDiv.style.display = 'block';
-            actionDescriptionDiv.classList.remove('hidden');
-        } else {
-            actionDescriptionDiv.style.display = 'none';
-            actionDescriptionDiv.classList.add('hidden');
+        if (actionRequiredSelect && actionDescriptionDiv) {
+            if (actionRequiredSelect.value === 'True') {
+                actionDescriptionDiv.style.display = 'block';
+                actionDescriptionDiv.classList.remove('hidden');
+            } else {
+                actionDescriptionDiv.style.display = 'none';
+                actionDescriptionDiv.classList.add('hidden');
+            }
         }
     }
     
@@ -758,14 +955,24 @@ document.addEventListener('DOMContentLoaded', function() {
     toggleActionDescription();
     
     // Listen for changes
-    changeTypeSelect.addEventListener('change', toggleProposedFields);
-    actionRequiredSelect.addEventListener('change', toggleActionDescription);
+    if (changeTypeSelect) changeTypeSelect.addEventListener('change', toggleProposedFields);
+    if (actionRequiredSelect) actionRequiredSelect.addEventListener('change', toggleActionDescription);
     
     // Form validation
     const form = document.getElementById('updateForm');
     const submitButton = form.querySelector('button[type="submit"]');
     
     form.addEventListener('submit', function(e) {
+        // Save all rich text content before form submission
+        const editors = document.querySelectorAll('.rich-text-editor[contenteditable="true"]');
+        editors.forEach(function(editor) {
+            const textareaId = editor.getAttribute('data-textarea');
+            const textarea = document.getElementById(textareaId);
+            if (textarea) {
+                textarea.value = editor.innerHTML;
+            }
+        });
+        
         // Add loading state to submit button
         submitButton.classList.add('btn-loading');
         submitButton.disabled = true;

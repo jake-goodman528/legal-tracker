@@ -12,19 +12,14 @@ class LoginForm(FlaskForm):
 
 
 class RegulationForm(FlaskForm):
-    """Enhanced form for creating/editing regulations with comprehensive fields"""
+    """Enhanced form for creating/editing regulations with new template structure"""
     
     # Core Information
-    jurisdiction_level = SelectField(
-        'Jurisdiction Level', 
-        choices=[
-            ('National', 'National'),
-            ('State', 'State'), 
-            ('Local', 'Local')
-        ],
-        validators=[DataRequired()],
-        default='Local',
-        description="Select the governmental level for this regulation"
+    jurisdiction = StringField(
+        'Jurisdiction', 
+        validators=[DataRequired(), Length(min=2, max=100)],
+        render_kw={"placeholder": "e.g., National, Florida State, Tampa City"},
+        description="The governmental jurisdiction (e.g., National, State, Local authority)"
     )
     
     location = StringField(
@@ -41,106 +36,6 @@ class RegulationForm(FlaskForm):
         description="Clear, concise title describing the regulation"
     )
     
-    key_requirements = TextAreaField(
-        'Key Requirements', 
-        validators=[DataRequired()],
-        render_kw={
-            "placeholder": "Describe the key requirements and compliance obligations in detail...",
-            "rows": 6
-        },
-        description="Detailed description of what property owners must do to comply"
-    )
-    
-    # Compliance Details
-    compliance_level = SelectField(
-        'Compliance Level',
-        choices=[
-            ('Mandatory', 'Mandatory - Required by law'),
-            ('Recommended', 'Recommended - Best practice'),
-            ('Optional', 'Optional - Additional guidance')
-        ],
-        validators=[DataRequired()],
-        default='Mandatory',
-        description="How critical is compliance with this regulation?"
-    )
-    
-    property_types = StringField(
-        'Property Types',
-        validators=[Optional()],
-        render_kw={"placeholder": "Residential, Commercial, Mixed-use (comma-separated)"},
-        description="Types of properties this regulation applies to (separate multiple with commas)"
-    )
-    
-    status = SelectField(
-        'Regulation Status',
-        choices=[
-            ('Current & Active', 'Current & Active'),
-            ('Upcoming', 'Upcoming - Not yet effective'),
-            ('Expired', 'Expired - No longer active')
-        ],
-        validators=[DataRequired()],
-        default='Current & Active',
-        description="Current enforcement status of this regulation"
-    )
-    
-    # Metadata & Classification
-    category = SelectField(
-        'Regulation Category',
-        choices=[
-            ('Zoning', 'Zoning - Land use restrictions'),
-            ('Registration', 'Registration - Property/business registration'),
-            ('Tax', 'Tax - Tax obligations and collection'),
-            ('Licensing', 'Licensing - Required permits and licenses'),
-            ('Safety', 'Safety - Safety requirements and inspections'),
-            ('Environmental', 'Environmental - Environmental compliance'),
-            ('General', 'General - Other regulations')
-        ],
-        validators=[DataRequired()],
-        default='General',
-        description="Primary category that best describes this regulation"
-    )
-    
-    priority = SelectField(
-        'Priority Level',
-        choices=[
-            ('High', 'High - Critical compliance'),
-            ('Medium', 'Medium - Important compliance'),
-            ('Low', 'Low - Standard compliance')
-        ],
-        validators=[DataRequired()],
-        default='Medium',
-        description="Importance level for property owners and operators"
-    )
-    
-    related_keywords = StringField(
-        'Related Keywords',
-        validators=[Optional()],
-        render_kw={"placeholder": "short-term rental, vacation rental, licensing, permits (comma-separated)"},
-        description="Keywords and tags to improve searchability (separate with commas)"
-    )
-    
-    compliance_checklist = TextAreaField(
-        'Compliance Checklist',
-        validators=[Optional()],
-        render_kw={
-            "placeholder": "• Obtain business license\n• Register property with city\n• Install safety equipment\n• Maintain insurance coverage",
-            "rows": 6
-        },
-        description="Specific actionable items property owners must complete"
-    )
-    
-    # Contact Information
-    local_authority_contact = TextAreaField(
-        'Local Authority Contact Information',
-        validators=[Optional()],
-        render_kw={
-            "placeholder": "Department: City Planning Office\nPhone: (555) 123-4567\nEmail: planning@city.gov\nAddress: 123 City Hall Dr",
-            "rows": 4
-        },
-        description="Contact details for relevant local government offices or departments"
-    )
-    
-    # Date Information
     last_updated = DateField(
         'Last Updated',
         validators=[Optional()],
@@ -148,29 +43,71 @@ class RegulationForm(FlaskForm):
         description="Date when this regulation information was last verified or updated"
     )
     
-    effective_date = DateField(
-        'Effective Date',
+    # Rich Text Content Fields - Support formatting (bold, indent, numbering, bullet points, etc.)
+    overview = TextAreaField(
+        'Overview',
         validators=[Optional()],
-        description="Date when this regulation becomes/became effective"
+        render_kw={
+            "placeholder": "Provide a comprehensive overview of this regulation...",
+            "rows": 6,
+            "class": "rich-text-editor"
+        },
+        description="High-level overview and summary of the regulation"
     )
     
-    expiry_date = DateField(
-        'Expiry Date',
+    detailed_requirements = TextAreaField(
+        'Detailed Requirements',
         validators=[Optional()],
-        description="Date when this regulation expires (leave blank if permanent)"
+        render_kw={
+            "placeholder": "List the detailed compliance requirements...",
+            "rows": 8,
+            "class": "rich-text-editor"
+        },
+        description="Comprehensive breakdown of all requirements and obligations"
     )
     
-    # Legacy fields for backward compatibility (collapsed by default in UI)
-    property_type = StringField(
-        'Property Type (Legacy)', 
-        validators=[Optional(), Length(max=100)],
-        description="Legacy single property type field - use 'Property Types' instead"
+    compliance_steps = TextAreaField(
+        'Compliance Steps',
+        validators=[Optional()],
+        render_kw={
+            "placeholder": "Outline the specific steps for compliance...",
+            "rows": 6,
+            "class": "rich-text-editor"
+        },
+        description="Step-by-step process for achieving compliance"
     )
     
-    keywords = StringField(
-        'Keywords (Legacy)', 
-        validators=[Optional(), Length(max=200)],
-        description="Legacy keywords field - use 'Related Keywords' instead"
+    required_forms = TextAreaField(
+        'Required Forms',
+        validators=[Optional()],
+        render_kw={
+            "placeholder": "List all forms, documents, and submissions required...",
+            "rows": 4,
+            "class": "rich-text-editor"
+        },
+        description="All forms, documents, and official submissions required"
+    )
+    
+    penalties_non_compliance = TextAreaField(
+        'Penalties for Non Compliance',
+        validators=[Optional()],
+        render_kw={
+            "placeholder": "Describe penalties, fines, and consequences for non-compliance...",
+            "rows": 4,
+            "class": "rich-text-editor"
+        },
+        description="Penalties, fines, and consequences for failing to comply"
+    )
+    
+    recent_changes = TextAreaField(
+        'Recent Changes',
+        validators=[Optional()],
+        render_kw={
+            "placeholder": "Document any recent changes or updates to this regulation...",
+            "rows": 4,
+            "class": "rich-text-editor"
+        },
+        description="Recent modifications, amendments, or updates to the regulation"
     )
     
     submit = SubmitField('Save Regulation')
@@ -179,7 +116,6 @@ class RegulationForm(FlaskForm):
 class UpdateForm(FlaskForm):
     """Form for creating/editing updates"""
     title = StringField('Title', validators=[DataRequired(), Length(max=200)])
-    description = TextAreaField('Description', validators=[DataRequired()])
     jurisdiction_affected = StringField('Jurisdiction Affected', validators=[DataRequired(), Length(max=100)])
     update_date = DateField('Update Date', validators=[DataRequired()])
     status = SelectField('Status',
@@ -223,8 +159,6 @@ class UpdateForm(FlaskForm):
                                 validators=[DataRequired()],
                                 default='Both')
     
-    related_regulation_ids = StringField('Related Regulation IDs (comma-separated)', validators=[Optional()])
-    tags = StringField('Tags (comma-separated)', validators=[Optional()])
     source_url = StringField('Source URL', validators=[Optional(), Length(max=500)])
     
     priority = SelectField('Priority',
@@ -241,15 +175,7 @@ class UpdateForm(FlaskForm):
         description="Expected date when a decision will be made on this proposed change"
     )
     
-    potential_impact = TextAreaField(
-        'Potential Impact',
-        validators=[Optional()],
-        render_kw={
-            "placeholder": "Describe the potential impact on property owners and operators...",
-            "rows": 4
-        },
-        description="Assessment of how this change might affect short-term rental operators"
-    )
+
     
     decision_status = SelectField(
         'Decision Status',
@@ -283,14 +209,84 @@ class UpdateForm(FlaskForm):
         description="Deadline by which operators must comply with this change"
     )
     
-    affected_operators = TextAreaField(
-        'Affected Operators',
+
+    
+    # New template fields for structured public-facing display
+    summary = TextAreaField(
+        'Summary',
+        validators=[DataRequired()],
+        render_kw={
+            "placeholder": "Enter a brief summary of the update...",
+            "rows": 4,
+            "class": "rich-text-editor"
+        },
+        description="Brief summary of the update for the Summary section"
+    )
+    
+    full_text = TextAreaField(
+        'Full Text',
         validators=[Optional()],
         render_kw={
-            "placeholder": "Describe which types of operators are affected (e.g., all STR operators, only commercial operators, etc.)...",
-            "rows": 3
+            "placeholder": "Enter the complete detailed text of the update...",
+            "rows": 8,
+            "class": "rich-text-editor"
         },
-        description="Description of which operators or property types are affected by this change"
+        description="Complete detailed text of the update with full context and information"
+    )
+    
+    compliance_requirements = TextAreaField(
+        'Compliance Requirements',
+        validators=[Optional()],
+        render_kw={
+            "placeholder": "List specific compliance requirements that operators must meet...",
+            "rows": 6,
+            "class": "rich-text-editor"
+        },
+        description="Specific compliance requirements and obligations for property operators"
+    )
+    
+    implementation_timeline = TextAreaField(
+        'Implementation Timeline',
+        validators=[Optional()],
+        render_kw={
+            "placeholder": "Describe the timeline for implementing these changes...",
+            "rows": 4,
+            "class": "rich-text-editor"
+        },
+        description="Timeline and phases for implementing the regulatory changes"
+    )
+    
+    official_sources = TextAreaField(
+        'Official Sources',
+        validators=[Optional()],
+        render_kw={
+            "placeholder": "List official sources, documents, and references...",
+            "rows": 4,
+            "class": "rich-text-editor"
+        },
+        description="Official sources, documents, and authoritative references"
+    )
+    
+    expert_analysis = TextAreaField(
+        'Expert Analysis: Kaystreet Management\'s Interpretation',
+        validators=[Optional()],
+        render_kw={
+            "placeholder": "Provide Kaystreet Management's expert interpretation and analysis...",
+            "rows": 6,
+            "class": "rich-text-editor"
+        },
+        description="Kaystreet Management's expert interpretation and analysis of the regulatory change"
+    )
+    
+    kaystreet_commitment = TextAreaField(
+        'Kaystreet Management\'s Commitment',
+        validators=[Optional()],
+        render_kw={
+            "placeholder": "Describe Kaystreet Management's commitment to helping clients...",
+            "rows": 4,
+            "class": "rich-text-editor"
+        },
+        description="Kaystreet Management's commitment statement regarding client support and guidance"
     )
     
     submit = SubmitField('Save Update') 

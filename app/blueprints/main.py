@@ -27,7 +27,10 @@ def index():
     try:
         # Get recent updates for homepage
         recent_updates = Update.query.filter(
-            db.or_(Update.change_type == 'Recent', Update.status == 'Recent')
+            db.or_(
+                Update.change_type == 'Recent',
+                Update.status == 'Recent'
+            )
         ).order_by(Update.update_date.desc()).limit(3).all()
         
         # Get recent regulations
@@ -48,33 +51,25 @@ def index():
 def regulations():
     """Regulations listing page with filtering"""
     try:
-        # Get filter parameters
-        filters = {
-            'jurisdiction': request.args.get('jurisdiction', '').strip(),
-            'location': request.args.get('location', '').strip(),
-            'category': request.args.get('category', '').strip(),
-            'search': request.args.get('search', '').strip()
-        }
+        logger.info("DEBUG: Starting regulations route")
         
-        # Use RegulationService to get filtered regulations
-        regulations = RegulationService.get_filtered_regulations(filters)
+        # Get sample regulations directly from database
+        from models import Regulation
+        regulations = Regulation.query.all()
+        logger.info(f"DEBUG: Found {len(regulations)} regulations in database")
         
-        # Get filter options using RegulationService
-        filter_options = RegulationService.get_filter_options()
-        
-        # Get saved searches for quick filters
-        saved_searches = RegulationService.get_public_saved_searches()
-        
+        # Hardcode everything to eliminate variables
         return render_template('regulations.html',
                              regulations=regulations,
-                             all_jurisdictions=filter_options['jurisdictions'],
-                             all_locations=filter_options['locations'], 
-                             all_categories=filter_options['categories'],
-                             current_jurisdiction=filters['jurisdiction'],
-                             current_location=filters['location'],
-                             current_category=filters['category'],
-                             current_search=filters['search'],
-                             saved_searches=saved_searches)
+                             all_jurisdictions=['State', 'Local'],
+                             all_locations=['California', 'San Francisco'], 
+                             all_categories=[],
+                             current_jurisdiction='',
+                             current_location='',
+                             current_category='',
+                             current_search='',
+                             saved_searches=[])
+                             
     except Exception as e:
         logger.error(f"Error loading regulations: {str(e)}", exc_info=True)
         flash('Error loading regulations. Please try again later.', 'error')
@@ -341,6 +336,24 @@ def notifications():
                              bookmarked_updates=[],
                              action_required_updates=[],
                              upcoming_deadlines=[])
+
+
+@main_bp.route('/test-regulations')
+def test_regulations():
+    """Test route to debug regulations issue"""
+    try:
+        from models import Regulation
+        regulations = Regulation.query.all()
+        
+        result = {
+            'count': len(regulations),
+            'regulations': [{'id': r.id, 'title': r.title, 'location': r.location} for r in regulations]
+        }
+        
+        return f"<h1>Test Results</h1><pre>{result}</pre>"
+        
+    except Exception as e:
+        return f"<h1>Error</h1><pre>{str(e)}</pre>"
 
 
 # Error handlers

@@ -1,0 +1,49 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Manage Regulations{% endblock %}
+
+{% block content %}
+<div class="admin-content">
+    <div class="admin-page-header mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1><i class="fas fa-book me-2"></i>Manage Regulations</h1>
+            <a href="{{ url_for('admin.new_regulation') }}" class="btn btn-success">
+                <i class="fas fa-plus me-2"></i>Add New Regulation
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                <th>Jurisdiction</th>
+                <th>Location</th>
+                <th>Title</th>
+                <th>Last Updated</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for regulation in regulations %}
+            <tr>
+                <td>{{ regulation.jurisdiction }}</td>
+                <td>{{ regulation.location }}</td>
+                <td>{{ regulation.title }}</td>
+                <td>{{ regulation.last_updated.strftime('%Y-%m-%d') if regulation.last_updated else 'N/A' }}</td>
+                <td>
+                    <a href="{{ url_for('admin.edit_regulation', regulation_id=regulation.id) }}" class="btn btn-sm btn-primary">Edit</a>
+                    <form method="POST" action="{{ url_for('admin.delete_regulation', regulation_id=regulation.id) }}" style="display: inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %} 

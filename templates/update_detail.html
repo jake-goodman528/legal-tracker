@@ -64,225 +64,264 @@
                     
                     <!-- Action Required Badge -->
                     {% if update.action_required %}
-                    <span class="badge bg-warning text-dark">
-                        <i class="fas fa-exclamation-circle"></i> ACTION REQUIRED
+                    <span class="badge bg-danger">
+                        <i class="fas fa-exclamation-triangle"></i> ACTION REQUIRED
                     </span>
                     {% endif %}
-                    
-                    <!-- Decision Status Badge -->
-                    {% if update.decision_status %}
-                    <span class="badge bg-primary">{{ update.decision_status.upper() }}</span>
-                    {% endif %}
+                </div>
+                
+                <!-- Key Details -->
+                <div class="header-details">
+                    <div class="detail-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <strong>{{ update.jurisdiction_affected }}</strong>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-tag"></i>
+                        {{ update.category }}
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-calendar"></i>
+                        {{ update.update_date.strftime('%B %d, %Y') }}
+                    </div>
                 </div>
             </div>
+            
             <div class="col-md-4 text-end">
-                <a href="{{ url_for('main.updates') }}" class="btn btn-outline-light me-2">
-                    <i class="fas fa-arrow-left"></i> Back to Updates
-                </a>
-                <button class="btn btn-light" onclick="window.print()">
-                    <i class="fas fa-print"></i> Print
-                </button>
                 {% if update.source_url %}
-                <a href="{{ update.source_url }}" target="_blank" class="btn btn-light ms-1">
-                    <i class="fas fa-external-link-alt"></i> Source
+                <a href="{{ update.source_url }}" target="_blank" class="btn btn-outline-primary btn-lg me-2">
+                    <i class="fas fa-external-link-alt me-1"></i> View Source
                 </a>
                 {% endif %}
+                <div class="share-buttons mt-2">
+                    <button class="btn btn-outline-secondary btn-sm" onclick="shareUpdate()">
+                        <i class="fas fa-share-alt me-1"></i> Share
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Main Content -->
+<!-- Main Content Section -->
 <div class="container my-5">
     <div class="row">
         <!-- Main Content Column -->
         <div class="col-lg-8">
-            <!-- Key Information Section -->
-            <div class="section-header">
-                <h3><i class="fas fa-info-circle text-primary"></i> Key Information</h3>
-            </div>
-            <div class="info-card mb-4">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="compliance-item">
-                            <strong>Jurisdiction:</strong><br>
-                            <span class="text-info">{{ update.jurisdiction_affected }}</span>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="compliance-item">
-                            <strong>Category:</strong><br>
-                            <span class="badge bg-secondary">{{ update.category }}</span>
-                        </div>
-                    </div>
-                </div>
-                <hr class="my-3">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="compliance-item">
-                            <strong>Property Types:</strong><br>
-                            <span class="badge bg-secondary">{{ update.property_types }}</span>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="compliance-item">
-                            <strong>Update Date:</strong><br>
-                            <span class="text-info">{{ update.update_date.strftime('%B %d, %Y') }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- Title Section (Already displayed in header, but included for template structure) -->
             
-            <!-- Description Section -->
-            <div class="section-header">
-                <h3><i class="fas fa-file-alt text-primary"></i> Description</h3>
-            </div>
-            <div class="info-card mb-4">
-                <div class="requirements-content">
-                    {{ update.description|nl2br }}
+            <!-- Summary Section -->
+            <div class="update-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-file-alt text-primary me-2"></i>
+                        Summary
+                    </h2>
+                </div>
+                <div class="section-content">
+                    <div class="content-box rich-content">
+                        {{ update.summary|safe }}
+                    </div>
                 </div>
             </div>
-            
-            <!-- Timeline Section -->
-            <div class="section-header">
-                <h3><i class="fas fa-calendar-alt text-primary"></i> Timeline</h3>
+
+            <!-- Full Text Section -->
+            {% if update.full_text %}
+            <div class="update-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-align-left text-primary me-2"></i>
+                        Full Text
+                    </h2>
+                </div>
+                <div class="section-content">
+                    <div class="content-box rich-content">
+                        {{ update.full_text|safe }}
+                    </div>
+                </div>
             </div>
-            <div class="info-card mb-4">
-                <div class="row">
-                    {% if update.effective_date %}
-                    <div class="col-md-4">
-                        <div class="compliance-item">
-                            <strong>Effective Date:</strong><br>
-                            <span class="text-success">
-                                <i class="fas fa-calendar-check"></i> {{ update.effective_date.strftime('%B %d, %Y') }}
-                            </span>
+            {% endif %}
+
+            <!-- Effective Date Section -->
+            {% if update.effective_date %}
+            <div class="update-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-calendar-check text-primary me-2"></i>
+                        Effective Date
+                    </h2>
+                </div>
+                <div class="section-content">
+                    <div class="content-box">
+                        <div class="date-display">
+                            <i class="fas fa-calendar-alt me-2"></i>
+                            <strong>{{ update.effective_date.strftime('%B %d, %Y') }}</strong>
                         </div>
-                    </div>
-                    {% endif %}
-                    {% if update.deadline_date %}
-                    <div class="col-md-4">
-                        <div class="compliance-item">
-                            <strong>Deadline Date:</strong><br>
-                            <span class="text-danger">
-                                <i class="fas fa-clock"></i> {{ update.deadline_date.strftime('%B %d, %Y') }}
-                            </span>
-                        </div>
-                    </div>
-                    {% endif %}
-                    {% if update.compliance_deadline %}
-                    <div class="col-md-4">
-                        <div class="compliance-item">
-                            <strong>Compliance Deadline:</strong><br>
+                        {% if update.compliance_deadline %}
+                        <div class="date-display mt-2">
+                            <i class="fas fa-clock me-2 text-warning"></i>
                             <span class="text-warning">
-                                <i class="fas fa-exclamation-triangle"></i> {{ update.compliance_deadline.strftime('%B %d, %Y') }}
+                                <strong>Compliance Deadline: {{ update.compliance_deadline.strftime('%B %d, %Y') }}</strong>
                             </span>
                         </div>
-                    </div>
-                    {% endif %}
-                </div>
-                {% if update.expected_decision_date %}
-                <hr class="my-3">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="compliance-item">
-                            <strong>Expected Decision Date:</strong><br>
-                            <span class="text-info">
-                                <i class="fas fa-gavel"></i> {{ update.expected_decision_date.strftime('%B %d, %Y') }}
-                            </span>
-                        </div>
-                    </div>
-                    {% if update.decision_status %}
-                    <div class="col-md-6">
-                        <div class="compliance-item">
-                            <strong>Decision Status:</strong><br>
-                            <span class="badge bg-primary">{{ update.decision_status }}</span>
-                        </div>
-                    </div>
-                    {% endif %}
-                </div>
-                {% endif %}
-            </div>
-            
-            <!-- Impact Assessment Section -->
-            {% if update.potential_impact or update.affected_operators %}
-            <div class="section-header">
-                <h3><i class="fas fa-chart-line text-primary"></i> Impact Assessment</h3>
-            </div>
-            <div class="info-card mb-4">
-                {% if update.potential_impact %}
-                <div class="mb-3">
-                    <strong>Potential Impact:</strong>
-                    <div class="mt-2">
-                        {{ update.potential_impact|nl2br }}
+                        {% endif %}
                     </div>
                 </div>
-                {% endif %}
-                {% if update.affected_operators %}
-                <div class="mb-3">
-                    <strong>Affected Operators:</strong>
-                    <div class="mt-2">
-                        {{ update.affected_operators|nl2br }}
-                    </div>
-                </div>
-                {% endif %}
             </div>
             {% endif %}
-            
-            <!-- Action Items Section -->
+
+            <!-- Compliance Requirements Section -->
+            {% if update.compliance_requirements %}
+            <div class="update-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-tasks text-primary me-2"></i>
+                        Compliance Requirements
+                    </h2>
+                </div>
+                <div class="section-content">
+                    <div class="content-box rich-content">
+                        {{ update.compliance_requirements|safe }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Implementation Timeline Section -->
+            {% if update.implementation_timeline %}
+            <div class="update-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-timeline text-primary me-2"></i>
+                        Implementation Timeline
+                    </h2>
+                </div>
+                <div class="section-content">
+                    <div class="content-box rich-content">
+                        {{ update.implementation_timeline|safe }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Official Sources Section -->
+            {% if update.official_sources %}
+            <div class="update-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-university text-primary me-2"></i>
+                        Official Sources
+                    </h2>
+                </div>
+                <div class="section-content">
+                    <div class="content-box rich-content">
+                        {{ update.official_sources|safe }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Expert Analysis Section -->
+            {% if update.expert_analysis %}
+            <div class="update-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-user-tie text-primary me-2"></i>
+                        Expert Analysis: Kaystreet Management's Interpretation
+                    </h2>
+                </div>
+                <div class="section-content">
+                    <div class="content-box expert-analysis rich-content">
+                        {{ update.expert_analysis|safe }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Kaystreet Management's Commitment Section -->
+            {% if update.kaystreet_commitment %}
+            <div class="update-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-handshake text-primary me-2"></i>
+                        Kaystreet Management's Commitment
+                    </h2>
+                </div>
+                <div class="section-content">
+                    <div class="content-box commitment-section rich-content">
+                        {{ update.kaystreet_commitment|safe }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Action Items Section (if action required) -->
             {% if update.action_required %}
-            <div class="section-header">
-                <h3><i class="fas fa-tasks text-primary"></i> Action Items</h3>
-            </div>
-            <div class="info-card mb-4">
-                <div class="alert alert-warning">
-                    <h5><i class="fas fa-exclamation-triangle"></i> Action Required</h5>
-                    {% if update.action_description %}
-                    <p class="mb-0">{{ update.action_description|nl2br }}</p>
-                    {% else %}
-                    <p class="mb-0">Please review this update and take appropriate action.</p>
-                    {% endif %}
+            <div class="update-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-exclamation-triangle text-danger me-2"></i>
+                        Action Items
+                    </h2>
+                </div>
+                <div class="section-content">
+                    <div class="alert alert-warning">
+                        <h5><i class="fas fa-exclamation-triangle"></i> Action Required</h5>
+                        {% if update.action_description %}
+                        <div class="rich-content">{{ update.action_description|safe }}</div>
+                        {% else %}
+                        <p class="mb-0">Please review this update and take appropriate action.</p>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
             {% endif %}
-            
+
             <!-- Related Information Section -->
             {% if related_regulations or update.get_tags_list() %}
-            <div class="section-header">
-                <h3><i class="fas fa-link text-primary"></i> Related Information</h3>
-            </div>
-            <div class="info-card mb-4">
-                <!-- Related Regulations -->
-                {% if related_regulations %}
-                <div class="mb-3">
-                    <strong>Related Regulations:</strong>
-                    <div class="mt-2">
-                        {% for regulation in related_regulations %}
-                        <div class="related-regulation mb-2">
-                            <a href="{{ url_for('main.regulation_detail', regulation_id=regulation.id) }}" class="text-decoration-none">
-                                <div class="card border-left-primary">
-                                    <div class="card-body py-2">
-                                        <h6 class="card-title mb-1">{{ regulation.title }}</h6>
-                                        <small class="text-muted">{{ regulation.location }} - {{ regulation.category }}</small>
-                                    </div>
+            <div class="update-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-link text-primary me-2"></i>
+                        Related Information
+                    </h2>
+                </div>
+                <div class="section-content">
+                    <div class="content-box">
+                        <!-- Related Regulations -->
+                        {% if related_regulations %}
+                        <div class="mb-3">
+                            <h5>Related Regulations:</h5>
+                            <div class="mt-2">
+                                {% for regulation in related_regulations %}
+                                <div class="related-regulation mb-2">
+                                    <a href="{{ url_for('main.regulation_detail', regulation_id=regulation.id) }}" class="text-decoration-none">
+                                        <div class="card border-left-primary">
+                                            <div class="card-body py-2">
+                                                <h6 class="card-title mb-1">{{ regulation.title }}</h6>
+                                                <small class="text-muted">{{ regulation.location }} - {{ regulation.category }}</small>
+                                            </div>
+                                        </div>
+                                    </a>
                                 </div>
-                            </a>
+                                {% endfor %}
+                            </div>
                         </div>
-                        {% endfor %}
+                        {% endif %}
+                        
+                        <!-- Tags -->
+                        {% if update.get_tags_list() %}
+                        <div class="mb-3">
+                            <h5>Tags:</h5>
+                            <div class="mt-2">
+                                {% for tag in update.get_tags_list() %}
+                                <span class="badge bg-light text-dark me-2 mb-2 keyword-tag">{{ tag }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
-                {% endif %}
-                
-                <!-- Tags -->
-                {% if update.get_tags_list() %}
-                <div class="mb-3">
-                    <strong>Tags:</strong>
-                    <div class="mt-2">
-                        {% for tag in update.get_tags_list() %}
-                        <span class="badge bg-light text-dark me-2 mb-2 keyword-tag">{{ tag }}</span>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
             </div>
             {% endif %}
         </div>
@@ -331,6 +370,11 @@
                     </div>
                     <hr>
                     <div class="sidebar-item">
+                        <strong>Property Types:</strong><br>
+                        <span class="text-muted">{{ update.property_types }}</span>
+                    </div>
+                    <hr>
+                    <div class="sidebar-item">
                         <strong>Impact Level:</strong><br>
                         <span class="badge 
                             {% if update.impact_level == 'High' %}bg-danger
@@ -339,60 +383,40 @@
                             {{ update.impact_level }}
                         </span>
                     </div>
-                    <hr>
-                    <div class="sidebar-item">
-                        <strong>Priority:</strong><br>
-                        {% if update.priority == 1 %}
-                        <span class="badge bg-danger">High</span>
-                        {% elif update.priority == 2 %}
-                        <span class="badge bg-warning text-dark">Medium</span>
-                        {% else %}
-                        <span class="badge bg-success">Low</span>
-                        {% endif %}
-                    </div>
                 </div>
             </div>
-            
-            <!-- Quick Actions Card -->
+
+            <!-- Contact Card -->
             <div class="sidebar-card mb-4">
                 <div class="card-header">
-                    <h5><i class="fas fa-cog"></i> Quick Actions</h5>
+                    <h5><i class="fas fa-phone"></i> Need Help?</h5>
                 </div>
                 <div class="card-body">
-                    <div class="d-grid gap-2">
-                        {% if update.source_url %}
-                        <a href="{{ update.source_url }}" target="_blank" class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-external-link-alt"></i> View Original Source
-                        </a>
-                        {% endif %}
-                        <button class="btn btn-outline-secondary btn-sm" onclick="window.print()">
-                            <i class="fas fa-print"></i> Print This Update
-                        </button>
-                        <a href="{{ url_for('main.updates') }}" class="btn btn-outline-info btn-sm">
-                            <i class="fas fa-arrow-left"></i> Back to All Updates
-                        </a>
-                    </div>
+                    <p class="mb-3">Have questions about this update? Our experts are here to help.</p>
+                    <a href="https://kaystreetmanagement.com/contact" target="_blank" class="btn btn-primary w-100">
+                        <i class="fas fa-calendar-alt me-1"></i> Schedule Consultation
+                    </a>
                 </div>
             </div>
-            
-            <!-- Contact Information Card -->
-            {% if update.jurisdiction_affected %}
+
+            <!-- Similar Updates -->
+            {% if similar_updates %}
             <div class="sidebar-card">
                 <div class="card-header">
-                    <h5><i class="fas fa-phone"></i> Contact Information</h5>
+                    <h5><i class="fas fa-newspaper"></i> Similar Updates</h5>
                 </div>
                 <div class="card-body">
-                    <div class="sidebar-item">
-                        <strong>Jurisdiction:</strong><br>
-                        <span class="text-info">{{ update.jurisdiction_affected }}</span>
+                    {% for similar in similar_updates %}
+                    <div class="similar-update mb-3">
+                        <a href="{{ url_for('main.update_detail', update_id=similar.id) }}" class="text-decoration-none">
+                            <h6 class="mb-1">{{ similar.title }}</h6>
+                            <small class="text-muted">
+                                {{ similar.jurisdiction_affected }} - {{ similar.update_date.strftime('%m/%d/%Y') }}
+                            </small>
+                        </a>
                     </div>
-                    <hr>
-                    <div class="sidebar-item">
-                        <small class="text-muted">
-                            <i class="fas fa-info-circle"></i> 
-                            For specific questions about this update, contact your local authorities in {{ update.jurisdiction_affected }}.
-                        </small>
-                    </div>
+                    {% if not loop.last %}<hr>{% endif %}
+                    {% endfor %}
                 </div>
             </div>
             {% endif %}
@@ -400,54 +424,70 @@
     </div>
 </div>
 
-<!-- Custom Styles -->
 <style>
-.regulation-header {
-    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-    color: white;
-    padding: 2rem 0;
-    margin-bottom: 0;
-}
-
-.header-title {
-    font-size: 2rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-}
-
-.header-badges .badge {
-    font-size: 0.75rem;
-    margin-right: 0.5rem;
-    margin-bottom: 0.5rem;
+/* Enhanced Update Detail Styling */
+.update-section {
+    margin-bottom: 2.5rem;
 }
 
 .section-header {
     margin-bottom: 1rem;
-}
-
-.section-header h3 {
-    color: #2c3e50;
-    font-size: 1.25rem;
-    font-weight: 600;
     border-bottom: 2px solid #e9ecef;
     padding-bottom: 0.5rem;
 }
 
-.info-card {
-    background: white;
+.section-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+}
+
+.content-box {
+    background: #f8f9fa;
     border: 1px solid #e9ecef;
     border-radius: 8px;
     padding: 1.5rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    line-height: 1.6;
 }
 
-.compliance-item {
+.rich-content {
+    font-size: 1.05rem;
+}
+
+.rich-content strong {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.rich-content ul, .rich-content ol {
+    margin-left: 1.5rem;
     margin-bottom: 1rem;
 }
 
-.compliance-item strong {
-    color: #495057;
-    font-size: 0.9rem;
+.rich-content li {
+    margin-bottom: 0.5rem;
+}
+
+.expert-analysis {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-left: 4px solid var(--secondary-color);
+}
+
+.commitment-section {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    border-left: 4px solid #ffc107;
+}
+
+.date-display {
+    font-size: 1.1rem;
+    padding: 0.5rem;
+    background: white;
+    border-radius: 4px;
+    border-left: 3px solid var(--primary-color);
 }
 
 .sidebar-card {
@@ -458,58 +498,55 @@
 }
 
 .sidebar-card .card-header {
-    background: #f8f9fa;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     border-bottom: 1px solid #e9ecef;
     padding: 1rem;
     font-weight: 600;
-}
-
-.sidebar-card .card-body {
-    padding: 1rem;
 }
 
 .sidebar-item {
     margin-bottom: 0.5rem;
 }
 
-.sidebar-item strong {
-    color: #495057;
-    font-size: 0.9rem;
+.similar-update a:hover h6 {
+    color: var(--primary-color);
 }
 
-.related-regulation .card {
-    border-left: 4px solid #007bff;
-    transition: all 0.3s ease;
-}
-
-.related-regulation .card:hover {
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    transform: translateY(-2px);
-}
-
-.keyword-tag {
-    font-size: 0.8rem;
-    padding: 0.4rem 0.8rem;
-    border-radius: 20px;
-}
-
-.requirements-content {
-    line-height: 1.6;
-    color: #495057;
-}
-
+/* Responsive Design */
 @media (max-width: 768px) {
-    .header-title {
-        font-size: 1.5rem;
+    .section-title {
+        font-size: 1.2rem;
     }
     
-    .regulation-header {
-        padding: 1rem 0;
-    }
-    
-    .info-card {
+    .content-box {
         padding: 1rem;
+    }
+    
+    .header-details {
+        margin-top: 1rem;
+    }
+    
+    .detail-item {
+        display: block;
+        margin-bottom: 0.5rem;
     }
 }
 </style>
+
+<script>
+function shareUpdate() {
+    if (navigator.share) {
+        navigator.share({
+            title: '{{ update.title }}',
+            text: '{{ update.description[:100] }}...',
+            url: window.location.href
+        });
+    } else {
+        // Fallback: copy URL to clipboard
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            alert('Update URL copied to clipboard!');
+        });
+    }
+}
+</script>
 {% endblock %} 

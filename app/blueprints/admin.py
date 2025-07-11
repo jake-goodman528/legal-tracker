@@ -166,15 +166,24 @@ def dashboard():
         
         # Count updates by type
         recent_count = Update.query.filter(
-            db.or_(Update.change_type == 'Recent', Update.status == 'Recent')
+            db.or_(
+                Update.change_type == 'Recent',
+                Update.status == 'Recent'
+            )
         ).count()
         
         upcoming_count = Update.query.filter(
-            db.or_(Update.change_type == 'Upcoming', Update.status == 'Upcoming')
+            db.or_(
+                Update.change_type == 'Upcoming',
+                Update.status == 'Upcoming'
+            )
         ).count()
         
         proposed_count = Update.query.filter(
-            db.or_(Update.change_type == 'Proposed', Update.status == 'Proposed')
+            db.or_(
+                Update.change_type == 'Proposed',
+                Update.status == 'Proposed'
+            )
         ).count()
         
         # Combine stats for template compatibility
@@ -237,7 +246,7 @@ def manage_regulations():
         if load_time > 1.0:
             performance_logger.warning(f"Slow regulation loading - Duration: {load_time:.3f}s | Count: {len(regulations)}")
         
-        return render_template('admin/manage_regulations.html', regulations=regulations)
+        return render_template('admin/manage_regulations_temp.html', regulations=regulations)
         
     except Exception as e:
         logger.error(f"Error in manage_regulations: {str(e)}", exc_info=True)
@@ -254,36 +263,21 @@ def new_regulation():
     
     if form.validate_on_submit():
         try:
-            # Prepare regulation data with comprehensive fields
+            # Prepare regulation data with new template fields
             regulation_data = {
                 # Core Information
-                'jurisdiction_level': form.jurisdiction_level.data,
+                'jurisdiction': form.jurisdiction.data,
                 'location': form.location.data,
                 'title': form.title.data,
-                'key_requirements': form.key_requirements.data,
-                
-                # Compliance Details
-                'compliance_level': form.compliance_level.data,
-                'property_types': form.property_types.data,
-                'status': form.status.data,
-                
-                # Metadata
-                'category': form.category.data,
-                'priority': form.priority.data,
-                'related_keywords': form.related_keywords.data,
-                'compliance_checklist': form.compliance_checklist.data,
-                
-                # Contact Information
-                'local_authority_contact': form.local_authority_contact.data,
-                
-                # Timestamps
                 'last_updated': form.last_updated.data,
                 
-                # Legacy fields for backward compatibility
-                'property_type': form.property_type.data,
-                'effective_date': form.effective_date.data,
-                'expiry_date': form.expiry_date.data,
-                'keywords': form.keywords.data
+                # Rich Text Content Fields
+                'overview': form.overview.data,
+                'detailed_requirements': form.detailed_requirements.data,
+                'compliance_steps': form.compliance_steps.data,
+                'required_forms': form.required_forms.data,
+                'penalties_non_compliance': form.penalties_non_compliance.data,
+                'recent_changes': form.recent_changes.data
             }
             
             logger.info(f"Creating new regulation - Title: {regulation_data['title']} | Location: {regulation_data['location']}")
@@ -317,36 +311,21 @@ def edit_regulation(regulation_id):
         logger.info(f"Editing regulation - ID: {regulation_id} | Title: {regulation.title}")
         
         if form.validate_on_submit():
-            # Update regulation data with comprehensive fields
+            # Update regulation data with new template fields
             update_data = {
                 # Core Information
-                'jurisdiction_level': form.jurisdiction_level.data,
+                'jurisdiction': form.jurisdiction.data,
                 'location': form.location.data,
                 'title': form.title.data,
-                'key_requirements': form.key_requirements.data,
-                
-                # Compliance Details
-                'compliance_level': form.compliance_level.data,
-                'property_types': form.property_types.data,
-                'status': form.status.data,
-                
-                # Metadata
-                'category': form.category.data,
-                'priority': form.priority.data,
-                'related_keywords': form.related_keywords.data,
-                'compliance_checklist': form.compliance_checklist.data,
-                
-                # Contact Information
-                'local_authority_contact': form.local_authority_contact.data,
-                
-                # Timestamps
                 'last_updated': form.last_updated.data,
                 
-                # Legacy fields for backward compatibility
-                'property_type': form.property_type.data,
-                'effective_date': form.effective_date.data,
-                'expiry_date': form.expiry_date.data,
-                'keywords': form.keywords.data
+                # Rich Text Content Fields
+                'overview': form.overview.data,
+                'detailed_requirements': form.detailed_requirements.data,
+                'compliance_steps': form.compliance_steps.data,
+                'required_forms': form.required_forms.data,
+                'penalties_non_compliance': form.penalties_non_compliance.data,
+                'recent_changes': form.recent_changes.data
             }
             
             success, updated_regulation, error = RegulationService.update_regulation(regulation_id, update_data)
@@ -418,6 +397,9 @@ def manage_updates():
         return redirect(url_for('admin.dashboard'))
 
 
+
+
+
 @admin_bp.route('/updates/new', methods=['GET', 'POST'])
 @require_admin_login
 @log_admin_action('update_create')
@@ -451,7 +433,15 @@ def new_update():
                 'change_type': getattr(form, 'change_type', None) and form.change_type.data,
                 'compliance_deadline': getattr(form, 'compliance_deadline', None) and form.compliance_deadline.data,
                 'affected_operators': getattr(form, 'affected_operators', None) and form.affected_operators.data,
-                'related_regulation_ids': getattr(form, 'related_regulation_ids', None) and form.related_regulation_ids.data
+                'related_regulation_ids': getattr(form, 'related_regulation_ids', None) and form.related_regulation_ids.data,
+                # New template fields
+                'summary': getattr(form, 'summary', None) and form.summary.data,
+                'full_text': getattr(form, 'full_text', None) and form.full_text.data,
+                'compliance_requirements': getattr(form, 'compliance_requirements', None) and form.compliance_requirements.data,
+                'implementation_timeline': getattr(form, 'implementation_timeline', None) and form.implementation_timeline.data,
+                'official_sources': getattr(form, 'official_sources', None) and form.official_sources.data,
+                'expert_analysis': getattr(form, 'expert_analysis', None) and form.expert_analysis.data,
+                'kaystreet_commitment': getattr(form, 'kaystreet_commitment', None) and form.kaystreet_commitment.data
             }
             
             logger.info(f"Creating new update - Title: {update_data['title']} | Jurisdiction: {update_data['jurisdiction_affected']} | Status: {update_data['status']}")
@@ -516,7 +506,15 @@ def edit_update(update_id):
                 'change_type': getattr(form, 'change_type', None) and form.change_type.data,
                 'compliance_deadline': getattr(form, 'compliance_deadline', None) and form.compliance_deadline.data,
                 'affected_operators': getattr(form, 'affected_operators', None) and form.affected_operators.data,
-                'related_regulation_ids': getattr(form, 'related_regulation_ids', None) and form.related_regulation_ids.data
+                'related_regulation_ids': getattr(form, 'related_regulation_ids', None) and form.related_regulation_ids.data,
+                # New template fields
+                'summary': getattr(form, 'summary', None) and form.summary.data,
+                'full_text': getattr(form, 'full_text', None) and form.full_text.data,
+                'compliance_requirements': getattr(form, 'compliance_requirements', None) and form.compliance_requirements.data,
+                'implementation_timeline': getattr(form, 'implementation_timeline', None) and form.implementation_timeline.data,
+                'official_sources': getattr(form, 'official_sources', None) and form.official_sources.data,
+                'expert_analysis': getattr(form, 'expert_analysis', None) and form.expert_analysis.data,
+                'kaystreet_commitment': getattr(form, 'kaystreet_commitment', None) and form.kaystreet_commitment.data
             }
             
             success, updated_update, error = UpdateService.update_update(update_id, update_data)

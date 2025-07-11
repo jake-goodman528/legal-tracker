@@ -5,233 +5,84 @@
 {% block content %}
 <div class="admin-content">
     <!-- Page Header -->
-    <div class="admin-page-header">
-        <div class="d-flex justify-content-between align-items-start">
-            <div>
+    <div class="admin-page-header mb-4">
+        <div class="row align-items-center">
+            <div class="col">
                 <h1 class="admin-page-title">
                     <i class="fas fa-newspaper"></i>
                     Manage Updates
                 </h1>
                 <p class="admin-page-subtitle">Track and publish industry updates, regulatory changes, and important news for compliance tracking.</p>
             </div>
-            <div class="admin-header-actions">
-                <div class="btn-group">
-                    <a href="{{ url_for('admin.new_update') }}" class="btn btn-admin-primary">
-                        <i class="fas fa-plus me-2"></i>
-                        Add New Update
-                    </a>
-                    <button type="button" class="btn btn-admin-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
-                        <span class="visually-hidden">Toggle Dropdown</span>
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ url_for('admin.import_updates_csv') }}">
-                            <i class="fas fa-upload me-2"></i>Import from CSV
-                        </a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('admin.export_updates_csv') }}">
-                            <i class="fas fa-download me-2"></i>Export to CSV
-                        </a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="{{ url_for('admin.deadline_reminders') }}">
-                            <i class="fas fa-calendar-exclamation me-2"></i>Deadline Reminders
-                        </a></li>
-                    </ul>
-                </div>
+            <div class="col-auto">
+                <a href="{{ url_for('admin.new_update') }}" class="btn btn-success">
+                    <i class="fas fa-plus me-2"></i>
+                    Add New Update
+                </a>
             </div>
-        </div>
-    </div>
-
-    <!-- Status Filter Tabs -->
-    <div class="admin-filter-tabs mb-4">
-        <div class="filter-tabs-container">
-            <button class="filter-tab active" data-filter="all" onclick="filterByStatus('all')">
-                <i class="fas fa-list me-2"></i>
-                All Updates
-                <span class="tab-count">{{ updates | length }}</span>
-            </button>
-            <button class="filter-tab" data-filter="Recent" onclick="filterByStatus('Recent')">
-                <i class="fas fa-check-circle me-2"></i>
-                Recent
-                <span class="tab-count">{{ updates | selectattr('change_type', 'equalto', 'Recent') | list | length }}</span>
-            </button>
-            <button class="filter-tab" data-filter="Upcoming" onclick="filterByStatus('Upcoming')">
-                <i class="fas fa-clock me-2"></i>
-                Upcoming
-                <span class="tab-count">{{ updates | selectattr('change_type', 'equalto', 'Upcoming') | list | length }}</span>
-            </button>
-            <button class="filter-tab" data-filter="Proposed" onclick="filterByStatus('Proposed')">
-                <i class="fas fa-hourglass-half me-2"></i>
-                Proposed
-                <span class="tab-count">{{ updates | selectattr('change_type', 'equalto', 'Proposed') | list | length }}</span>
-            </button>
         </div>
     </div>
 
     {% if updates %}
-    <!-- Professional Updates Table -->
-    <div class="admin-updates-table-card">
-        <div class="updates-table-header">
-            <div class="table-header-content">
-                <h5 class="updates-table-title">
-                    <i class="fas fa-table"></i>
-                    <span id="current-filter-title">All Updates</span>
-                    <span class="updates-count-badge" id="visible-count">{{ updates | length }}</span>
-                </h5>
-                <div class="table-actions">
-                    <div class="bulk-actions" id="bulk-actions" style="display: none;">
-                        <select id="bulk-action-select" class="form-select form-select-sm me-2">
-                            <option value="">Bulk Actions</option>
-                            <option value="change-status">Change Status</option>
-                            <option value="delete">Delete Selected</option>
-                        </select>
-                        <button class="btn btn-admin-secondary btn-sm" onclick="executeBulkAction()">
-                            <i class="fas fa-play me-1"></i>
-                            Apply
-                        </button>
-                    </div>
-                    <button class="btn btn-admin-secondary btn-sm" onclick="exportUpdatesToCSV()">
-                        <i class="fas fa-download me-1"></i>
-                        Export CSV
-                    </button>
-                </div>
-            </div>
+    <!-- Updates Table -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-list me-2"></i>
+                All Updates ({{ updates|length }})
+            </h5>
         </div>
-        <div class="updates-table-body">
+        <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="admin-updates-table" id="updatesTable">
-                    <thead>
+                <table class="table table-hover mb-0">
+                    <thead class="table-dark">
                         <tr>
-                            <th class="checkbox-column">
-                                <input type="checkbox" id="select-all" onchange="toggleSelectAll()">
-                            </th>
-                            <th class="title-column sortable" data-sort="title">
-                                <i class="fas fa-file-alt me-1"></i>
-                                Title & Description
-                                <i class="fas fa-sort sort-icon"></i>
-                            </th>
-                            <th class="jurisdiction-column sortable" data-sort="jurisdiction">
-                                <i class="fas fa-map-marker-alt me-1"></i>
-                                Jurisdiction
-                                <i class="fas fa-sort sort-icon"></i>
-                            </th>
-                            <th class="status-column sortable" data-sort="status">
-                                <i class="fas fa-flag me-1"></i>
-                                Status
-                                <i class="fas fa-sort sort-icon"></i>
-                            </th>
-                            <th class="date-column sortable" data-sort="date">
-                                <i class="fas fa-calendar-alt me-1"></i>
-                                Update Date
-                                <i class="fas fa-sort sort-icon"></i>
-                            </th>
-                            <th class="decision-date-column sortable" data-sort="decision-date">
-                                <i class="fas fa-calendar-check me-1"></i>
-                                Expected Decision
-                                <i class="fas fa-sort sort-icon"></i>
-                            </th>
-                            <th class="impact-column">
-                                <i class="fas fa-exclamation-triangle me-1"></i>
-                                Impact & Decision Status
-                            </th>
-                            <th class="actions-column">
-                                <i class="fas fa-tools me-1"></i>
-                                Actions
-                            </th>
+                            <th>Title</th>
+                            <th>Jurisdiction</th>
+                            <th>Status</th>
+                            <th>Update Date</th>
+                            <th class="text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for update in updates %}
-                        <tr class="update-table-row" data-item-id="{{ update.id }}" data-status="{{ update.change_type or update.status }}">
-                            <td class="checkbox-cell">
-                                <input type="checkbox" class="row-checkbox" value="{{ update.id }}">
+                        <tr>
+                            <td>
+                                <div class="fw-bold">{{ update.title }}</div>
+                                {% if update.description %}
+                                <small class="text-muted">
+                                    {{ update.description|striptags|truncate(100) }}
+                                </small>
+                                {% endif %}
                             </td>
-                            <td class="title-cell">
-                                <div class="update-title-text">{{ update.title }}</div>
-                                <div class="update-description-preview">
-                                    {{ update.description[:100] }}{% if update.description|length > 100 %}...{% endif %}
-                                </div>
+                            <td>
+                                <span class="badge bg-primary">{{ update.jurisdiction_affected or 'N/A' }}</span>
                             </td>
-                            <td class="jurisdiction-cell">
-                                <div class="update-jurisdiction">{{ update.jurisdiction_affected }}</div>
+                            <td>
+                                <span class="badge 
+                                    {% if (update.change_type or update.status) == 'Recent' %}bg-success
+                                    {% elif (update.change_type or update.status) == 'Upcoming' %}bg-warning
+                                    {% else %}bg-info{% endif %}">
+                                    {{ update.change_type or update.status or 'N/A' }}
+                                </span>
                             </td>
-                            <td class="status-cell">
-                                <div class="status-with-actions">
-                                    <span class="status-badge 
-                                        {% if (update.change_type or update.status) == 'Recent' %}status-recent
-                                        {% elif (update.change_type or update.status) == 'Upcoming' %}status-upcoming
-                                        {% else %}status-proposed{% endif %}">
-                                        {{ update.change_type or update.status }}
-                                    </span>
-                                    <div class="quick-status-actions">
-                                        <button class="quick-status-btn" onclick="quickChangeStatus({{ update.id }}, 'Recent')" 
-                                                title="Mark as Recent" {% if (update.change_type or update.status) == 'Recent' %}disabled{% endif %}>
-                                            <i class="fas fa-check"></i>
-                                        </button>
-                                        <button class="quick-status-btn" onclick="quickChangeStatus({{ update.id }}, 'Upcoming')" 
-                                                title="Mark as Upcoming" {% if (update.change_type or update.status) == 'Upcoming' %}disabled{% endif %}>
-                                            <i class="fas fa-clock"></i>
-                                        </button>
-                                        <button class="quick-status-btn" onclick="quickChangeStatus({{ update.id }}, 'Proposed')" 
-                                                title="Mark as Proposed" {% if (update.change_type or update.status) == 'Proposed' %}disabled{% endif %}>
-                                            <i class="fas fa-hourglass-half"></i>
-                                        </button>
-                                    </div>
-                                </div>
+                            <td>
+                                {{ update.update_date.strftime('%b %d, %Y') if update.update_date else 'N/A' }}
                             </td>
-                            <td class="date-cell">
-                                <div class="update-date">
-                                    {% if update.update_date %}
-                                        {{ update.update_date.strftime('%b %d, %Y') }}
-                                    {% else %}
-                                        Not specified
-                                    {% endif %}
-                                </div>
-                            </td>
-                            <td class="decision-date-cell">
-                                <div class="decision-date">
-                                    {% if update.expected_decision_date %}
-                                        {{ update.expected_decision_date.strftime('%b %d, %Y') }}
-                                    {% else %}
-                                        <span class="text-muted">N/A</span>
-                                    {% endif %}
-                                </div>
-                            </td>
-                            <td class="impact-cell">
-                                <div class="impact-info">
-                                    <div class="impact-level">
-                                        <span class="impact-badge impact-{{ update.impact_level.lower() if update.impact_level else 'medium' }}">
-                                            {{ update.impact_level or 'Medium' }}
-                                        </span>
-                                    </div>
-                                    {% if update.decision_status %}
-                                        <div class="decision-status">
-                                            <span class="decision-badge decision-{{ update.decision_status.lower().replace(' ', '-') }}">
-                                                {{ update.decision_status }}
-                                            </span>
-                                        </div>
-                                    {% endif %}
-                                    {% if update.potential_impact %}
-                                        <div class="potential-impact-preview">
-                                            {{ update.potential_impact[:60] }}{% if update.potential_impact|length > 60 %}...{% endif %}
-                                        </div>
-                                    {% endif %}
-                                </div>
-                            </td>
-                            <td class="actions-cell">
-                                <div class="update-actions">
-                                    <a href="{{ url_for('admin.edit_update', update_id=update.id) }}" 
-                                       class="action-btn edit-btn" 
-                                       title="Edit Update">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <button type="button" 
-                                            class="action-btn delete-btn" 
-                                            title="Delete Update"
-                                            data-update-id="{{ update.id }}"
-                                            data-update-title="{{ update.title }}"
-                                            onclick="deleteUpdate(this)">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
+                            <td class="text-center">
+                                <a href="{{ url_for('main.update_detail', update_id=update.id) }}" 
+                                   class="btn btn-sm btn-info" title="View">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ url_for('admin.edit_update', update_id=update.id) }}" 
+                                   class="btn btn-sm btn-primary" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-danger" 
+                                        onclick="confirmDelete({{ update.id }}, '{{ update.title }}')"
+                                        title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             </td>
                         </tr>
                         {% endfor %}
@@ -239,24 +90,18 @@
                 </table>
             </div>
         </div>
-
     </div>
     {% else %}
-    <!-- Professional Empty State -->
-    <div class="admin-empty-state">
-        <div class="empty-state-icon">
-            <i class="fas fa-newspaper"></i>
-        </div>
-        <h3 class="empty-state-title">No updates found</h3>
-        <p class="empty-state-description">Start building your updates database by adding your first regulatory update or industry news.</p>
-        <a href="{{ url_for('admin.new_update') }}" class="btn btn-admin-primary">
-            <i class="fas fa-plus me-2"></i> Add First Update
-        </a>
-        <div class="mt-4">
-            <p class="text-muted small">
-                <i class="fas fa-lightbulb me-1"></i>
-                Tip: Regular updates help keep your compliance tracking current and valuable.
-            </p>
+    <!-- Empty State -->
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <i class="fas fa-newspaper fa-4x text-muted mb-3"></i>
+            <h3>No updates found</h3>
+            <p class="text-muted">Start by adding your first update.</p>
+            <a href="{{ url_for('admin.new_update') }}" class="btn btn-success">
+                <i class="fas fa-plus me-2"></i>
+                Add First Update
+            </a>
         </div>
     </div>
     {% endif %}
@@ -272,13 +117,12 @@
             </div>
             <div class="modal-body">
                 <p>Are you sure you want to delete this update?</p>
-                <p><strong id="deleteUpdateTitle"></strong></p>
-                <p class="text-danger">This action cannot be undone.</p>
+                <p class="fw-bold" id="deleteUpdateTitle"></p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form id="deleteUpdateForm" method="POST" class="d-inline">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <form id="deleteForm" method="POST" style="display: inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button type="submit" class="btn btn-danger">Delete</button>
                 </form>
             </div>
@@ -286,841 +130,11 @@
     </div>
 </div>
 
-<!-- Bulk Status Change Modal -->
-<div class="modal fade" id="bulkStatusModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Change Status</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>Change status for <span id="selected-count">0</span> selected updates:</p>
-                <select id="new-status-select" class="form-select">
-                    <option value="Recent">Recent</option>
-                    <option value="Upcoming">Upcoming</option>
-                    <option value="Proposed">Proposed</option>
-                </select>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="confirmBulkStatusChange()">Change Status</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Bulk Delete Confirmation Modal -->
-<div class="modal fade" id="bulkDeleteModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Confirm Bulk Deletion</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to delete <span id="delete-count">0</span> selected updates?</p>
-                <p class="text-danger">This action cannot be undone.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" onclick="confirmBulkDelete()">Delete Selected</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<style>
-/* Professional Admin Updates Interface Styles */
-
-/* Filter Tabs */
-.admin-filter-tabs {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    padding: 1rem;
-    border-left: 4px solid var(--admin-accent);
-}
-
-.filter-tabs-container {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-}
-
-.filter-tab {
-    background: #F8F9FA;
-    border: 1px solid #E5E7EB;
-    border-radius: 6px;
-    padding: 0.75rem 1rem;
-    font-family: 'Yantramanav', sans-serif;
-    font-weight: 500;
-    color: #6B7280;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.filter-tab:hover {
-    background: #E5E7EB;
-    color: #374151;
-}
-
-.filter-tab.active {
-    background: var(--admin-primary);
-    color: white;
-    border-color: var(--admin-primary);
-}
-
-.tab-count {
-    background: rgba(255, 255, 255, 0.2);
-    padding: 0.25rem 0.5rem;
-    border-radius: 12px;
-    font-size: 0.8rem;
-    font-weight: 600;
-}
-
-.filter-tab.active .tab-count {
-    background: var(--admin-accent);
-}
-
-/* Updates Table Styles */
-.admin-updates-table-card {
-    background: white;
-    border-radius: 8px;
-    border-left: 4px solid var(--admin-accent);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-}
-
-.updates-table-header {
-    background: #F8F9FA;
-    border-bottom: 1px solid #E5E7EB;
-    padding: 1.5rem;
-}
-
-.table-header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
-.updates-table-title {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--admin-primary);
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.updates-table-title i {
-    color: var(--admin-accent);
-}
-
-.updates-count-badge {
-    background: var(--admin-accent);
-    color: white;
-    padding: 0.25rem 0.75rem;
-    border-radius: 12px;
-    font-family: 'Yantramanav', sans-serif;
-    font-size: 0.8rem;
-    font-weight: 600;
-    margin-left: 0.5rem;
-}
-
-.table-actions {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.bulk-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.updates-table-body {
-    background: white;
-}
-
-.admin-updates-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 0;
-}
-
-.admin-updates-table thead th {
-    background: var(--admin-primary);
-    color: white;
-    padding: 1rem;
-    text-align: left;
-    font-family: 'Yantramanav', sans-serif;
-    font-weight: 600;
-    font-size: 0.85rem;
-    border: none;
-    white-space: nowrap;
-    position: relative;
-}
-
-.admin-updates-table thead th i {
-    color: var(--admin-accent);
-    margin-right: 0.5rem;
-}
-
-.admin-updates-table thead th.sortable {
-    cursor: pointer;
-    user-select: none;
-}
-
-.admin-updates-table thead th.sortable:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.sort-icon {
-    position: absolute;
-    right: 0.5rem;
-    top: 50%;
-    transform: translateY(-50%);
-    opacity: 0.5;
-    transition: opacity 0.3s ease;
-}
-
-.sortable:hover .sort-icon {
-    opacity: 1;
-}
-
-.admin-updates-table tbody tr {
-    border-bottom: 1px solid #F3F4F6;
-    transition: background-color 0.3s ease;
-}
-
-.admin-updates-table tbody tr:hover {
-    background: #F8F9FA;
-}
-
-.admin-updates-table tbody tr.hidden {
-    display: none;
-}
-
-.admin-updates-table tbody td {
-    padding: 1rem;
-    vertical-align: middle;
-    border: none;
-}
-
-.update-title-text {
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 600;
-    color: var(--admin-primary);
-    font-size: 0.95rem;
-    margin-bottom: 0.5rem;
-    line-height: 1.3;
-}
-
-.update-description-preview {
-    font-family: 'Yantramanav', sans-serif;
-    font-size: 0.8rem;
-    color: #6B7280;
-    line-height: 1.4;
-}
-
-.update-jurisdiction {
-    font-family: 'Yantramanav', sans-serif;
-    font-weight: 500;
-    color: #374151;
-}
-
-.update-date, .decision-date {
-    font-family: 'Yantramanav', sans-serif;
-    font-weight: 500;
-    color: #374151;
-    font-size: 0.9rem;
-}
-
-/* Status and Action Badges */
-.status-with-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.status-badge {
-    display: inline-block;
-    padding: 0.375rem 0.75rem;
-    border-radius: 12px;
-    font-family: 'Yantramanav', sans-serif;
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.status-recent {
-    background: #D1FAE5;
-    color: #065F46;
-}
-
-.status-upcoming {
-    background: #FEF3C7;
-    color: #92400E;
-}
-
-.status-proposed {
-    background: #DBEAFE;
-    color: #1E40AF;
-}
-
-.quick-status-actions {
-    display: flex;
-    gap: 0.25rem;
-}
-
-.quick-status-btn {
-    background: #F3F4F6;
-    border: 1px solid #E5E7EB;
-    border-radius: 4px;
-    padding: 0.25rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 0.7rem;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.quick-status-btn:hover:not(:disabled) {
-    background: var(--admin-accent);
-    color: white;
-}
-
-.quick-status-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.impact-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-}
-
-.impact-badge {
-    display: inline-block;
-    padding: 0.25rem 0.5rem;
-    border-radius: 8px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.impact-high {
-    background: #FEE2E2;
-    color: #991B1B;
-}
-
-.impact-medium {
-    background: #FEF3C7;
-    color: #92400E;
-}
-
-.impact-low {
-    background: #D1FAE5;
-    color: #065F46;
-}
-
-.decision-badge {
-    display: inline-block;
-    padding: 0.25rem 0.5rem;
-    border-radius: 8px;
-    font-size: 0.7rem;
-    font-weight: 500;
-    text-transform: capitalize;
-}
-
-.decision-under-review {
-    background: #EDE9FE;
-    color: #6B46C1;
-}
-
-.decision-public-hearings {
-    background: #DBEAFE;
-    color: #1E40AF;
-}
-
-.decision-proposed {
-    background: #FEF3C7;
-    color: #92400E;
-}
-
-.decision-approved {
-    background: #D1FAE5;
-    color: #065F46;
-}
-
-.decision-rejected {
-    background: #FEE2E2;
-    color: #991B1B;
-}
-
-.potential-impact-preview {
-    font-size: 0.7rem;
-    color: #6B7280;
-    font-style: italic;
-    margin-top: 0.25rem;
-}
-
-/* Update Actions */
-.update-actions {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-}
-
-/* Column Widths */
-.checkbox-column {
-    width: 3%;
-}
-
-.title-column {
-    width: 25%;
-}
-
-.jurisdiction-column {
-    width: 12%;
-}
-
-.status-column {
-    width: 12%;
-}
-
-.date-column {
-    width: 10%;
-}
-
-.decision-date-column {
-    width: 10%;
-}
-
-.impact-column {
-    width: 18%;
-}
-
-.actions-column {
-    width: 10%;
-    text-align: center;
-}
-
-/* Empty State */
-.admin-empty-state {
-    background: white;
-    border-radius: 8px;
-    border-left: 4px solid var(--admin-accent);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    padding: 3rem 2rem;
-    text-align: center;
-}
-
-.empty-state-icon {
-    width: 80px;
-    height: 80px;
-    background: linear-gradient(135deg, var(--admin-accent), #0FA8C0);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 2rem auto;
-}
-
-.empty-state-icon i {
-    font-size: 2rem;
-    color: white;
-}
-
-.empty-state-title {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--admin-primary);
-    margin-bottom: 1rem;
-}
-
-.empty-state-description {
-    font-family: 'Yantramanav', sans-serif;
-    color: #6B7280;
-    margin-bottom: 2rem;
-    font-size: 1rem;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .filter-tabs-container {
-        flex-direction: column;
-    }
-    
-    .filter-tab {
-        justify-content: center;
-    }
-    
-    .table-header-content {
-        flex-direction: column;
-        gap: 1rem;
-        align-items: stretch;
-    }
-    
-    .updates-table-title {
-        justify-content: center;
-    }
-    
-    .table-actions {
-        justify-content: center;
-    }
-    
-    /* Hide less important columns on mobile */
-    .decision-date-column,
-    .decision-date-cell,
-    .impact-column,
-    .impact-cell {
-        display: none;
-    }
-    
-    .quick-status-actions {
-        flex-direction: column;
-        gap: 0.25rem;
-    }
-    
-    .update-actions {
-        flex-direction: column;
-        gap: 0.25rem;
-    }
-    
-    .action-btn {
-        width: 100%;
-        justify-content: flex-start;
-        padding: 0.5rem;
-        border-radius: 4px;
-    }
-    
-    .action-btn i {
-        margin-right: 0.5rem;
-    }
-    
-    .action-btn::after {
-        content: attr(title);
-        font-size: 0.8rem;
-    }
-}
-</style>
-
 <script>
-// Global variables
-let currentSort = null;
-let sortDirection = 'asc';
-let selectedItems = [];
-
-// Filter functionality
-function filterByStatus(status) {
-    // Update active tab
-    document.querySelectorAll('.filter-tab').forEach(tab => {
-        tab.classList.remove('active');
-    });
-    document.querySelector(`[data-filter="${status}"]`).classList.add('active');
-    
-    // Filter table rows
-    const rows = document.querySelectorAll('.update-table-row');
-    let visibleCount = 0;
-    
-    rows.forEach(row => {
-        const rowStatus = row.getAttribute('data-status');
-        if (status === 'all' || rowStatus === status) {
-            row.classList.remove('hidden');
-            visibleCount++;
-        } else {
-            row.classList.add('hidden');
-        }
-    });
-    
-    // Update title and count
-    const titleMap = {
-        'all': 'All Updates',
-        'Recent': 'Recent Updates',
-        'Upcoming': 'Upcoming Updates',
-        'Proposed': 'Proposed Updates'
-    };
-    
-    document.getElementById('current-filter-title').textContent = titleMap[status];
-    document.getElementById('visible-count').textContent = visibleCount;
-    
-    // Clear selections when filtering
-    clearSelections();
-}
-
-// Sorting functionality
-function sortTable(column) {
-    const table = document.getElementById('updatesTable');
-    const tbody = table.querySelector('tbody');
-    const rows = Array.from(tbody.querySelectorAll('tr:not(.hidden)'));
-    
-    // Toggle sort direction
-    if (currentSort === column) {
-        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-    } else {
-        sortDirection = 'asc';
-        currentSort = column;
-    }
-    
-    // Sort rows
-    rows.sort((a, b) => {
-        let aVal, bVal;
-        
-        switch (column) {
-            case 'title':
-                aVal = a.querySelector('.update-title-text').textContent.toLowerCase();
-                bVal = b.querySelector('.update-title-text').textContent.toLowerCase();
-                break;
-            case 'jurisdiction':
-                aVal = a.querySelector('.update-jurisdiction').textContent.toLowerCase();
-                bVal = b.querySelector('.update-jurisdiction').textContent.toLowerCase();
-                break;
-            case 'status':
-                aVal = a.getAttribute('data-status').toLowerCase();
-                bVal = b.getAttribute('data-status').toLowerCase();
-                break;
-            case 'date':
-                aVal = a.querySelector('.update-date').textContent;
-                bVal = b.querySelector('.update-date').textContent;
-                break;
-            case 'decision-date':
-                aVal = a.querySelector('.decision-date').textContent;
-                bVal = b.querySelector('.decision-date').textContent;
-                break;
-            default:
-                return 0;
-        }
-        
-        if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
-        if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
-        return 0;
-    });
-    
-    // Reorder rows
-    rows.forEach(row => tbody.appendChild(row));
-    
-    // Update sort icons
-    document.querySelectorAll('.sort-icon').forEach(icon => {
-        icon.className = 'fas fa-sort sort-icon';
-    });
-    
-    const activeHeader = document.querySelector(`[data-sort="${column}"] .sort-icon`);
-    if (activeHeader) {
-        activeHeader.className = `fas fa-sort-${sortDirection === 'asc' ? 'up' : 'down'} sort-icon`;
-    }
-}
-
-// Selection functionality
-function toggleSelectAll() {
-    const selectAllCheckbox = document.getElementById('select-all');
-    const rowCheckboxes = document.querySelectorAll('.row-checkbox');
-    const visibleCheckboxes = Array.from(rowCheckboxes).filter(cb => 
-        !cb.closest('tr').classList.contains('hidden')
-    );
-    
-    visibleCheckboxes.forEach(checkbox => {
-        checkbox.checked = selectAllCheckbox.checked;
-    });
-    
-    updateSelectedItems();
-}
-
-function updateSelectedItems() {
-    const checkboxes = document.querySelectorAll('.row-checkbox:checked');
-    selectedItems = Array.from(checkboxes).map(cb => cb.value);
-    
-    const bulkActions = document.getElementById('bulk-actions');
-    if (selectedItems.length > 0) {
-        bulkActions.style.display = 'flex';
-    } else {
-        bulkActions.style.display = 'none';
-    }
-    
-    // Update select all checkbox state
-    const selectAllCheckbox = document.getElementById('select-all');
-    const visibleCheckboxes = Array.from(document.querySelectorAll('.row-checkbox')).filter(cb => 
-        !cb.closest('tr').classList.contains('hidden')
-    );
-    const checkedVisibleCheckboxes = visibleCheckboxes.filter(cb => cb.checked);
-    
-    if (checkedVisibleCheckboxes.length === 0) {
-        selectAllCheckbox.indeterminate = false;
-        selectAllCheckbox.checked = false;
-    } else if (checkedVisibleCheckboxes.length === visibleCheckboxes.length) {
-        selectAllCheckbox.indeterminate = false;
-        selectAllCheckbox.checked = true;
-    } else {
-        selectAllCheckbox.indeterminate = true;
-    }
-}
-
-function clearSelections() {
-    document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = false);
-    document.getElementById('select-all').checked = false;
-    document.getElementById('select-all').indeterminate = false;
-    selectedItems = [];
-    document.getElementById('bulk-actions').style.display = 'none';
-}
-
-// Bulk actions
-function executeBulkAction() {
-    const action = document.getElementById('bulk-action-select').value;
-    if (!action || selectedItems.length === 0) return;
-    
-    switch (action) {
-        case 'change-status':
-            document.getElementById('selected-count').textContent = selectedItems.length;
-            new bootstrap.Modal(document.getElementById('bulkStatusModal')).show();
-            break;
-        case 'delete':
-            document.getElementById('delete-count').textContent = selectedItems.length;
-            new bootstrap.Modal(document.getElementById('bulkDeleteModal')).show();
-            break;
-    }
-}
-
-function confirmBulkStatusChange() {
-    const newStatus = document.getElementById('new-status-select').value;
-    if (!newStatus) return;
-    
-    // Send AJAX request to update status
-    fetch('/admin/updates/bulk-status-change', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': document.querySelector('[name=csrf_token]').value
-        },
-        body: JSON.stringify({
-            update_ids: selectedItems,
-            new_status: newStatus
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert('Error updating status: ' + data.error);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error updating status');
-    });
-    
-    bootstrap.Modal.getInstance(document.getElementById('bulkStatusModal')).hide();
-}
-
-function confirmBulkDelete() {
-    // Send AJAX request to delete updates
-    fetch('/admin/updates/bulk-delete', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': document.querySelector('[name=csrf_token]').value
-        },
-        body: JSON.stringify({
-            update_ids: selectedItems
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert('Error deleting updates: ' + data.error);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error deleting updates');
-    });
-    
-    bootstrap.Modal.getInstance(document.getElementById('bulkDeleteModal')).hide();
-}
-
-// Quick status change
-function quickChangeStatus(updateId, newStatus) {
-    fetch('/admin/updates/quick-status-change', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': document.querySelector('[name=csrf_token]').value
-        },
-        body: JSON.stringify({
-            update_id: updateId,
-            new_status: newStatus
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert('Error updating status: ' + data.error);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error updating status');
-    });
-}
-
-// Delete functionality
-function deleteUpdate(button) {
-    const id = button.getAttribute('data-update-id');
-    const title = button.getAttribute('data-update-title');
+function confirmDelete(id, title) {
     document.getElementById('deleteUpdateTitle').textContent = title;
-    document.getElementById('deleteUpdateForm').action = `/admin/updates/${id}/delete`;
+    document.getElementById('deleteForm').action = `/admin/updates/${id}/delete`;
     new bootstrap.Modal(document.getElementById('deleteModal')).show();
 }
-
-// CSV Export
-function exportUpdatesToCSV() {
-    window.location.href = '/admin/updates/export-csv';
-}
-
-// Event listeners
-document.addEventListener('DOMContentLoaded', function() {
-    // Add sortable click handlers
-    document.querySelectorAll('.sortable').forEach(header => {
-        header.addEventListener('click', function() {
-            const column = this.getAttribute('data-sort');
-            sortTable(column);
-        });
-    });
-    
-    // Add checkbox change handlers
-    document.querySelectorAll('.row-checkbox').forEach(checkbox => {
-        checkbox.addEventListener('change', updateSelectedItems);
-    });
-    
-    // Add loading state to delete button
-    document.getElementById('deleteUpdateForm').addEventListener('submit', function(e) {
-        const submitBtn = this.querySelector('button[type="submit"]');
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Deleting...';
-        submitBtn.disabled = true;
-    });
-});
 </script>
-{% endblock %}
-
-{% block scripts %}
-<script src="{{ url_for('static', filename='js/admin-bulk-operations.js') }}"></script>
 {% endblock %}

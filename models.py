@@ -28,36 +28,23 @@ class Regulation(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     
-    # Core Information
-    jurisdiction_level = db.Column(db.String(20), nullable=False)  # National, State, Local
-    location = db.Column(db.String(100), nullable=False)  # USA, Florida, Tampa, etc.
-    title = db.Column(db.String(200), nullable=False)
-    key_requirements = db.Column(db.Text, nullable=False)
+    # Core Information - Required fields
+    jurisdiction = db.Column(db.String(100), nullable=False)  # Jurisdiction (combines level and location)
+    location = db.Column(db.String(100), nullable=False)  # Location
+    title = db.Column(db.String(200), nullable=False)  # Title
+    last_updated = db.Column(db.DateTime, default=datetime.utcnow)  # Last Updated
     
-    # Compliance Details
-    compliance_level = db.Column(db.String(20), nullable=False, default='Mandatory')  # Mandatory, Recommended, Optional
-    property_types = db.Column(db.String(200))  # Comma-separated: Residential, Commercial, Mixed-use
-    status = db.Column(db.String(20), default='Current & Active')  # Current & Active, Upcoming, Expired
-    
-    # Metadata
-    category = db.Column(db.String(50), nullable=False, default='General')  # Zoning, Registration, Tax, Licensing
-    priority = db.Column(db.String(10), default='Medium')  # High, Medium, Low
-    related_keywords = db.Column(db.Text)  # Comma-separated tags
-    compliance_checklist = db.Column(db.Text)  # JSON or structured text
-    
-    # Contact Information
-    local_authority_contact = db.Column(db.Text)  # Contact details for local authorities
+    # Rich Text Content Fields - Support formatting (bold, indent, numbering, bullet points, etc.)
+    overview = db.Column(db.Text, nullable=True)  # Overview - formatted content
+    detailed_requirements = db.Column(db.Text, nullable=True)  # Detailed Requirements - formatted content
+    compliance_steps = db.Column(db.Text, nullable=True)  # Compliance Steps - formatted content
+    required_forms = db.Column(db.Text, nullable=True)  # Required Forms - formatted content
+    penalties_non_compliance = db.Column(db.Text, nullable=True)  # Penalties for Non Compliance - formatted content
+    recent_changes = db.Column(db.Text, nullable=True)  # Recent Changes - formatted content
     
     # Timestamps
-    last_updated = db.Column(db.DateTime, default=datetime.utcnow)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
-    # Legacy fields for backward compatibility (to be migrated)
-    property_type = db.Column(db.String(50), nullable=True)  # Legacy field - will migrate to property_types
-    effective_date = db.Column(db.Date, nullable=True)  # When regulation becomes effective
-    expiry_date = db.Column(db.Date, nullable=True)  # When regulation expires (if applicable)
-    keywords = db.Column(db.Text, nullable=True)  # Legacy field - will migrate to related_keywords
 
     def __repr__(self) -> str:
         return f'<Regulation {self.title}>'
@@ -71,26 +58,18 @@ class Regulation(db.Model):
         """
         return {
             'id': self.id,
-            'jurisdiction_level': self.jurisdiction_level,
+            'jurisdiction': self.jurisdiction,
             'location': self.location,
             'title': self.title,
-            'key_requirements': self.key_requirements,
-            'compliance_level': self.compliance_level,
-            'property_types': self.property_types.split(',') if self.property_types else [],
-            'status': self.status,
-            'category': self.category,
-            'priority': self.priority,
-            'related_keywords': self.related_keywords.split(',') if self.related_keywords else [],
-            'compliance_checklist': self.compliance_checklist,
-            'local_authority_contact': self.local_authority_contact,
             'last_updated': self.last_updated.isoformat() if self.last_updated else None,
+            'overview': self.overview,
+            'detailed_requirements': self.detailed_requirements,
+            'compliance_steps': self.compliance_steps,
+            'required_forms': self.required_forms,
+            'penalties_non_compliance': self.penalties_non_compliance,
+            'recent_changes': self.recent_changes,
             'created_at': self.created_at.isoformat() if self.created_at else None,
-            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
-            # Legacy fields for backward compatibility
-            'property_type': self.property_type,
-            'effective_date': self.effective_date.isoformat() if self.effective_date else None,
-            'expiry_date': self.expiry_date.isoformat() if self.expiry_date else None,
-            'keywords': self.keywords
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
 
 class Update(db.Model):
@@ -121,6 +100,15 @@ class Update(db.Model):
     change_type = db.Column(db.String(20), nullable=False, default='Recent')  # Recent, Upcoming, Proposed
     compliance_deadline = db.Column(db.Date, nullable=True)  # Deadline for compliance with new changes
     affected_operators = db.Column(db.Text, nullable=True)  # Description of which operators are affected
+    
+    # New template fields for structured public-facing display
+    summary = db.Column(db.Text, nullable=True)  # Brief summary for the Summary section
+    full_text = db.Column(db.Text, nullable=True)  # Full detailed text of the update
+    compliance_requirements = db.Column(db.Text, nullable=True)  # Specific compliance requirements
+    implementation_timeline = db.Column(db.Text, nullable=True)  # Timeline for implementation
+    official_sources = db.Column(db.Text, nullable=True)  # Official sources and references
+    expert_analysis = db.Column(db.Text, nullable=True)  # Kaystreet Management's interpretation
+    kaystreet_commitment = db.Column(db.Text, nullable=True)  # Kaystreet Management's commitment statement
     
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -153,6 +141,13 @@ class Update(db.Model):
             'change_type': self.change_type,
             'compliance_deadline': self.compliance_deadline.isoformat() if self.compliance_deadline else None,
             'affected_operators': self.affected_operators,
+            'summary': self.summary,
+            'full_text': self.full_text,
+            'compliance_requirements': self.compliance_requirements,
+            'implementation_timeline': self.implementation_timeline,
+            'official_sources': self.official_sources,
+            'expert_analysis': self.expert_analysis,
+            'kaystreet_commitment': self.kaystreet_commitment,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }

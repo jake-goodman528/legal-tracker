@@ -175,10 +175,10 @@
                     <div class="card h-100 regulation-card-enhanced shadow-sm">
                         <div class="card-header d-flex justify-content-between align-items-center bg-light">
                             <div class="header-badges">
-                                <span class="badge bg-{{ 'success' if regulation.jurisdiction_level == 'Local' else 'primary' if regulation.jurisdiction_level == 'State' else 'warning' }}">
-                                    {{ regulation.jurisdiction_level.upper() }}
+                                <span class="badge bg-{{ 'success' if regulation.jurisdiction == 'Local' else 'primary' if regulation.jurisdiction == 'State' else 'warning' }}">
+                                    {{ regulation.jurisdiction.upper() }}
                                 </span>
-                                <span class="badge bg-secondary ms-2">{{ regulation.category }}</span>
+                                <span class="badge bg-secondary ms-2">General</span>
                             </div>
                             <small class="text-muted">
                                 <i class="fas fa-map-marker-alt"></i> {{ regulation.location }}
@@ -192,49 +192,38 @@
                                 </a>
                             </h5>
                             <p class="card-text text-muted">
-                                {{ regulation.key_requirements[:150] if regulation.key_requirements else 'No requirements specified' }}{% if regulation.key_requirements and regulation.key_requirements|length > 150 %}...{% endif %}
+                                {{ regulation.overview[:150] if regulation.overview else 'No overview available' }}{% if regulation.overview and regulation.overview|length > 150 %}...{% endif %}
                             </p>
                             
                             <!-- Status Indicators Row -->
                             <div class="row text-center mb-3 status-indicators">
                                 <div class="col-4">
-                                    <small class="text-muted d-block">Compliance</small>
-                                    <span class="badge bg-{{ 'danger' if regulation.compliance_level == 'Mandatory' else 'warning' if regulation.compliance_level == 'Recommended' else 'info' }}">
-                                        {{ regulation.compliance_level or 'Not Set' }}
+                                    <small class="text-muted d-block">Jurisdiction</small>
+                                    <span class="badge bg-primary">
+                                        {{ regulation.jurisdiction }}
                                     </span>
                                 </div>
                                 <div class="col-4">
-                                    <small class="text-muted d-block">Priority</small>
-                                    <span class="badge bg-{{ 'danger' if regulation.priority == 'High' else 'warning' if regulation.priority == 'Medium' else 'secondary' }}">
-                                        {{ regulation.priority or 'Not Set' }}
+                                    <small class="text-muted d-block">Location</small>
+                                    <span class="badge bg-secondary">
+                                        {{ regulation.location }}
                                     </span>
                                 </div>
                                 <div class="col-4">
                                     <small class="text-muted d-block">Status</small>
-                                    <span class="badge bg-{{ 'success' if regulation.status == 'Current & Active' else 'info' if regulation.status == 'Upcoming' else 'secondary' }}">
-                                        {{ (regulation.status or 'Unknown')[:8] }}
+                                    <span class="badge bg-success">
+                                        Active
                                     </span>
                                 </div>
                             </div>
 
                             <!-- Additional Info -->
-                            {% if regulation.property_types %}
                             <div class="mb-2">
                                 <small class="text-muted">
-                                    <i class="fas fa-building"></i> 
-                                    Property Types: {{ regulation.property_types }}
+                                    <i class="fas fa-calendar-alt"></i> 
+                                    Last Updated: {{ regulation.last_updated.strftime('%m/%d/%Y') if regulation.last_updated else 'N/A' }}
                                 </small>
                             </div>
-                            {% endif %}
-
-                            {% if regulation.related_keywords %}
-                            <div class="mb-2">
-                                <small class="text-muted">
-                                    <i class="fas fa-tags"></i> 
-                                    Keywords: {{ regulation.related_keywords[:50] }}{% if regulation.related_keywords|length > 50 %}...{% endif %}
-                                </small>
-                            </div>
-                            {% endif %}
                         </div>
                         <div class="card-footer d-flex justify-content-between align-items-center bg-transparent">
                             <small class="text-muted">
@@ -264,10 +253,10 @@
         <div class="table-view" id="tableView">
             <div class="table-responsive">
                 <table class="table table-hover regulations-table" id="regulationsTable">
-                    <thead class="table-light">
+                    <thead>
                         <tr>
-                            <th class="sortable" data-sort="jurisdiction_level">
-                                <i class="fas fa-layer-group"></i> Level
+                            <th class="sortable" data-sort="jurisdiction">
+                                <i class="fas fa-university"></i> Jurisdiction
                                 <i class="fas fa-sort sort-icon"></i>
                             </th>
                             <th class="sortable" data-sort="location">
@@ -275,23 +264,7 @@
                                 <i class="fas fa-sort sort-icon"></i>
                             </th>
                             <th class="sortable" data-sort="title">
-                                <i class="fas fa-gavel"></i> Regulation
-                                <i class="fas fa-sort sort-icon"></i>
-                            </th>
-                            <th class="sortable" data-sort="category">
-                                <i class="fas fa-tags"></i> Category
-                                <i class="fas fa-sort sort-icon"></i>
-                            </th>
-                            <th class="sortable" data-sort="compliance_level">
-                                <i class="fas fa-shield-alt"></i> Compliance
-                                <i class="fas fa-sort sort-icon"></i>
-                            </th>
-                            <th class="sortable" data-sort="priority">
-                                <i class="fas fa-exclamation-triangle"></i> Priority
-                                <i class="fas fa-sort sort-icon"></i>
-                            </th>
-                            <th class="sortable" data-sort="status">
-                                <i class="fas fa-check-circle"></i> Status
+                                <i class="fas fa-file-text"></i> Title
                                 <i class="fas fa-sort sort-icon"></i>
                             </th>
                             <th class="sortable" data-sort="last_updated">
@@ -305,8 +278,8 @@
                         {% for regulation in regulations %}
                         <tr class="regulation-row" data-regulation-id="{{ regulation.id }}">
                             <td>
-                                <span class="badge bg-{{ 'success' if regulation.jurisdiction_level == 'Local' else 'primary' if regulation.jurisdiction_level == 'State' else 'warning' }}">
-                                    {{ regulation.jurisdiction_level }}
+                                <span class="badge bg-primary">
+                                    {{ regulation.jurisdiction }}
                                 </span>
                             </td>
                             <td class="location-cell">{{ regulation.location }}</td>
@@ -315,31 +288,6 @@
                                    class="regulation-title-link text-decoration-none">
                                     {{ regulation.title }}
                                 </a>
-                                {% if regulation.property_types %}
-                                <br><small class="text-muted">
-                                    <i class="fas fa-building"></i> {{ regulation.property_types }}
-                                </small>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <span class="badge category-badge category-{{ regulation.category.lower().replace(' ', '-') }}">
-                                    {{ regulation.category }}
-                                </span>
-                            </td>
-                            <td>
-                                <span class="badge bg-{{ 'danger' if regulation.compliance_level == 'Mandatory' else 'warning' if regulation.compliance_level == 'Recommended' else 'info' }}">
-                                    {{ regulation.compliance_level or 'Not Set' }}
-                                </span>
-                            </td>
-                            <td>
-                                <span class="badge bg-{{ 'danger' if regulation.priority == 'High' else 'warning' if regulation.priority == 'Medium' else 'secondary' }}">
-                                    {{ regulation.priority or 'Not Set' }}
-                                </span>
-                            </td>
-                            <td>
-                                <span class="badge bg-{{ 'success' if regulation.status == 'Current & Active' else 'info' if regulation.status == 'Upcoming' else 'secondary' }}">
-                                    {{ regulation.status or 'Unknown' }}
-                                </span>
                             </td>
                             <td class="date-cell">
                                 {{ regulation.last_updated.strftime('%Y-%m-%d') if regulation.last_updated else 'N/A' }}
@@ -559,22 +507,16 @@
 <script src="{{ url_for('static', filename='js/advanced-search.js') }}"></script>
 <script src="{{ url_for('static', filename='js/search-enhancements.js') }}"></script>
 <script>
-// Enhanced regulations data with comprehensive fields
+// Enhanced regulations data with new model structure
 window.originalRegulationsData = [
     {% for regulation in regulations %}
     {
         id: "{{ regulation.id }}",
-        jurisdiction_level: "{{ regulation.jurisdiction_level }}",
+        jurisdiction: "{{ regulation.jurisdiction }}",
         location: "{{ regulation.location }}",
         title: "{{ regulation.title|e }}",
-        category: "{{ regulation.category }}",
-        compliance_level: "{{ regulation.compliance_level or '' }}",
-        priority: "{{ regulation.priority or '' }}",
-        status: "{{ regulation.status or '' }}",
-        property_types: "{{ regulation.property_types or '' }}",
-        related_keywords: "{{ regulation.related_keywords or '' }}",
         last_updated: "{{ regulation.last_updated.strftime('%Y-%m-%d') if regulation.last_updated else '' }}",
-        key_requirements: "{{ regulation.key_requirements|e if regulation.key_requirements else '' }}"
+        overview: "{{ regulation.overview|e if regulation.overview else '' }}"
     }{% if not loop.last %},{% endif %}
     {% endfor %}
 ];
@@ -620,16 +562,10 @@ function switchView(viewType) {
 function applyEnhancedFilters() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
     const jurisdictionFilter = document.getElementById('jurisdictionFilter').value;
-    const categoryFilter = document.getElementById('categoryFilter').value;
-    const priorityFilter = document.getElementById('priorityFilter').value;
-    const statusFilter = document.getElementById('statusFilter').value;
-    const complianceFilter = document.getElementById('complianceFilter').value;
     const locationFilter = document.getElementById('locationFilter').value;
-    const propertyTypeFilter = document.getElementById('propertyTypeFilter').value;
     
     let filteredCount = 0;
-    let hasActiveFilters = searchTerm || jurisdictionFilter || categoryFilter || priorityFilter || 
-                          statusFilter || complianceFilter || locationFilter || propertyTypeFilter;
+    let hasActiveFilters = searchTerm || jurisdictionFilter || locationFilter;
     
     // Show/hide filter status
     const filterStatus = document.getElementById('filterStatus');
@@ -647,18 +583,12 @@ function applyEnhancedFilters() {
         
         if (searchTerm && !data.title.toLowerCase().includes(searchTerm) && 
             !data.location.toLowerCase().includes(searchTerm) &&
-            !data.key_requirements.toLowerCase().includes(searchTerm) &&
-            !data.related_keywords.toLowerCase().includes(searchTerm)) {
+            !data.overview.toLowerCase().includes(searchTerm)) {
             show = false;
         }
         
-        if (jurisdictionFilter && data.jurisdiction_level !== jurisdictionFilter) show = false;
-        if (categoryFilter && data.category !== categoryFilter) show = false;
-        if (priorityFilter && data.priority !== priorityFilter) show = false;
-        if (statusFilter && data.status !== statusFilter) show = false;
-        if (complianceFilter && data.compliance_level !== complianceFilter) show = false;
+        if (jurisdictionFilter && data.jurisdiction !== jurisdictionFilter) show = false;
         if (locationFilter && data.location !== locationFilter) show = false;
-        if (propertyTypeFilter && !data.property_types.includes(propertyTypeFilter)) show = false;
         
         card.style.display = show ? 'block' : 'none';
         if (show) filteredCount++;
@@ -672,18 +602,12 @@ function applyEnhancedFilters() {
         
         if (searchTerm && !data.title.toLowerCase().includes(searchTerm) && 
             !data.location.toLowerCase().includes(searchTerm) &&
-            !data.key_requirements.toLowerCase().includes(searchTerm) &&
-            !data.related_keywords.toLowerCase().includes(searchTerm)) {
+            !data.overview.toLowerCase().includes(searchTerm)) {
             show = false;
         }
         
-        if (jurisdictionFilter && data.jurisdiction_level !== jurisdictionFilter) show = false;
-        if (categoryFilter && data.category !== categoryFilter) show = false;
-        if (priorityFilter && data.priority !== priorityFilter) show = false;
-        if (statusFilter && data.status !== statusFilter) show = false;
-        if (complianceFilter && data.compliance_level !== complianceFilter) show = false;
+        if (jurisdictionFilter && data.jurisdiction !== jurisdictionFilter) show = false;
         if (locationFilter && data.location !== locationFilter) show = false;
-        if (propertyTypeFilter && !data.property_types.includes(propertyTypeFilter)) show = false;
         
         row.style.display = show ? 'table-row' : 'none';
     });
@@ -706,12 +630,7 @@ function applyEnhancedFilters() {
 function clearAllFilters() {
     document.getElementById('searchInput').value = '';
     document.getElementById('jurisdictionFilter').value = '';
-    document.getElementById('categoryFilter').value = '';
-    document.getElementById('priorityFilter').value = '';
-    document.getElementById('statusFilter').value = '';
-    document.getElementById('complianceFilter').value = '';
     document.getElementById('locationFilter').value = '';
-    document.getElementById('propertyTypeFilter').value = '';
     
     applyEnhancedFilters();
     
