@@ -51,26 +51,43 @@ def index():
 def regulations():
     """Regulations listing page with filtering"""
     try:
-        logger.info("DEBUG: Starting regulations route")
+        # Get filter parameters from query string
+        filters = {
+            'jurisdiction_level': request.args.get('jurisdiction_level', ''),
+            'jurisdiction': request.args.get('jurisdiction', ''),
+            'location': request.args.get('location', ''),
+            'category': request.args.get('category', ''),
+            'search': request.args.get('search', ''),
+            'compliance_level': request.args.get('compliance_level', ''),
+            'property_type': request.args.get('property_type', '')
+        }
         
-        # Get sample regulations directly from database
-        from models import Regulation
-        regulations = Regulation.query.all()
-        logger.info(f"DEBUG: Found {len(regulations)} regulations in database")
+        # Get regulations with filters applied
+        from app.services.regulation_service import RegulationService
+        
+        # If any filters are applied, use filtered results
+        if any(filters.values()):
+            regulations = RegulationService.get_filtered_regulations(filters)
+        else:
+            # Get all regulations if no filters
+            from models import Regulation
+            regulations = Regulation.query.all()
         
         # Get distinct jurisdiction levels and locations from database
-        from app.services.regulation_service import RegulationService
         filter_options = RegulationService.get_filter_options()
         
         return render_template('regulations.html',
                              regulations=regulations,
-                             all_jurisdictions=filter_options.get('jurisdiction_levels', ['National', 'State', 'Local']),
+                             all_jurisdictions=filter_options.get('jurisdictions', []),
                              all_locations=filter_options.get('locations', []), 
                              all_categories=filter_options.get('categories', []),
-                             current_jurisdiction='',
-                             current_location='',
-                             current_category='',
-                             current_search='',
+                             current_jurisdiction=filters['jurisdiction'],
+                             current_location=filters['location'],
+                             current_category=filters['category'],
+                             current_search=filters['search'],
+                             current_jurisdiction_level=filters['jurisdiction_level'],
+                             current_compliance_level=filters['compliance_level'],
+                             current_property_type=filters['property_type'],
                              saved_searches=[])
                              
     except Exception as e:
@@ -78,13 +95,16 @@ def regulations():
         flash('Error loading regulations. Please try again later.', 'error')
         return render_template('regulations.html',
                              regulations=[],
-                             all_jurisdictions=['National', 'State', 'Local'],
+                             all_jurisdictions=[],
                              all_locations=[], 
                              all_categories=[],
                              current_jurisdiction='',
                              current_location='',
                              current_category='',
                              current_search='',
+                             current_jurisdiction_level='',
+                             current_compliance_level='',
+                             current_property_type='',
                              saved_searches=[])
 
 
@@ -339,24 +359,6 @@ def notifications():
                              bookmarked_updates=[],
                              action_required_updates=[],
                              upcoming_deadlines=[])
-
-
-@main_bp.route('/test-regulations')
-def test_regulations():
-    """Test route to debug regulations issue"""
-    try:
-        from models import Regulation
-        regulations = Regulation.query.all()
-        
-        result = {
-            'count': len(regulations),
-            'regulations': [{'id': r.id, 'title': r.title, 'location': r.location} for r in regulations]
-        }
-        
-        return f"<h1>Test Results</h1><pre>{result}</pre>"
-        
-    except Exception as e:
-        return f"<h1>Error</h1><pre>{str(e)}</pre>"
 
 
 # Error handlers

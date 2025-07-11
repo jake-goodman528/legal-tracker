@@ -38,6 +38,7 @@
                     <thead class="table-dark">
                         <tr>
                             <th>Title</th>
+                            <th>Level</th>
                             <th>Jurisdiction</th>
                             <th>Status</th>
                             <th>Update Date</th>
@@ -56,7 +57,10 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <span class="badge bg-primary">{{ update.jurisdiction_affected or 'N/A' }}</span>
+                                <span class="badge bg-primary">{{ update.jurisdiction_level or 'N/A' }}</span>
+                            </td>
+                            <td>
+                                {{ update.jurisdiction_affected or 'N/A' }}
                             </td>
                             <td>
                                 <span class="badge 

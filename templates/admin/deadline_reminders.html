@@ -98,7 +98,7 @@
                                         <span class="deadline-status status-{{ (update.change_type or update.status).lower() }}">
                                             {{ update.change_type or update.status }}
                                         </span>
-                                        <span class="deadline-jurisdiction">{{ update.jurisdiction_affected }}</span>
+                                        <span class="deadline-jurisdiction">{{ update.jurisdiction_level }} - {{ update.jurisdiction_affected }}</span>
                                         <span class="deadline-priority priority-{{ update.priority or '3' }}">
                                             {% if update.priority == '1' %}High Priority{% elif update.priority == '2' %}Medium Priority{% else %}Low Priority{% endif %}
                                         </span>

@@ -92,7 +92,6 @@ class RegulationService:
             for each category if database query fails.
         """
         try:
-            logging.info("DEBUG: get_filter_options called")
             jurisdictions = db.session.query(Regulation.jurisdiction).distinct().all()
             jurisdiction_levels = db.session.query(Regulation.jurisdiction_level).distinct().all()
             locations = db.session.query(Regulation.location).distinct().all()
@@ -103,14 +102,11 @@ class RegulationService:
                 'locations': [l[0] for l in locations if l[0]],
                 'categories': []  # Empty for now since Regulation model doesn't have category field
             }
-            logging.info(f"DEBUG: get_filter_options returning: {result}")
             return result
             
         except Exception as e:
             logging.error(f"Error getting filter options: {str(e)}")
-            result = {'jurisdictions': [], 'jurisdiction_levels': [], 'locations': [], 'categories': []}
-            logging.info(f"DEBUG: get_filter_options error fallback returning: {result}")
-            return result
+            return {'jurisdictions': [], 'jurisdiction_levels': [], 'locations': [], 'categories': []}
     
     @staticmethod
     def get_location_options_by_jurisdiction_level(jurisdiction_level: str) -> List[str]:

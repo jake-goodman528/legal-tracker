@@ -94,36 +94,77 @@ def log_api_call(endpoint_name):
 @log_api_call('advanced_search')
 def advanced_search():
     """Advanced search API endpoint with multiple criteria"""
-    # Get search parameters
-    search_params = {
-        'query': request.args.get('q', '').strip(),
-        'categories': request.args.getlist('categories[]'),
-        'compliance_levels': request.args.getlist('compliance_levels[]'),
-        'property_types': request.args.getlist('property_types[]'),
-        'locations': request.args.getlist('locations[]'),
-        'jurisdictions': request.args.getlist('jurisdictions[]'),
-        'jurisdiction_levels': request.args.getlist('jurisdiction_levels[]'),
-        'date_from': request.args.get('date_from'),
-        'date_to': request.args.get('date_to'),
-        'date_range_days': request.args.get('date_range_days')
-    }
-    
-    logger.info(f"Search parameters received: {search_params}")
-    
-    # Use SearchService to perform the search
-    results = SearchService.advanced_search(search_params)
-    
-    logger.info(f"Search returned {len(results)} results")
-    
-    # Convert to dictionaries for JSON response
-    regulations_data = [reg.to_dict() for reg in results]
-    
-    return jsonify({
-        'success': True,
-        'regulations': regulations_data,
-        'count': len(regulations_data),
-        'search_criteria': search_params
-    })
+    try:
+        # Get raw search parameters
+        raw_params = {
+            'q': request.args.get('q', '').strip(),
+            'query': request.args.get('query', '').strip(),
+            'categories': request.args.getlist('categories[]'),
+            'compliance_levels': request.args.getlist('compliance_levels[]'),
+            'property_types': request.args.getlist('property_types[]'),
+            'locations': request.args.getlist('locations[]'),
+            'jurisdictions': request.args.getlist('jurisdictions[]'),
+            'jurisdiction_levels': request.args.getlist('jurisdiction_levels[]'),
+            'jurisdiction_level': request.args.get('jurisdiction_level'),
+            'location': request.args.get('location'),
+            'date_from': request.args.get('date_from'),
+            'date_to': request.args.get('date_to'),
+            'date_range_days': request.args.get('date_range_days')
+        }
+        
+        logger.info(f"Raw search parameters received: {raw_params}")
+        
+        # Validate and sanitize parameters
+        from app.utils.filter_validation import FilterValidator, FilterValidationError
+        
+        try:
+            validated_params = FilterValidator.validate_regulations_filters(raw_params)
+            logger.info(f"Validated search parameters: {validated_params}")
+        except FilterValidationError as e:
+            logger.warning(f"Filter validation error: {str(e)}")
+            return jsonify({
+                'success': False,
+                'error': f'Invalid filter parameters: {str(e)}'
+            }), 400
+        
+        # Use SearchService to perform the search
+        results = SearchService.advanced_search(validated_params)
+        
+        logger.info(f"Search returned {len(results)} results")
+        
+        # Convert to dictionaries for JSON response
+        regulations_data = []
+        for reg in results:
+            try:
+                if hasattr(reg, 'to_dict'):
+                    regulations_data.append(reg.to_dict())
+                else:
+                    # Fallback for regulations without to_dict method
+                    regulations_data.append({
+                        'id': reg.id,
+                        'title': reg.title,
+                        'jurisdiction_level': reg.jurisdiction_level,
+                        'location': reg.location,
+                        'last_updated': reg.last_updated.isoformat() if reg.last_updated else None,
+                        'overview': reg.overview
+                    })
+            except Exception as e:
+                logger.warning(f"Error serializing regulation {reg.id}: {str(e)}")
+                continue
+        
+        return jsonify({
+            'success': True,
+            'regulations': regulations_data,
+            'count': len(regulations_data),
+            'search_criteria': validated_params
+        })
+        
+    except Exception as e:
+        logger.error(f"Advanced search error: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': 'Search failed due to server error'
+        }), 500
 
 
 @api_bp.route('/locations/<jurisdiction_level>')
@@ -432,52 +473,85 @@ def set_reminder(update_id):
 def search_updates():
     """Search updates with filters including all new fields"""
     try:
-        search_params = {
-            'query': request.args.get('q', ''),
-            'status': request.args.getlist('status[]'),
-            'categories': request.args.getlist('categories[]'),
-            'jurisdictions': request.args.getlist('jurisdictions[]'),
+        # Get raw search parameters
+        raw_params = {
+            'q': request.args.get('q', ''),
+            'query': request.args.get('query', ''),
+            'status': request.args.get('status'),
+            'category': request.args.get('category'),
+            'jurisdiction': request.args.get('jurisdiction'),
+            'impact_level': request.args.get('impact_level'),
+            'priority': request.args.get('priority'),
+            'action_required': request.args.get('action_required'),
             'date_from': request.args.get('date_from'),
             'date_to': request.args.get('date_to'),
+            # Support array parameters too
+            'statuses': request.args.getlist('status[]'),
+            'categories': request.args.getlist('categories[]'),
+            'jurisdictions': request.args.getlist('jurisdictions[]'),
             'impact_levels': request.args.getlist('impact_levels[]'),
-            'action_required': request.args.get('action_required'),
             'priorities': request.args.getlist('priorities[]'),
             'decision_statuses': request.args.getlist('decision_statuses[]'),
             'change_types': request.args.getlist('change_types[]'),
             'affected_operators': request.args.getlist('affected_operators[]')
         }
         
-        logger.info(f"Update search with params: {search_params}")
+        logger.info(f"Raw update search params: {raw_params}")
         
-        results = UpdateService.search_updates(search_params)
+        # Validate and sanitize parameters
+        from app.utils.filter_validation import FilterValidator, FilterValidationError
+        
+        try:
+            validated_params = FilterValidator.validate_updates_filters(raw_params)
+            logger.info(f"Validated update search parameters: {validated_params}")
+        except FilterValidationError as e:
+            logger.warning(f"Update filter validation error: {str(e)}")
+            return jsonify({
+                'success': False,
+                'error': f'Invalid filter parameters: {str(e)}'
+            }), 400
+        
+        # Use UpdateService to perform the search
+        results = UpdateService.search_updates(validated_params)
         
         # Include all new fields in the response
         updates_data = []
         for update in results:
-            update_data = {
-                'id': update.id,
-                'title': update.title,
-                'description': update.description,
-                'jurisdiction_affected': update.jurisdiction_affected,
-                'update_date': update.update_date.strftime('%Y-%m-%d') if update.update_date else None,
-                'status': update.status,
-                'category': update.category,
-                'impact_level': update.impact_level,
-                'action_required': update.action_required,
-                'priority': update.priority,
-                'change_type': update.change_type,
-                'decision_status': update.decision_status,
-                'potential_impact': update.potential_impact,
-                'affected_operators': update.affected_operators,
-                'effective_date': update.effective_date.strftime('%Y-%m-%d') if update.effective_date else None,
-                'deadline_date': update.deadline_date.strftime('%Y-%m-%d') if update.deadline_date else None,
-                'compliance_deadline': update.compliance_deadline.strftime('%Y-%m-%d') if update.compliance_deadline else None,
-                'expected_decision_date': update.expected_decision_date.strftime('%Y-%m-%d') if update.expected_decision_date else None,
-                'tags': update.tags,
-                'source_url': update.source_url,
-                'related_regulation_ids': update.related_regulation_ids
-            }
-            updates_data.append(update_data)
+            try:
+                update_data = {
+                    'id': update.id,
+                    'title': update.title,
+                    'description': update.description,
+                    'jurisdiction_affected': update.jurisdiction_affected,
+                    'update_date': update.update_date.strftime('%Y-%m-%d') if update.update_date else None,
+                    'status': update.status,
+                    'category': update.category,
+                    'impact_level': update.impact_level,
+                    'action_required': update.action_required,
+                    'priority': update.priority,
+                    'change_type': update.change_type,
+                    'decision_status': getattr(update, 'decision_status', None),
+                    'potential_impact': getattr(update, 'potential_impact', None),
+                    'affected_operators': getattr(update, 'affected_operators', None),
+                    'effective_date': update.effective_date.strftime('%Y-%m-%d') if update.effective_date else None,
+                    'deadline_date': update.deadline_date.strftime('%Y-%m-%d') if update.deadline_date else None,
+                    'compliance_deadline': getattr(update, 'compliance_deadline', None),
+                    'expected_decision_date': getattr(update, 'expected_decision_date', None),
+                    'tags': update.tags,
+                    'source_url': update.source_url,
+                    'related_regulation_ids': getattr(update, 'related_regulation_ids', None)
+                }
+                
+                # Handle date fields that might not exist
+                if hasattr(update, 'compliance_deadline') and update.compliance_deadline:
+                    update_data['compliance_deadline'] = update.compliance_deadline.strftime('%Y-%m-%d')
+                if hasattr(update, 'expected_decision_date') and update.expected_decision_date:
+                    update_data['expected_decision_date'] = update.expected_decision_date.strftime('%Y-%m-%d')
+                
+                updates_data.append(update_data)
+            except Exception as e:
+                logger.warning(f"Error serializing update {update.id}: {str(e)}")
+                continue
         
         logger.info(f"Update search returned {len(updates_data)} results")
         
@@ -485,15 +559,14 @@ def search_updates():
             'success': True,
             'updates': updates_data,
             'count': len(updates_data),
-            'search_params': search_params
+            'search_params': validated_params
         })
         
     except Exception as e:
         logger.error(f"Update search error: {str(e)}", exc_info=True)
         return jsonify({
             'success': False,
-            'error': 'Update search failed',
-            'details': str(e)
+            'error': 'Update search failed due to server error'
         }), 500
 
 

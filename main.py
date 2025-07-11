@@ -19,11 +19,9 @@ if __name__ == '__main__':
     port = int(os.environ.get("PORT", 9000))
     host = os.environ.get("HOST", "0.0.0.0")
     
+    print(f"Starting STR Compliance Toolkit on {host}:{port}")
     if debug_mode:
-        print(f"Starting STR Compliance Toolkit on {host}:{port}")
         print(f"Debug mode: {debug_mode}")
         print(f"Admin username: {os.environ.get('ADMIN_USERNAME', 'admin')}")
-    else:
-        print(f"Starting STR Compliance Toolkit on {host}:{port}")
     
     app.run(host=host, port=port, debug=debug_mode) 

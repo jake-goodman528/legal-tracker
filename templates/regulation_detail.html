@@ -29,7 +29,7 @@
                 <h1 class="header-title">{{ regulation.location }} - Regulatory Details</h1>
                 <div class="header-badges mb-3">
                     <span class="badge badge-jurisdiction bg-primary">
-                        {{ regulation.jurisdiction.upper() }}
+                        {{ regulation.jurisdiction_level.upper() }}
                     </span>
                     <span class="badge badge-location bg-info">
                         {{ regulation.location.upper() }}
@@ -124,7 +124,7 @@
                 <div class="sidebar-card-body">
                     <div class="classification-item mb-3">
                         <strong>Jurisdiction:</strong><br>
-                        <span class="badge badge-jurisdiction bg-primary">{{ regulation.jurisdiction.upper() }}</span>
+                        <span class="badge badge-jurisdiction bg-primary">{{ regulation.jurisdiction_level.upper() }}</span>
                     </div>
                     <div class="classification-item">
                         <strong>Location:</strong><br>
@@ -143,7 +143,7 @@
                     {% for related in related_regulations %}
                     <div class="related-regulation mb-3 pb-3 border-bottom">
                         <div class="related-badges mb-2">
-                            <span class="badge bg-secondary badge-sm">{{ related.jurisdiction }}</span>
+                            <span class="badge bg-secondary badge-sm">{{ related.jurisdiction_level }}</span>
                             <span class="badge bg-info badge-sm">{{ related.location }}</span>
                         </div>
                         <h6 class="related-title">{{ related.title }}</h6>

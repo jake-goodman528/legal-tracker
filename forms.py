@@ -123,6 +123,7 @@ class RegulationForm(FlaskForm):
 class UpdateForm(FlaskForm):
     """Form for creating/editing updates"""
     title = StringField('Title', validators=[DataRequired(), Length(max=200)])
+    description = TextAreaField('Description', validators=[DataRequired()], render_kw={"rows": 4})
     jurisdiction = SelectField(
         'Jurisdiction',
         choices=[('National', 'National'), ('State', 'State'), ('Local', 'Local')],
@@ -186,6 +187,29 @@ class UpdateForm(FlaskForm):
                                  ('3', 'Low')],
                           validators=[DataRequired()],
                           default='3')
+    
+    tags = StringField('Tags', validators=[Optional(), Length(max=200)], 
+                      description="Comma-separated tags for categorization")
+    
+    potential_impact = TextAreaField(
+        'Potential Impact',
+        validators=[Optional()],
+        render_kw={
+            "placeholder": "Describe the potential impact of this change...",
+            "rows": 4
+        },
+        description="Description of the potential impact on property operators"
+    )
+    
+    affected_operators = TextAreaField(
+        'Affected Operators',
+        validators=[Optional()],
+        render_kw={
+            "placeholder": "Describe which operators are affected by this change...",
+            "rows": 3
+        },
+        description="Description of which types of operators are affected"
+    )
     
     # New fields for expanded functionality
     expected_decision_date = DateField(

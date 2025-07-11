@@ -227,7 +227,7 @@
                                         <span class="activity-status status-{{ (update.change_type or update.status).lower() }}">
                                             {{ update.change_type or update.status }}
                                         </span>
-                                        <span class="activity-jurisdiction">{{ update.jurisdiction_affected }}</span>
+                                        <span class="activity-jurisdiction">{{ update.jurisdiction_level }} - {{ update.jurisdiction_affected }}</span>
                                         <span class="activity-date">{{ update.update_date.strftime('%b %d, %Y') if update.update_date else 'No date' }}</span>
                                     </div>
                                     {% if update.potential_impact %}

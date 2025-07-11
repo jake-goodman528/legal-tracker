@@ -37,6 +37,7 @@
                 <table class="table table-hover mb-0">
                     <thead class="table-dark">
                         <tr>
+                            <th>Level</th>
                             <th>Jurisdiction</th>
                             <th>Location</th>
                             <th>Title</th>
@@ -48,8 +49,9 @@
                         {% for regulation in regulations %}
                         <tr>
                             <td>
-                                <span class="badge bg-primary">{{ regulation.jurisdiction }}</span>
+                                <span class="badge bg-primary">{{ regulation.jurisdiction_level }}</span>
                             </td>
+                            <td>{{ regulation.jurisdiction }}</td>
                             <td>{{ regulation.location }}</td>
                             <td>
                                 <div class="fw-bold">{{ regulation.title }}</div>

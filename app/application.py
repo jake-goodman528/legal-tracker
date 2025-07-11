@@ -198,19 +198,9 @@ def create_app():
     app.config['APPLICATION_ROOT'] = '/'
     app.config['PREFERRED_URL_SCHEME'] = 'http'
     
-    # DISABLE TEMPLATE CACHING TO FIX STALE TEMPLATE ISSUES
+    # Configure template settings
     app.config['TEMPLATES_AUTO_RELOAD'] = True
     app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
-    app.jinja_env.auto_reload = True
-    app.jinja_env.cache = None
-    
-    # Force template recompilation
-    if hasattr(app.jinja_env, 'bytecode_cache'):
-        app.jinja_env.bytecode_cache = None
-    
-    # Clear any compiled templates
-    if hasattr(app.jinja_env, '_module_loader'):
-        app.jinja_env._module_loader = None
     
     # Configure CSRF exemptions for specific endpoints
     app.config['WTF_CSRF_EXEMPT_LIST'] = ['/api/client-errors']

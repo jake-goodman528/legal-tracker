@@ -125,9 +125,8 @@ class SearchService:
             results = query.order_by(Regulation.last_updated.desc()).all()
             
             # Update search suggestions if there was a text query
-            # Temporarily disabled to prevent database constraint errors
-            # if search_params.get('query'):
-            #     SearchService.update_search_suggestions(search_params['query'], results)
+            if search_params.get('query'):
+                SearchService.update_search_suggestions(search_params['query'], results)
             
             return results
             

@@ -50,6 +50,22 @@
                             </div>
                             
                             <div class="mb-4">
+                                {{ form.description.label(class="form-label required") }}
+                                {{ form.description(class="form-control", placeholder="Enter a detailed description of this update") }}
+                                {% if form.description.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.description.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Provide a detailed description of what this update entails
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
                                 {{ form.category.label(class="form-label required") }}
                                 {{ form.category(class="form-select form-select-lg") }}
                                 {% if form.category.errors %}
@@ -403,6 +419,54 @@
                                 <div class="form-text">
                                     <i class="fas fa-info-circle me-1"></i>
                                     Link to official source, announcement, or documentation
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                {{ form.tags.label(class="form-label") }}
+                                {{ form.tags(class="form-control", placeholder="e.g., licensing, registration, fees") }}
+                                {% if form.tags.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.tags.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Comma-separated tags for easy categorization and searching
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                {{ form.potential_impact.label(class="form-label") }}
+                                {{ form.potential_impact(class="form-control", placeholder="Describe the potential impact on property operators...") }}
+                                {% if form.potential_impact.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.potential_impact.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Describe the potential impact this change may have on property operators
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                {{ form.affected_operators.label(class="form-label") }}
+                                {{ form.affected_operators(class="form-control", placeholder="Describe which operators are affected...") }}
+                                {% if form.affected_operators.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.affected_operators.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Describe which types of operators are affected by this change
                                 </div>
                             </div>
                         </div>
