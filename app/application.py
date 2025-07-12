@@ -409,6 +409,16 @@ def create_app():
                 return text
             return text.replace('\n', '<br>\n')
         
+        # Add admin helper functions to template context
+        from app.utils.admin_helpers import get_admin_messages, get_public_messages
+        
+        @app.context_processor
+        def inject_admin_helpers():
+            return {
+                'get_admin_messages': get_admin_messages,
+                'get_public_messages': get_public_messages
+            }
+        
         app_logger.info("Custom template filters registered")
         
         app_logger.info("Flask app created successfully")

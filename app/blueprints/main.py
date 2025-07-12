@@ -11,6 +11,7 @@ Contains all public-facing routes for the STR Compliance Toolkit:
 from flask import Blueprint, render_template, request, session, abort, flash, redirect, url_for
 from models import db, Regulation, Update, SavedSearch, UserUpdateInteraction
 from app.services import RegulationService, UpdateService, UserInteractionService
+from app.utils.admin_helpers import public_flash
 import logging
 from datetime import datetime
 
@@ -49,63 +50,20 @@ def index():
 
 @main_bp.route('/regulations')
 def regulations():
-    """Regulations listing page with filtering"""
+    """Regulations listing page"""
     try:
-        # Get filter parameters from query string
-        filters = {
-            'jurisdiction_level': request.args.get('jurisdiction_level', ''),
-            'jurisdiction': request.args.get('jurisdiction', ''),
-            'location': request.args.get('location', ''),
-            'category': request.args.get('category', ''),
-            'search': request.args.get('search', ''),
-            'compliance_level': request.args.get('compliance_level', ''),
-            'property_type': request.args.get('property_type', '')
-        }
-        
-        # Get regulations with filters applied
-        from app.services.regulation_service import RegulationService
-        
-        # If any filters are applied, use filtered results
-        if any(filters.values()):
-            regulations = RegulationService.get_filtered_regulations(filters)
-        else:
-            # Get all regulations if no filters
-            from models import Regulation
-            regulations = Regulation.query.all()
-        
-        # Get distinct jurisdiction levels and locations from database
-        filter_options = RegulationService.get_filter_options()
+        # Get all regulations
+        from models import Regulation
+        regulations = Regulation.query.all()
         
         return render_template('regulations.html',
-                             regulations=regulations,
-                             all_jurisdictions=filter_options.get('jurisdictions', []),
-                             all_locations=filter_options.get('locations', []), 
-                             all_categories=filter_options.get('categories', []),
-                             current_jurisdiction=filters['jurisdiction'],
-                             current_location=filters['location'],
-                             current_category=filters['category'],
-                             current_search=filters['search'],
-                             current_jurisdiction_level=filters['jurisdiction_level'],
-                             current_compliance_level=filters['compliance_level'],
-                             current_property_type=filters['property_type'],
-                             saved_searches=[])
+                             regulations=regulations)
                              
     except Exception as e:
         logger.error(f"Error loading regulations: {str(e)}", exc_info=True)
-        flash('Error loading regulations. Please try again later.', 'error')
+        public_flash('Error loading regulations. Please try again later.', 'error')
         return render_template('regulations.html',
-                             regulations=[],
-                             all_jurisdictions=[],
-                             all_locations=[], 
-                             all_categories=[],
-                             current_jurisdiction='',
-                             current_location='',
-                             current_category='',
-                             current_search='',
-                             current_jurisdiction_level='',
-                             current_compliance_level='',
-                             current_property_type='',
-                             saved_searches=[])
+                             regulations=[])
 
 
 @main_bp.route('/regulations/<int:regulation_id>')
@@ -131,42 +89,17 @@ def regulation_detail(regulation_id):
             # Re-raise HTTP exceptions to let error handlers handle them
             raise
         logger.error(f"Error loading regulation detail - ID: {regulation_id} | Error: {str(e)}", exc_info=True)
-        flash('Error loading regulation details.', 'error')
+        public_flash('Error loading regulation details.', 'error')
         return redirect(url_for('main.regulations'))
 
 
 @main_bp.route('/updates')
 def updates():
-    """Updates listing page with categorized sections and comprehensive filtering"""
+    """Updates listing page with categorized sections"""
     try:
-        # Get filter parameters with enhanced filtering
-        filters = {
-            'status': request.args.get('status', ''),
-            'jurisdiction': request.args.get('jurisdiction', ''),
-            'category': request.args.get('category', ''),
-            'impact': request.args.get('impact', ''),
-            'priority': request.args.get('priority', ''),
-            'decision_status': request.args.get('decision_status', ''),
-            'search': request.args.get('search', ''),
-            'date_from': request.args.get('date_from', ''),
-            'date_to': request.args.get('date_to', ''),
-            'section': request.args.get('section', ''),  # Filter by section
-            'action_required': request.args.get('action_required', ''),
-            'change_type': request.args.get('change_type', '')
-        }
-        
-        # Get categorized updates
-        recent_upcoming_updates = UpdateService.get_recent_upcoming_updates(filters)
-        proposed_updates = UpdateService.get_proposed_updates(filters)
-        
-        # If filtering by section, only show that section
-        if filters['section'] == 'recent':
-            proposed_updates = []
-        elif filters['section'] == 'proposed':
-            recent_upcoming_updates = []
-        
-        # Get filter options
-        filter_options = UpdateService.get_filter_options()
+        # Get categorized updates without filtering
+        recent_upcoming_updates = UpdateService.get_recent_upcoming_updates({})
+        proposed_updates = UpdateService.get_proposed_updates({})
         
         # Get user interactions for all updates
         user_session = UserInteractionService.get_user_session()
@@ -184,52 +117,16 @@ def updates():
                              recent_upcoming_count=recent_upcoming_count,
                              proposed_count=proposed_count,
                              total_count=total_count,
-                             statuses=filter_options['statuses'],
-                             jurisdictions=filter_options['jurisdictions'],
-                             categories=filter_options['categories'],
-                             impact_levels=filter_options['impact_levels'],
-                             decision_statuses=filter_options.get('decision_statuses', []),
-                             priorities=filter_options.get('priorities', []),
-                             current_status=filters['status'],
-                             current_jurisdiction=filters['jurisdiction'],
-                             current_category=filters['category'],
-                             current_impact=filters['impact'],
-                             current_priority=filters['priority'],
-                             current_decision_status=filters['decision_status'],
-                             current_search=filters['search'],
-                             current_date_from=filters['date_from'],
-                             current_date_to=filters['date_to'],
-                             current_section=filters['section'],
-                             current_action_required=filters['action_required'],
-                             current_change_type=filters['change_type'],
                              update_interactions=update_interactions)
     except Exception as e:
         logger.error(f"Error loading updates: {str(e)}", exc_info=True)
-        flash('Error loading updates. Please try again later.', 'error')
+        public_flash('Error loading updates. Please try again later.', 'error')
         return render_template('updates.html',
                              recent_upcoming_updates=[],
                              proposed_updates=[],
                              recent_upcoming_count=0,
                              proposed_count=0,
                              total_count=0,
-                             statuses=[],
-                             jurisdictions=[],
-                             categories=[],
-                             impact_levels=[],
-                             decision_statuses=[],
-                             priorities=[],
-                             current_status='',
-                             current_jurisdiction='',
-                             current_category='',
-                             current_impact='',
-                             current_priority='',
-                             current_decision_status='',
-                             current_search='',
-                             current_date_from='',
-                             current_date_to='',
-                             current_section='',
-                             current_action_required='',
-                             current_change_type='',
                              update_interactions={})
 
 
@@ -251,7 +148,7 @@ def updates_by_category(category):
             # Re-raise HTTP exceptions to let error handlers handle them
             raise
         logger.error(f"Error in updates_by_category - Category: {category} | Error: {str(e)}", exc_info=True)
-        flash('Error loading category updates.', 'error')
+        public_flash('Error loading category updates.', 'error')
         return redirect(url_for('main.updates'))
 
 
@@ -273,7 +170,7 @@ def updates_by_status(status):
             # Re-raise HTTP exceptions to let error handlers handle them
             raise
         logger.error(f"Error in updates_by_status - Status: {status} | Error: {str(e)}", exc_info=True)
-        flash('Error loading status updates.', 'error')
+        public_flash('Error loading status updates.', 'error')
         return redirect(url_for('main.updates'))
 
 
@@ -317,7 +214,7 @@ def update_detail(update_id):
             # Re-raise HTTP exceptions to let error handlers handle them
             raise
         logger.error(f"Error loading update detail - ID: {update_id} | Error: {str(e)}", exc_info=True)
-        flash('Error loading update details.', 'error')
+        public_flash('Error loading update details.', 'error')
         return redirect(url_for('main.updates'))
 
 
@@ -354,7 +251,7 @@ def notifications():
                              upcoming_deadlines=upcoming_deadlines)
     except Exception as e:
         logger.error(f"Error loading notifications: {str(e)}", exc_info=True)
-        flash('Error loading notifications.', 'error')
+        public_flash('Error loading notifications.', 'error')
         return render_template('notifications.html',
                              bookmarked_updates=[],
                              action_required_updates=[],

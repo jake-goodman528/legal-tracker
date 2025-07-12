@@ -254,6 +254,46 @@
             margin: 0.5rem 0 0 0;
             font-size: 1rem;
         }
+        
+        /* Admin Alert Styles */
+        .admin-alert {
+            border: none;
+            border-radius: 8px;
+            font-family: 'Yantramanav', sans-serif;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .admin-alert .alert-icon {
+            font-size: 1.1rem;
+        }
+        
+        .admin-alert .alert-content {
+            font-weight: 500;
+        }
+        
+        .admin-alert.alert-success {
+            background: #D1FAE5;
+            color: #065F46;
+            border-left: 4px solid #10B981;
+        }
+        
+        .admin-alert.alert-danger {
+            background: #FEE2E2;
+            color: #991B1B;
+            border-left: 4px solid #EF4444;
+        }
+        
+        .admin-alert.alert-warning {
+            background: #FEF3C7;
+            color: #92400E;
+            border-left: 4px solid #F59E0B;
+        }
+        
+        .admin-alert.alert-info {
+            background: #DBEAFE;
+            color: #1E40AF;
+            border-left: 4px solid #3B82F6;
+        }
     </style>
 </head>
 <body>
@@ -319,6 +359,36 @@
 
         <!-- Admin Main Content -->
         <main class="admin-main">
+            <!-- Admin Flash Messages -->
+            {% if get_admin_messages %}
+                {% set admin_messages = get_admin_messages() %}
+                {% if admin_messages %}
+                    <div class="mb-4">
+                        {% for category, message in admin_messages %}
+                            <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show admin-alert" role="alert">
+                                <div class="d-flex align-items-center">
+                                    <div class="alert-icon me-3">
+                                        {% if category == 'success' %}
+                                            <i class="fas fa-check-circle"></i>
+                                        {% elif category == 'error' or category == 'danger' %}
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        {% elif category == 'warning' %}
+                                            <i class="fas fa-exclamation-circle"></i>
+                                        {% else %}
+                                            <i class="fas fa-info-circle"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="alert-content flex-grow-1">
+                                        {{ message }}
+                                    </div>
+                                </div>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endif %}
+            
             {% block content %}{% endblock %}
         </main>
     </div>

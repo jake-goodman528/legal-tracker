@@ -14,7 +14,7 @@ from models import (
     UserUpdateInteraction, UpdateReminder, NotificationPreference
 )
 from app.services import (
-    SearchService, UpdateService, UserInteractionService, NotificationService
+    RegulationService, UpdateService, UserInteractionService, NotificationService
 )
 from datetime import datetime, timedelta
 from sqlalchemy import or_, and_, func
@@ -89,83 +89,7 @@ def log_api_call(endpoint_name):
     return decorator
 
 
-# Search Endpoints
-@api_bp.route('/search/advanced')
-@log_api_call('advanced_search')
-def advanced_search():
-    """Advanced search API endpoint with multiple criteria"""
-    try:
-        # Get raw search parameters
-        raw_params = {
-            'q': request.args.get('q', '').strip(),
-            'query': request.args.get('query', '').strip(),
-            'categories': request.args.getlist('categories[]'),
-            'compliance_levels': request.args.getlist('compliance_levels[]'),
-            'property_types': request.args.getlist('property_types[]'),
-            'locations': request.args.getlist('locations[]'),
-            'jurisdictions': request.args.getlist('jurisdictions[]'),
-            'jurisdiction_levels': request.args.getlist('jurisdiction_levels[]'),
-            'jurisdiction_level': request.args.get('jurisdiction_level'),
-            'location': request.args.get('location'),
-            'date_from': request.args.get('date_from'),
-            'date_to': request.args.get('date_to'),
-            'date_range_days': request.args.get('date_range_days')
-        }
-        
-        logger.info(f"Raw search parameters received: {raw_params}")
-        
-        # Validate and sanitize parameters
-        from app.utils.filter_validation import FilterValidator, FilterValidationError
-        
-        try:
-            validated_params = FilterValidator.validate_regulations_filters(raw_params)
-            logger.info(f"Validated search parameters: {validated_params}")
-        except FilterValidationError as e:
-            logger.warning(f"Filter validation error: {str(e)}")
-            return jsonify({
-                'success': False,
-                'error': f'Invalid filter parameters: {str(e)}'
-            }), 400
-        
-        # Use SearchService to perform the search
-        results = SearchService.advanced_search(validated_params)
-        
-        logger.info(f"Search returned {len(results)} results")
-        
-        # Convert to dictionaries for JSON response
-        regulations_data = []
-        for reg in results:
-            try:
-                if hasattr(reg, 'to_dict'):
-                    regulations_data.append(reg.to_dict())
-                else:
-                    # Fallback for regulations without to_dict method
-                    regulations_data.append({
-                        'id': reg.id,
-                        'title': reg.title,
-                        'jurisdiction_level': reg.jurisdiction_level,
-                        'location': reg.location,
-                        'last_updated': reg.last_updated.isoformat() if reg.last_updated else None,
-                        'overview': reg.overview
-                    })
-            except Exception as e:
-                logger.warning(f"Error serializing regulation {reg.id}: {str(e)}")
-                continue
-        
-        return jsonify({
-            'success': True,
-            'regulations': regulations_data,
-            'count': len(regulations_data),
-            'search_criteria': validated_params
-        })
-        
-    except Exception as e:
-        logger.error(f"Advanced search error: {str(e)}", exc_info=True)
-        return jsonify({
-            'success': False,
-            'error': 'Search failed due to server error'
-        }), 500
-
+# Removed search and filter endpoints - functionality no longer needed
 
 @api_bp.route('/locations/<jurisdiction_level>')
 @log_api_call('get_locations_by_jurisdiction')
@@ -190,196 +114,53 @@ def get_locations_by_jurisdiction(jurisdiction_level):
         }), 500
 
 
-@api_bp.route('/search/suggestions')
-@log_api_call('search_suggestions')
-def search_suggestions():
-    """Get search suggestions based on user input"""
-    query = request.args.get('q', '').strip()
-    
-    suggestions = SearchService.get_search_suggestions(query)
-    
-    return jsonify({'suggestions': suggestions})
-
-
-@api_bp.route('/search/saved')
-@log_api_call('get_saved_searches')
-def get_saved_searches():
-    """Get user's saved searches"""
-    user_id = session.get('user_id', 'anonymous')
-    logger.info(f"Getting saved searches for user: {user_id}")
-    
-    try:
-        saved_searches = SearchService.get_saved_searches(user_id)
-        
-        searches_data = [{
-            'id': search.id,
-            'name': search.name,
-            'criteria': search.search_criteria,
-            'created_at': search.created_at.isoformat(),
-            'last_used': search.last_used.isoformat() if search.last_used else None
-        } for search in saved_searches]
-        
-        logger.info(f"Retrieved {len(searches_data)} saved searches for user {user_id}")
-        
-        return jsonify({
-            'success': True,
-            'saved_searches': searches_data
-        })
-        
-    except Exception as e:
-        logger.error(f"Get saved searches error for user {user_id}: {str(e)}", exc_info=True)
-        return jsonify({
-            'success': False,
-            'error': 'Failed to retrieve saved searches'
-        }), 500
-
-
-@api_bp.route('/search/save', methods=['POST'])
-@log_api_call('save_search')
-def save_search():
-    """Save a search configuration"""
-    user_id = session.get('user_id', 'anonymous')
-    
-    try:
-        data = request.get_json()
-        search_name = data.get('name', '')
-        search_criteria = data.get('criteria', {})
-        
-        logger.info(f"Saving search for user {user_id} - Name: {search_name}")
-        
-        if not search_name or not search_criteria:
-            return jsonify({
-                'success': False,
-                'error': 'Search name and criteria are required'
-            }), 400
-        
-        success, saved_search, error = SearchService.save_search(user_id, search_name, search_criteria)
-        
-        if success:
-            logger.info(f"Successfully saved search - ID: {saved_search.id} | User: {user_id}")
-            return jsonify({
-                'success': True,
-                'saved_search': {
-                    'id': saved_search.id,
-                    'name': saved_search.name,
-                    'created_at': saved_search.created_at.isoformat()
-                }
-            })
-        else:
-            logger.error(f"Failed to save search for user {user_id}: {error}")
-            return jsonify({
-                'success': False,
-                'error': error
-            }), 400
-            
-    except Exception as e:
-        logger.error(f"Save search error for user {user_id}: {str(e)}", exc_info=True)
-        return jsonify({
-            'success': False,
-            'error': 'Failed to save search'
-        }), 500
-
-
-@api_bp.route('/search/saved/<int:search_id>/use', methods=['POST'])
-@log_api_call('use_saved_search')
-def use_saved_search(search_id):
-    """Use a saved search and update last_used timestamp"""
-    user_id = session.get('user_id', 'anonymous')
-    
-    logger.info(f"Using saved search - ID: {search_id} | User: {user_id}")
-    
-    try:
-        success, search_criteria, error = SearchService.use_saved_search(user_id, search_id)
-        
-        if success:
-            logger.info(f"Successfully loaded saved search - ID: {search_id}")
-            return jsonify({
-                'success': True,
-                'search_criteria': search_criteria
-            })
-        else:
-            logger.warning(f"Failed to use saved search - ID: {search_id} | Error: {error}")
-            return jsonify({
-                'success': False,
-                'error': error
-            }), 404
-            
-    except Exception as e:
-        logger.error(f"Use saved search error - ID: {search_id}: {str(e)}", exc_info=True)
-        return jsonify({
-            'success': False,
-            'error': 'Failed to load saved search'
-        }), 500
-
-
-# Export Endpoints
+# CSV Export Endpoint
 @api_bp.route('/export/csv')
 @log_api_call('csv_export')
 def export_csv():
-    """Export search results to CSV"""
+    """Export regulations to CSV format"""
     try:
-        # Get search parameters (same as advanced search)
-        search_params = {
-            'query': request.args.get('q', '').strip(),
-            'categories': request.args.getlist('categories[]'),
-            'compliance_levels': request.args.getlist('compliance_levels[]'),
-            'property_types': request.args.getlist('property_types[]'),
-            'locations': request.args.getlist('locations[]'),
-            'jurisdictions': request.args.getlist('jurisdictions[]'),
-            'date_from': request.args.get('date_from'),
-            'date_to': request.args.get('date_to')
-        }
+        # Get all regulations
+        from models import Regulation
+        regulations = Regulation.query.all()
         
-        logger.info(f"CSV export requested with params: {search_params}")
-        
-        # Perform search
-        results = SearchService.advanced_search(search_params)
-        
-        # Create CSV data
+        # Create CSV content
         output = io.StringIO()
         writer = csv.writer(output)
         
         # Write headers
-        headers = [
+        writer.writerow([
             'ID', 'Title', 'Jurisdiction Level', 'Location', 'Category',
-            'Compliance Level', 'Property Type', 'Key Requirements',
-            'Effective Date', 'Last Updated', 'Keywords'
-        ]
-        writer.writerow(headers)
+            'Compliance Level', 'Property Type', 'Last Updated', 'Overview'
+        ])
         
-        # Write data rows
-        for reg in results:
+        # Write regulation data
+        for regulation in regulations:
             writer.writerow([
-                reg.id,
-                reg.title,
-                reg.jurisdiction_level,
-                reg.location,
-                reg.category,
-                reg.compliance_level,
-                reg.property_type,
-                reg.key_requirements[:500] if reg.key_requirements else '',  # Truncate long text
-                reg.effective_date.strftime('%Y-%m-%d') if reg.effective_date else '',
-                reg.last_updated.strftime('%Y-%m-%d') if reg.last_updated else '',
-                reg.keywords
+                regulation.id,
+                regulation.title,
+                regulation.jurisdiction_level,
+                regulation.location,
+                getattr(regulation, 'category', 'General'),
+                getattr(regulation, 'compliance_level', 'N/A'),
+                getattr(regulation, 'property_type', 'N/A'),
+                regulation.last_updated.strftime('%Y-%m-%d') if regulation.last_updated else 'N/A',
+                regulation.overview[:100] + '...' if len(regulation.overview) > 100 else regulation.overview
             ])
         
-        # Prepare response
-        output_data = output.getvalue()
-        output.close()
-        
-        logger.info(f"CSV export completed - {len(results)} regulations exported")
-        
-        response = make_response(output_data)
+        # Create response
+        response = make_response(output.getvalue())
         response.headers['Content-Type'] = 'text/csv'
-        response.headers['Content-Disposition'] = f'attachment; filename=regulations_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
+        response.headers['Content-Disposition'] = 'attachment; filename=regulations.csv'
         
+        logger.info(f"CSV export completed - {len(regulations)} regulations exported")
         return response
         
     except Exception as e:
         logger.error(f"CSV export error: {str(e)}", exc_info=True)
         return jsonify({
             'success': False,
-            'error': 'Export failed. Please try again.'
+            'error': 'Export failed'
         }), 500
 
 
@@ -468,158 +249,25 @@ def set_reminder(update_id):
 
 
 # Update Search and Management
-@api_bp.route('/updates/search')
-@log_api_call('search_updates')
-def search_updates():
-    """Search updates with filters including all new fields"""
-    try:
-        # Get raw search parameters
-        raw_params = {
-            'q': request.args.get('q', ''),
-            'query': request.args.get('query', ''),
-            'status': request.args.get('status'),
-            'category': request.args.get('category'),
-            'jurisdiction': request.args.get('jurisdiction'),
-            'impact_level': request.args.get('impact_level'),
-            'priority': request.args.get('priority'),
-            'action_required': request.args.get('action_required'),
-            'date_from': request.args.get('date_from'),
-            'date_to': request.args.get('date_to'),
-            # Support array parameters too
-            'statuses': request.args.getlist('status[]'),
-            'categories': request.args.getlist('categories[]'),
-            'jurisdictions': request.args.getlist('jurisdictions[]'),
-            'impact_levels': request.args.getlist('impact_levels[]'),
-            'priorities': request.args.getlist('priorities[]'),
-            'decision_statuses': request.args.getlist('decision_statuses[]'),
-            'change_types': request.args.getlist('change_types[]'),
-            'affected_operators': request.args.getlist('affected_operators[]')
-        }
-        
-        logger.info(f"Raw update search params: {raw_params}")
-        
-        # Validate and sanitize parameters
-        from app.utils.filter_validation import FilterValidator, FilterValidationError
-        
-        try:
-            validated_params = FilterValidator.validate_updates_filters(raw_params)
-            logger.info(f"Validated update search parameters: {validated_params}")
-        except FilterValidationError as e:
-            logger.warning(f"Update filter validation error: {str(e)}")
-            return jsonify({
-                'success': False,
-                'error': f'Invalid filter parameters: {str(e)}'
-            }), 400
-        
-        # Use UpdateService to perform the search
-        results = UpdateService.search_updates(validated_params)
-        
-        # Include all new fields in the response
-        updates_data = []
-        for update in results:
-            try:
-                update_data = {
-                    'id': update.id,
-                    'title': update.title,
-                    'description': update.description,
-                    'jurisdiction_affected': update.jurisdiction_affected,
-                    'update_date': update.update_date.strftime('%Y-%m-%d') if update.update_date else None,
-                    'status': update.status,
-                    'category': update.category,
-                    'impact_level': update.impact_level,
-                    'action_required': update.action_required,
-                    'priority': update.priority,
-                    'change_type': update.change_type,
-                    'decision_status': getattr(update, 'decision_status', None),
-                    'potential_impact': getattr(update, 'potential_impact', None),
-                    'affected_operators': getattr(update, 'affected_operators', None),
-                    'effective_date': update.effective_date.strftime('%Y-%m-%d') if update.effective_date else None,
-                    'deadline_date': update.deadline_date.strftime('%Y-%m-%d') if update.deadline_date else None,
-                    'compliance_deadline': getattr(update, 'compliance_deadline', None),
-                    'expected_decision_date': getattr(update, 'expected_decision_date', None),
-                    'tags': update.tags,
-                    'source_url': update.source_url,
-                    'related_regulation_ids': getattr(update, 'related_regulation_ids', None)
-                }
-                
-                # Handle date fields that might not exist
-                if hasattr(update, 'compliance_deadline') and update.compliance_deadline:
-                    update_data['compliance_deadline'] = update.compliance_deadline.strftime('%Y-%m-%d')
-                if hasattr(update, 'expected_decision_date') and update.expected_decision_date:
-                    update_data['expected_decision_date'] = update.expected_decision_date.strftime('%Y-%m-%d')
-                
-                updates_data.append(update_data)
-            except Exception as e:
-                logger.warning(f"Error serializing update {update.id}: {str(e)}")
-                continue
-        
-        logger.info(f"Update search returned {len(updates_data)} results")
-        
-        return jsonify({
-            'success': True,
-            'updates': updates_data,
-            'count': len(updates_data),
-            'search_params': validated_params
-        })
-        
-    except Exception as e:
-        logger.error(f"Update search error: {str(e)}", exc_info=True)
-        return jsonify({
-            'success': False,
-            'error': 'Update search failed due to server error'
-        }), 500
-
-
 @api_bp.route('/updates')
 @log_api_call('get_updates')
 def get_updates():
-    """Get all updates with optional filtering"""
+    """Get all updates"""
     try:
-        # Get filter parameters
-        filters = {
-            'status': request.args.get('status'),
-            'category': request.args.get('category'),
-            'jurisdiction': request.args.get('jurisdiction'),
-            'impact_level': request.args.get('impact_level'),
-            'priority': request.args.get('priority'),
-            'decision_status': request.args.get('decision_status'),
-            'change_type': request.args.get('change_type'),
-            'action_required': request.args.get('action_required'),
-            'limit': request.args.get('limit', 50, type=int),
-            'offset': request.args.get('offset', 0, type=int)
-        }
+        # Get pagination parameters
+        limit = request.args.get('limit', 50, type=int)
+        offset = request.args.get('offset', 0, type=int)
         
-        # Remove None values
-        filters = {k: v for k, v in filters.items() if v is not None}
+        logger.info(f"Getting updates with limit: {limit}, offset: {offset}")
         
-        logger.info(f"Getting updates with filters: {filters}")
-        
-        # Build query
+        # Get all updates
         query = Update.query
-        
-        # Apply filters
-        if filters.get('status'):
-            query = query.filter(Update.status == filters['status'])
-        if filters.get('category'):
-            query = query.filter(Update.category == filters['category'])
-        if filters.get('jurisdiction'):
-            query = query.filter(Update.jurisdiction_affected == filters['jurisdiction'])
-        if filters.get('impact_level'):
-            query = query.filter(Update.impact_level == filters['impact_level'])
-        if filters.get('priority'):
-            query = query.filter(Update.priority == filters['priority'])
-        if filters.get('decision_status'):
-            query = query.filter(Update.decision_status == filters['decision_status'])
-        if filters.get('change_type'):
-            query = query.filter(Update.change_type == filters['change_type'])
-        if filters.get('action_required'):
-            query = query.filter(Update.action_required == (filters['action_required'].lower() == 'true'))
         
         # Get total count
         total_count = query.count()
         
         # Apply pagination
-        updates = query.order_by(Update.update_date.desc()).offset(filters['offset']).limit(filters['limit']).all()
+        updates = query.order_by(Update.update_date.desc()).offset(offset).limit(limit).all()
         
         # Format response with all fields
         updates_data = []
@@ -657,8 +305,7 @@ def get_updates():
             'success': True,
             'updates': updates_data,
             'count': len(updates_data),
-            'total_count': total_count,
-            'filters': filters
+            'total_count': total_count
         })
         
     except Exception as e:

@@ -3,7 +3,6 @@ Regulation Service
 
 Handles all regulation-related business logic:
 - Regulation CRUD operations
-- Filtering and pagination
 - Detail content generation
 - Related regulation finding
 """
@@ -19,94 +18,9 @@ class RegulationService:
     
     This service provides comprehensive regulation management functionality including:
     - CRUD operations with validation and error handling
-    - Advanced filtering and search capabilities
     - Content formatting and presentation
     - Related content discovery and recommendations
     """
-    
-    @staticmethod
-    def get_filtered_regulations(filters: Dict[str, str]) -> List[Regulation]:
-        """
-        Retrieve regulations filtered by multiple criteria.
-        
-        Applies filtering logic across jurisdiction, location, and text search.
-        Supports partial matching for location and full-text search across titles
-        and overview content.
-        
-        Args:
-            filters: Dictionary containing filter criteria:
-                - jurisdiction (str, optional): Partial jurisdiction match
-                - location (str, optional): Partial location name match
-                - search (str, optional): Text search across title and overview
-        
-        Returns:
-            List of Regulation objects matching all specified criteria,
-            ordered by jurisdiction and location.
-            
-        Note:
-            Returns empty list if database query fails. Logs errors automatically.
-        """
-        try:
-            query = Regulation.query
-            
-            if filters.get('jurisdiction'):
-                query = query.filter(Regulation.jurisdiction.ilike(f'%{filters["jurisdiction"]}%'))
-            
-            if filters.get('jurisdiction_level'):
-                query = query.filter(Regulation.jurisdiction_level == filters['jurisdiction_level'])
-            
-            if filters.get('location'):
-                query = query.filter(Regulation.location.ilike(f'%{filters["location"]}%'))
-            
-            if filters.get('search'):
-                search_term = f'%{filters["search"]}%'
-                query = query.filter(
-                    db.or_(
-                        Regulation.title.ilike(search_term),
-                        Regulation.overview.ilike(search_term)
-                    )
-                )
-            
-            return query.order_by(Regulation.jurisdiction_level, Regulation.jurisdiction, Regulation.location).all()
-            
-        except Exception as e:
-            logging.error(f"Error filtering regulations: {str(e)}")
-            return []
-    
-    @staticmethod
-    def get_filter_options() -> Dict[str, List[str]]:
-        """
-        Extract all distinct filter values from existing regulations.
-        
-        Queries the database to build dynamic filter options based on actual
-        regulation data. Ensures filter UI only shows valid, available options.
-        
-        Returns:
-            Dictionary containing lists of available filter values:
-                - jurisdictions (List[str]): All unique jurisdictions
-                - locations (List[str]): All unique location names
-                - categories (List[str]): All unique categories (empty for now)
-                
-        Note:
-            Filters out null/empty values automatically. Returns empty lists
-            for each category if database query fails.
-        """
-        try:
-            jurisdictions = db.session.query(Regulation.jurisdiction).distinct().all()
-            jurisdiction_levels = db.session.query(Regulation.jurisdiction_level).distinct().all()
-            locations = db.session.query(Regulation.location).distinct().all()
-            
-            result = {
-                'jurisdictions': [j[0] for j in jurisdictions if j[0]],
-                'jurisdiction_levels': [jl[0] for jl in jurisdiction_levels if jl[0]],
-                'locations': [l[0] for l in locations if l[0]],
-                'categories': []  # Empty for now since Regulation model doesn't have category field
-            }
-            return result
-            
-        except Exception as e:
-            logging.error(f"Error getting filter options: {str(e)}")
-            return {'jurisdictions': [], 'jurisdiction_levels': [], 'locations': [], 'categories': []}
     
     @staticmethod
     def get_location_options_by_jurisdiction_level(jurisdiction_level: str) -> List[str]:
@@ -200,48 +114,48 @@ class RegulationService:
             if regulation.overview:
                 content_sections.append({
                     'title': 'Overview',
-                    'content': regulation.overview,
+                    'content': f'<p class="regulation-overview">{regulation.overview}</p>',
                     'type': 'overview'
                 })
             
-            # Detailed Requirements section
-            if regulation.detailed_requirements:
+            # Key Requirements section
+            if regulation.key_requirements:
                 content_sections.append({
-                    'title': 'Detailed Requirements',
-                    'content': regulation.detailed_requirements,
-                    'type': 'detailed_requirements'
+                    'title': 'Key Requirements',
+                    'content': f'<div class="regulation-requirements">{regulation.key_requirements}</div>',
+                    'type': 'requirements'
                 })
             
             # Compliance Steps section
             if regulation.compliance_steps:
                 content_sections.append({
                     'title': 'Compliance Steps',
-                    'content': regulation.compliance_steps,
-                    'type': 'compliance_steps'
+                    'content': f'<div class="regulation-compliance">{regulation.compliance_steps}</div>',
+                    'type': 'compliance'
                 })
             
-            # Required Forms section
-            if regulation.required_forms:
+            # Forms and Documents section
+            if regulation.forms_documents:
                 content_sections.append({
-                    'title': 'Required Forms',
-                    'content': regulation.required_forms,
-                    'type': 'required_forms'
+                    'title': 'Forms and Documents',
+                    'content': f'<div class="regulation-forms">{regulation.forms_documents}</div>',
+                    'type': 'forms'
                 })
             
-            # Penalties for Non Compliance section
-            if regulation.penalties_non_compliance:
+            # Penalties section
+            if regulation.penalties:
                 content_sections.append({
-                    'title': 'Penalties for Non Compliance',
-                    'content': regulation.penalties_non_compliance,
-                    'type': 'penalties_non_compliance'
+                    'title': 'Penalties',
+                    'content': f'<div class="regulation-penalties">{regulation.penalties}</div>',
+                    'type': 'penalties'
                 })
             
             # Recent Changes section
             if regulation.recent_changes:
                 content_sections.append({
                     'title': 'Recent Changes',
-                    'content': regulation.recent_changes,
-                    'type': 'recent_changes'
+                    'content': f'<div class="regulation-changes">{regulation.recent_changes}</div>',
+                    'type': 'changes'
                 })
             
             return content_sections

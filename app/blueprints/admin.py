@@ -14,6 +14,7 @@ from models import db, Regulation, Update, AdminUser
 from forms import LoginForm, RegulationForm, UpdateForm
 from werkzeug.security import check_password_hash
 from app.services import RegulationService, UpdateService
+from app.utils.admin_helpers import admin_flash
 import logging
 import traceback
 import time
@@ -65,7 +66,7 @@ def log_admin_action(action_type):
                 )
                 
                 # Flash error to user
-                flash(f"An error occurred during {action_type}: {str(e)}", 'error')
+                admin_admin_flash(f"An error occurred during {action_type}: {str(e)}", 'error')
                 raise
                 
         return decorated_function
@@ -86,7 +87,7 @@ def require_admin_login(f):
                 f"Unauthorized admin access attempt - URL: {request.url} | "
                 f"Remote: {request.remote_addr} | User-Agent: {request.headers.get('User-Agent', 'Unknown')}"
             )
-            flash('Please log in to access admin panel', 'error')
+            admin_admin_flash('Please log in to access admin panel', 'error')
             return redirect(url_for('admin.login'))
         return f(*args, **kwargs)
     return decorated_function
@@ -115,14 +116,14 @@ def login():
                 f"Successful admin login - Username: {username} | "
                 f"Admin ID: {user.id} | Remote: {request.remote_addr}"
             )
-            flash('Login successful!', 'success')
+            admin_admin_flash('Login successful!', 'success')
             return redirect(url_for('admin.dashboard'))
         else:
             security_logger.warning(
                 f"Failed admin login attempt - Username: {username} | "
                 f"Remote: {request.remote_addr} | User-Agent: {request.headers.get('User-Agent', 'Unknown')}"
             )
-            flash('Invalid username or password', 'error')
+            admin_admin_flash('Invalid username or password', 'error')
     
     return render_template('admin/login.html', form=form)
 
@@ -135,7 +136,7 @@ def logout():
     admin_id = session.get('admin_id')
     security_logger.info(f"Admin logout - Admin ID: {admin_id}")
     session.clear()
-    flash('Logged out successfully', 'info')
+    admin_admin_flash('Logged out successfully', 'info')
     return redirect(url_for('admin.login'))
 
 
@@ -211,7 +212,7 @@ def dashboard():
                              
     except Exception as e:
         logger.error(f"Error loading dashboard data: {str(e)}", exc_info=True)
-        flash('Error loading dashboard data', 'error')
+        admin_admin_flash('Error loading dashboard data', 'error')
         
         # Provide safe defaults
         default_stats = {
@@ -250,7 +251,7 @@ def manage_regulations():
         
     except Exception as e:
         logger.error(f"Error in manage_regulations: {str(e)}", exc_info=True)
-        flash(f"Error loading regulations: {str(e)}", 'error')
+        admin_admin_flash(f"Error loading regulations: {str(e)}", 'error')
         return redirect(url_for('admin.dashboard'))
 
 
@@ -287,15 +288,15 @@ def new_regulation():
             
             if success:
                 logger.info(f"Successfully created regulation - ID: {regulation.id} | Title: {regulation.title}")
-                flash(f'Regulation "{regulation.title}" created successfully!', 'success')
+                admin_admin_flash(f'Regulation "{regulation.title}" created successfully!', 'success')
                 return redirect(url_for('admin.manage_regulations'))
             else:
                 logger.error(f"Failed to create regulation - Error: {error}")
-                flash(f'Error creating regulation: {error}', 'error')
+                admin_admin_flash(f'Error creating regulation: {error}', 'error')
                 
         except Exception as e:
             logger.error(f"Exception in new_regulation: {str(e)}", exc_info=True)
-            flash(f'Error creating regulation: {str(e)}', 'error')
+            admin_admin_flash(f'Error creating regulation: {str(e)}', 'error')
         
     return render_template('admin/edit_regulation.html', form=form, title='New Regulation')
 
@@ -334,17 +335,17 @@ def edit_regulation(regulation_id):
             
             if success:
                 logger.info(f"Successfully updated regulation - ID: {regulation_id}")
-                flash(f'Regulation "{updated_regulation.title}" updated successfully!', 'success')
+                admin_flash(f'Regulation "{updated_regulation.title}" updated successfully!', 'success')
                 return redirect(url_for('admin.manage_regulations'))
             else:
                 logger.error(f"Failed to update regulation - ID: {regulation_id} | Error: {error}")
-                flash(f'Error updating regulation: {error}', 'error')
+                admin_flash(f'Error updating regulation: {error}', 'error')
         
         return render_template('admin/edit_regulation.html', form=form, regulation=regulation, title='Edit Regulation')
         
     except Exception as e:
         logger.error(f"Error in edit_regulation - ID: {regulation_id} | Error: {str(e)}", exc_info=True)
-        flash(f'Error editing regulation: {str(e)}', 'error')
+        admin_flash(f'Error editing regulation: {str(e)}', 'error')
         return redirect(url_for('admin.manage_regulations'))
 
 
@@ -363,14 +364,14 @@ def delete_regulation(regulation_id):
         
         if success:
             logger.info(f"Successfully deleted regulation - ID: {regulation_id} | Title: {regulation_title}")
-            flash(f'Regulation "{regulation_title}" deleted successfully!', 'success')
+            admin_flash(f'Regulation "{regulation_title}" deleted successfully!', 'success')
         else:
             logger.error(f"Failed to delete regulation - ID: {regulation_id} | Error: {error}")
-            flash(f'Error deleting regulation: {error}', 'error')
+            admin_flash(f'Error deleting regulation: {error}', 'error')
             
     except Exception as e:
         logger.error(f"Error in delete_regulation - ID: {regulation_id} | Error: {str(e)}", exc_info=True)
-        flash(f'Error deleting regulation: {str(e)}', 'error')
+        admin_flash(f'Error deleting regulation: {str(e)}', 'error')
     
     return redirect(url_for('admin.manage_regulations'))
 
@@ -395,7 +396,7 @@ def manage_updates():
         
     except Exception as e:
         logger.error(f"Error in manage_updates: {str(e)}", exc_info=True)
-        flash(f"Error loading updates: {str(e)}", 'error')
+        admin_flash(f"Error loading updates: {str(e)}", 'error')
         return redirect(url_for('admin.dashboard'))
 
 
@@ -409,14 +410,44 @@ def new_update():
     """Create new update with all fields"""
     form = UpdateForm()
     
+    # STEP 1: COMPREHENSIVE LOGGING FOR DEBUG
+    if request.method == 'POST':
+        logger.info("=== NEW UPDATE FORM SUBMISSION ===")
+        logger.info(f"Request method: {request.method}")
+        logger.info(f"Request data length: {len(request.form)}")
+        
+        # Log each field individually with detailed information
+        for field_name, field_value in request.form.items():
+            logger.info(f"Field '{field_name}': '{field_value}' (length: {len(str(field_value))})")
+        
+        # Log form validation status
+        logger.info(f"Form validation status: {form.validate_on_submit()}")
+        
+        # Log all form fields and their values
+        logger.info("=== FORM FIELD VALUES ===")
+        for field in form:
+            if hasattr(field, 'data'):
+                logger.info(f"Form field '{field.name}': '{field.data}' (type: {type(field.data)})")
+        
+        # Log form errors in detail
+        if form.errors:
+            logger.error("=== FORM VALIDATION ERRORS ===")
+            for field, errors in form.errors.items():
+                for error in errors:
+                    logger.error(f"Field '{field}' validation error: {error}")
+        else:
+            logger.info("No form validation errors detected")
+    
     if form.validate_on_submit():
         try:
+            logger.info("=== STARTING UPDATE CREATION PROCESS ===")
+            
             # Prepare update data with all new fields
             update_data = {
                 'title': form.title.data,
                 'description': form.description.data,
                 'jurisdiction_affected': form.jurisdiction_affected.data,
-                'jurisdiction_level': form.jurisdiction.data,
+                'jurisdiction_level': form.jurisdiction_level.data,  # Fixed: use jurisdiction_level field
                 'update_date': form.update_date.data,
                 'status': form.status.data,
                 'category': form.category.data,
@@ -430,45 +461,54 @@ def new_update():
                 'source_url': form.source_url.data,
                 'priority': form.priority.data,
                 # New fields
-                'expected_decision_date': getattr(form, 'expected_decision_date', None) and form.expected_decision_date.data,
-                'potential_impact': getattr(form, 'potential_impact', None) and form.potential_impact.data,
-                'decision_status': getattr(form, 'decision_status', None) and form.decision_status.data,
-                'change_type': getattr(form, 'change_type', None) and form.change_type.data,
-                'compliance_deadline': getattr(form, 'compliance_deadline', None) and form.compliance_deadline.data,
-                'affected_operators': getattr(form, 'affected_operators', None) and form.affected_operators.data,
-                'related_regulation_ids': getattr(form, 'related_regulation_ids', None) and form.related_regulation_ids.data,
+                'expected_decision_date': form.expected_decision_date.data if hasattr(form, 'expected_decision_date') else None,
+                'potential_impact': form.potential_impact.data if hasattr(form, 'potential_impact') else None,
+                'decision_status': form.decision_status.data if hasattr(form, 'decision_status') else None,
+                'change_type': form.change_type.data if hasattr(form, 'change_type') else None,
+                'compliance_deadline': form.compliance_deadline.data if hasattr(form, 'compliance_deadline') else None,
+                'affected_operators': form.affected_operators.data if hasattr(form, 'affected_operators') else None,
+                'related_regulation_ids': form.related_regulation_ids.data if hasattr(form, 'related_regulation_ids') else None,
                 # New template fields
-                'summary': getattr(form, 'summary', None) and form.summary.data,
-                'full_text': getattr(form, 'full_text', None) and form.full_text.data,
-                'compliance_requirements': getattr(form, 'compliance_requirements', None) and form.compliance_requirements.data,
-                'implementation_timeline': getattr(form, 'implementation_timeline', None) and form.implementation_timeline.data,
-                'official_sources': getattr(form, 'official_sources', None) and form.official_sources.data,
-                'expert_analysis': getattr(form, 'expert_analysis', None) and form.expert_analysis.data,
-                'kaystreet_commitment': getattr(form, 'kaystreet_commitment', None) and form.kaystreet_commitment.data
+                'summary': form.summary.data if hasattr(form, 'summary') else None,
+                'full_text': form.full_text.data if hasattr(form, 'full_text') else None,
+                'compliance_requirements': form.compliance_requirements.data if hasattr(form, 'compliance_requirements') else None,
+                'implementation_timeline': form.implementation_timeline.data if hasattr(form, 'implementation_timeline') else None,
+                'official_sources': form.official_sources.data if hasattr(form, 'official_sources') else None,
+                'expert_analysis': form.expert_analysis.data if hasattr(form, 'expert_analysis') else None,
+                'kaystreet_commitment': form.kaystreet_commitment.data if hasattr(form, 'kaystreet_commitment') else None
             }
+            
+            logger.info("=== PREPARED UPDATE DATA ===")
+            for field_name, field_value in update_data.items():
+                if field_value is None:
+                    logger.info(f"Data field '{field_name}': None")
+                else:
+                    logger.info(f"Data field '{field_name}': '{field_value}' (type: {type(field_value)}, length: {len(str(field_value))})")
             
             logger.info(f"Creating new update - Title: {update_data['title']} | Jurisdiction: {update_data['jurisdiction_affected']} | Status: {update_data['status']}")
             
+            logger.info("=== CALLING UPDATE SERVICE ===")
             success, update, error = UpdateService.create_update(update_data)
             
             if success:
                 logger.info(f"Successfully created update - ID: {update.id} | Title: {update.title}")
-                flash(f'Update "{update.title}" created successfully!', 'success')
+                admin_flash(f'Update "{update.title}" created successfully!', 'success')
                 return redirect(url_for('admin.manage_updates'))
             else:
                 logger.error(f"Failed to create update - Error: {error}")
-                flash(f'Error creating update: {error}', 'error')
+                admin_flash(f'Error creating update: {error}', 'error')
                 
         except Exception as e:
             logger.error(f"Exception in new_update: {str(e)}", exc_info=True)
-            flash(f'Error creating update: {str(e)}', 'error')
+            admin_flash(f'Error creating update: {str(e)}', 'error')
         
     # Log form validation errors
     if form.errors:
+        logger.warning("=== FORM VALIDATION ERRORS SUMMARY ===")
         for field, errors in form.errors.items():
             for error in errors:
                 logger.warning(f"Form validation error - Field: {field} | Error: {error}")
-                flash(f'{field}: {error}', 'error')
+                admin_flash(f'{field}: {error}', 'error')
     
     return render_template('admin/edit_update.html', form=form, title='New Update')
 
@@ -490,7 +530,7 @@ def edit_update(update_id):
                 'title': form.title.data,
                 'description': form.description.data,
                 'jurisdiction_affected': form.jurisdiction_affected.data,
-                'jurisdiction_level': form.jurisdiction.data,
+                'jurisdiction_level': form.jurisdiction_level.data,  # Fixed: use jurisdiction_level field
                 'update_date': form.update_date.data,
                 'status': form.status.data,
                 'category': form.category.data,
@@ -504,45 +544,45 @@ def edit_update(update_id):
                 'source_url': form.source_url.data,
                 'priority': form.priority.data,
                 # New fields
-                'expected_decision_date': getattr(form, 'expected_decision_date', None) and form.expected_decision_date.data,
-                'potential_impact': getattr(form, 'potential_impact', None) and form.potential_impact.data,
-                'decision_status': getattr(form, 'decision_status', None) and form.decision_status.data,
-                'change_type': getattr(form, 'change_type', None) and form.change_type.data,
-                'compliance_deadline': getattr(form, 'compliance_deadline', None) and form.compliance_deadline.data,
-                'affected_operators': getattr(form, 'affected_operators', None) and form.affected_operators.data,
-                'related_regulation_ids': getattr(form, 'related_regulation_ids', None) and form.related_regulation_ids.data,
+                'expected_decision_date': form.expected_decision_date.data if hasattr(form, 'expected_decision_date') else None,
+                'potential_impact': form.potential_impact.data if hasattr(form, 'potential_impact') else None,
+                'decision_status': form.decision_status.data if hasattr(form, 'decision_status') else None,
+                'change_type': form.change_type.data if hasattr(form, 'change_type') else None,
+                'compliance_deadline': form.compliance_deadline.data if hasattr(form, 'compliance_deadline') else None,
+                'affected_operators': form.affected_operators.data if hasattr(form, 'affected_operators') else None,
+                'related_regulation_ids': form.related_regulation_ids.data if hasattr(form, 'related_regulation_ids') else None,
                 # New template fields
-                'summary': getattr(form, 'summary', None) and form.summary.data,
-                'full_text': getattr(form, 'full_text', None) and form.full_text.data,
-                'compliance_requirements': getattr(form, 'compliance_requirements', None) and form.compliance_requirements.data,
-                'implementation_timeline': getattr(form, 'implementation_timeline', None) and form.implementation_timeline.data,
-                'official_sources': getattr(form, 'official_sources', None) and form.official_sources.data,
-                'expert_analysis': getattr(form, 'expert_analysis', None) and form.expert_analysis.data,
-                'kaystreet_commitment': getattr(form, 'kaystreet_commitment', None) and form.kaystreet_commitment.data
+                'summary': form.summary.data if hasattr(form, 'summary') else None,
+                'full_text': form.full_text.data if hasattr(form, 'full_text') else None,
+                'compliance_requirements': form.compliance_requirements.data if hasattr(form, 'compliance_requirements') else None,
+                'implementation_timeline': form.implementation_timeline.data if hasattr(form, 'implementation_timeline') else None,
+                'official_sources': form.official_sources.data if hasattr(form, 'official_sources') else None,
+                'expert_analysis': form.expert_analysis.data if hasattr(form, 'expert_analysis') else None,
+                'kaystreet_commitment': form.kaystreet_commitment.data if hasattr(form, 'kaystreet_commitment') else None
             }
             
             success, updated_update, error = UpdateService.update_update(update_id, update_data)
             
             if success:
                 logger.info(f"Successfully updated update - ID: {update_id}")
-                flash(f'Update "{updated_update.title}" updated successfully!', 'success')
+                admin_flash(f'Update "{updated_update.title}" updated successfully!', 'success')
                 return redirect(url_for('admin.manage_updates'))
             else:
                 logger.error(f"Failed to update update - ID: {update_id} | Error: {error}")
-                flash(f'Error updating update: {error}', 'error')
+                admin_flash(f'Error updating update: {error}', 'error')
         
         # Log form validation errors
         if form.errors:
             for field, errors in form.errors.items():
                 for error in errors:
                     logger.warning(f"Form validation error - Field: {field} | Error: {error}")
-                    flash(f'{field}: {error}', 'error')
+                    admin_flash(f'{field}: {error}', 'error')
         
         return render_template('admin/edit_update.html', form=form, update=update, title='Edit Update')
         
     except Exception as e:
         logger.error(f"Error in edit_update - ID: {update_id} | Error: {str(e)}", exc_info=True)
-        flash(f'Error editing update: {str(e)}', 'error')
+        admin_flash(f'Error editing update: {str(e)}', 'error')
         return redirect(url_for('admin.manage_updates'))
 
 
@@ -561,14 +601,14 @@ def delete_update(update_id):
         
         if success:
             logger.info(f"Successfully deleted update - ID: {update_id} | Title: {update_title}")
-            flash(f'Update "{update_title}" deleted successfully!', 'success')
+            admin_flash(f'Update "{update_title}" deleted successfully!', 'success')
         else:
             logger.error(f"Failed to delete update - ID: {update_id} | Error: {error}")
-            flash(f'Error deleting update: {error}', 'error')
+            admin_flash(f'Error deleting update: {error}', 'error')
             
     except Exception as e:
         logger.error(f"Error in delete_update - ID: {update_id} | Error: {str(e)}", exc_info=True)
-        flash(f'Error deleting update: {str(e)}', 'error')
+        admin_flash(f'Error deleting update: {str(e)}', 'error')
     
     return redirect(url_for('admin.manage_updates'))
 
@@ -770,7 +810,7 @@ def export_updates_csv():
         
     except Exception as e:
         logger.error(f"Error in export_updates_csv: {str(e)}", exc_info=True)
-        flash(f'Error exporting updates: {str(e)}', 'error')
+        admin_flash(f'Error exporting updates: {str(e)}', 'error')
         return redirect(url_for('admin.manage_updates'))
 
 
@@ -785,16 +825,16 @@ def import_updates_csv():
     try:
         # Check if file was uploaded
         if 'csv_file' not in request.files:
-            flash('No file selected', 'error')
+            admin_flash('No file selected', 'error')
             return redirect(request.url)
         
         file = request.files['csv_file']
         if file.filename == '':
-            flash('No file selected', 'error')
+            admin_flash('No file selected', 'error')
             return redirect(request.url)
         
         if not file.filename.lower().endswith('.csv'):
-            flash('Please upload a CSV file', 'error')
+            admin_flash('Please upload a CSV file', 'error')
             return redirect(request.url)
         
         logger.info(f"Starting CSV import - File: {file.filename}")
@@ -887,7 +927,7 @@ def import_updates_csv():
         
         # Report results
         if success_count > 0:
-            flash(f'Successfully imported {success_count} updates', 'success')
+            admin_flash(f'Successfully imported {success_count} updates', 'success')
         
         if error_count > 0:
             error_summary = f'Failed to import {error_count} updates'
@@ -895,7 +935,7 @@ def import_updates_csv():
                 error_summary += ': ' + '; '.join(errors)
             else:
                 error_summary += f'. First 10 errors: {"; ".join(errors[:10])}'
-            flash(error_summary, 'error')
+            admin_flash(error_summary, 'error')
         
         logger.info(f"CSV import completed - Success: {success_count} | Errors: {error_count}")
         
@@ -906,7 +946,7 @@ def import_updates_csv():
             
     except Exception as e:
         logger.error(f"Error in import_updates_csv: {str(e)}", exc_info=True)
-        flash(f'Error importing CSV: {str(e)}', 'error')
+        admin_flash(f'Error importing CSV: {str(e)}', 'error')
         return redirect(request.url)
 
 
@@ -949,5 +989,5 @@ def deadline_reminders():
         
     except Exception as e:
         logger.error(f"Error in deadline_reminders: {str(e)}", exc_info=True)
-        flash(f'Error loading deadline reminders: {str(e)}', 'error')
+        admin_flash(f'Error loading deadline reminders: {str(e)}', 'error')
         return redirect(url_for('admin.dashboard')) 
