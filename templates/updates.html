@@ -86,7 +86,9 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <span class="badge bg-primary">{{ update.jurisdiction_level }}</span>
+                                <span class="badge bg-{{ 'success' if update.jurisdiction_level == 'Local' else 'primary' if update.jurisdiction_level == 'State' else 'warning' }}">
+                                    {{ update.jurisdiction_level }}
+                                </span>
                             </td>
                             <td class="jurisdiction-cell">
                                 {{ update.jurisdiction_affected }}
@@ -149,7 +151,9 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <span class="badge bg-primary">{{ update.jurisdiction_level }}</span>
+                                <span class="badge bg-{{ 'success' if update.jurisdiction_level == 'Local' else 'primary' if update.jurisdiction_level == 'State' else 'warning' }}">
+                                    {{ update.jurisdiction_level }}
+                                </span>
                             </td>
                             <td class="jurisdiction-cell">
                                 {{ update.jurisdiction_affected }}
