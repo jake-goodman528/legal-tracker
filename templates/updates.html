@@ -97,7 +97,7 @@
                             </td>
                             <td class="title-cell">
                                 <a href="{{ url_for('main.update_detail', update_id=update.id) }}" 
-                                   class="update-title-link text-decoration-none">
+                                   class="regulation-title-link text-decoration-none">
                                     {{ update.title }}
                                 </a>
                                 {% if update.compliance_deadline %}
@@ -162,7 +162,7 @@
                             </td>
                             <td class="title-cell">
                                 <a href="{{ url_for('main.update_detail', update_id=update.id) }}" 
-                                   class="update-title-link text-decoration-none">
+                                   class="regulation-title-link text-decoration-none">
                                     {{ update.title }}
                                 </a>
                                 {% if update.expected_decision_date %}
@@ -249,12 +249,13 @@
     font-size: 0.75rem;
 }
 
-.update-title-link {
+/* Title links now use regulation-title-link class for consistency */
+.regulation-title-link {
     color: #007bff;
     font-weight: 500;
 }
 
-.update-title-link:hover {
+.regulation-title-link:hover {
     color: #0056b3;
     text-decoration: underline !important;
 }
