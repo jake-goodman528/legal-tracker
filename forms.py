@@ -130,7 +130,12 @@ class UpdateForm(FlaskForm):
         validators=[DataRequired()],
         description="Level of government jurisdiction"
     )
-    jurisdiction_affected = StringField('Location', validators=[DataRequired(), Length(max=100)])
+    jurisdiction_affected = SelectField(
+        'Location',
+        choices=[],  # Will be populated dynamically
+        validators=[DataRequired()],
+        description="Geographic area where this update applies"
+    )
     jurisdiction_level = SelectField(
         'Jurisdiction Level',
         choices=[('National', 'National'), ('State', 'State'), ('Local', 'Local')],
@@ -252,7 +257,11 @@ class UpdateForm(FlaskForm):
         description="Deadline by which operators must comply with this change"
     )
     
-
+    related_regulation_ids = StringField(
+        'Related Regulation IDs',
+        validators=[Optional(), Length(max=200)],
+        description="Comma-separated IDs of related regulations"
+    )
     
     # New template fields for structured public-facing display
     summary = TextAreaField(

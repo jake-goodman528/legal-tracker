@@ -924,236 +924,241 @@
 </style>
 
 <script>
+// Wrap everything in a try-catch and ensure DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    // Convert textareas to rich text editors
-    const textareas = document.querySelectorAll('.rich-text-editor');
-    
-    // Hide any Summernote notification that might be showing
-    const hideNotification = () => {
-        const elements = document.querySelectorAll('*');
-        elements.forEach(el => {
-            if (el.textContent && el.textContent.includes('SUMMERNOTE LOADED') && el.textContent.includes('TinyMCE has been replaced')) {
-                el.style.display = 'none';
-                el.remove();
-            }
-        });
-    };
-    
-    // Run immediately and after a short delay
-    hideNotification();
-    setTimeout(hideNotification, 100);
-    setTimeout(hideNotification, 500);
-    
-    textareas.forEach(function(textarea) {
-        // Create toolbar
-        const toolbar = document.createElement('div');
-        toolbar.className = 'rich-text-toolbar';
-        toolbar.innerHTML = `
-            <button type="button" onclick="formatText(this, 'bold')" title="Bold"><b>B</b></button>
-            <button type="button" onclick="formatText(this, 'italic')" title="Italic"><i>I</i></button>
-            <button type="button" onclick="formatText(this, 'underline')" title="Underline"><u>U</u></button>
-            <button type="button" onclick="formatText(this, 'insertUnorderedList')" title="Bullet List">• List</button>
-            <button type="button" onclick="formatText(this, 'insertOrderedList')" title="Numbered List">1. List</button>
-            <button type="button" onclick="formatText(this, 'indent')" title="Indent">→</button>
-            <button type="button" onclick="formatText(this, 'outdent')" title="Outdent">←</button>
-        `;
-        
-        // Create contenteditable div
-        const editor = document.createElement('div');
-        editor.className = 'rich-text-editor';
-        editor.contentEditable = true;
-        editor.innerHTML = textarea.value || '';
-        editor.setAttribute('data-textarea', textarea.id);
-        
-        // Insert toolbar and editor
-        textarea.parentNode.insertBefore(toolbar, textarea);
-        textarea.parentNode.insertBefore(editor, textarea);
-        textarea.style.display = 'none';
-        
-        // Update textarea when content changes
-        editor.addEventListener('input', function() {
-            textarea.value = editor.innerHTML;
-        });
-        
-        // Update on form submit
-        const form = textarea.closest('form');
-        if (form) {
-            form.addEventListener('submit', function() {
-                textarea.value = editor.innerHTML;
+    try {
+        // Check if we're on the edit_update page
+        const form = document.getElementById('updateForm');
+        if (!form) {
+            console.warn('UpdateForm not found - skipping edit_update.js initialization');
+            return;
+        }
+
+        // Rich text editor functionality
+        const richTextEditors = document.querySelectorAll('.rich-text-editor');
+        if (richTextEditors.length > 0) {
+            richTextEditors.forEach(function(editor) {
+                try {
+                    if (editor && editor.hasAttribute('data-textarea')) {
+                        const textareaId = editor.getAttribute('data-textarea');
+                        const textarea = document.getElementById(textareaId);
+                        if (textarea) {
+                            editor.innerHTML = textarea.value;
+                        }
+                    }
+                } catch (error) {
+                    console.warn('Error initializing rich text editor:', error);
+                }
             });
         }
-    });
-    
-    // Global formatting function
-    window.formatText = function(button, command) {
-        const toolbar = button.parentNode;
-        const editor = toolbar.nextElementSibling;
-        editor.focus();
-        document.execCommand(command, false, null);
+
+        // Conditional field display logic
+        const changeTypeSelect = document.getElementById('changeTypeSelect');
+        const actionRequiredSelect = document.getElementById('actionRequiredSelect');
+        const proposedFields = document.getElementById('proposedFields');
+        const actionDescriptionDiv = document.getElementById('actionDescriptionDiv');
         
-        // Update button state
-        const buttons = toolbar.querySelectorAll('button');
-        buttons.forEach(btn => btn.classList.remove('active'));
-        if (document.queryCommandState(command)) {
-            button.classList.add('active');
-        }
-         };
-    
-    // Conditional field display logic
-    const changeTypeSelect = document.getElementById('changeTypeSelect');
-    const actionRequiredSelect = document.getElementById('actionRequiredSelect');
-    const proposedFields = document.getElementById('proposedFields');
-    const actionDescriptionDiv = document.getElementById('actionDescriptionDiv');
-    
-    // Show/hide proposed fields based on change type
-    function toggleProposedFields() {
-        if (changeTypeSelect && proposedFields) {
-            if (changeTypeSelect.value === 'Proposed') {
-                proposedFields.style.display = 'block';
-                proposedFields.classList.remove('hidden');
-            } else {
-                proposedFields.style.display = 'none';
-                proposedFields.classList.add('hidden');
+        // Show/hide proposed fields based on change type
+        function toggleProposedFields() {
+            try {
+                if (changeTypeSelect && proposedFields) {
+                    if (changeTypeSelect.value === 'Proposed') {
+                        proposedFields.style.display = 'block';
+                        proposedFields.classList.remove('hidden');
+                    } else {
+                        proposedFields.style.display = 'none';
+                        proposedFields.classList.add('hidden');
+                    }
+                }
+            } catch (error) {
+                console.warn('Error in toggleProposedFields:', error);
             }
         }
-    }
-    
-    // Show/hide action description based on action required
-    function toggleActionDescription() {
-        if (actionRequiredSelect && actionDescriptionDiv) {
-            if (actionRequiredSelect.value === 'True') {
-                actionDescriptionDiv.style.display = 'block';
-                actionDescriptionDiv.classList.remove('hidden');
-            } else {
-                actionDescriptionDiv.style.display = 'none';
-                actionDescriptionDiv.classList.add('hidden');
+        
+        // Show/hide action description based on action required
+        function toggleActionDescription() {
+            try {
+                if (actionRequiredSelect && actionDescriptionDiv) {
+                    if (actionRequiredSelect.value === 'True') {
+                        actionDescriptionDiv.style.display = 'block';
+                        actionDescriptionDiv.classList.remove('hidden');
+                    } else {
+                        actionDescriptionDiv.style.display = 'none';
+                        actionDescriptionDiv.classList.add('hidden');
+                    }
+                }
+            } catch (error) {
+                console.warn('Error in toggleActionDescription:', error);
             }
         }
-    }
-    
-    // Initial state
-    toggleProposedFields();
-    toggleActionDescription();
-    
-    // Listen for changes
-    if (changeTypeSelect) changeTypeSelect.addEventListener('change', toggleProposedFields);
-    if (actionRequiredSelect) actionRequiredSelect.addEventListener('change', toggleActionDescription);
-    
-    // Form validation
-    const form = document.getElementById('updateForm');
-    const submitButton = form.querySelector('button[type="submit"]');
-    
-    form.addEventListener('submit', function(e) {
-        // Save all rich text content before form submission
-        const editors = document.querySelectorAll('.rich-text-editor[contenteditable="true"]');
-        editors.forEach(function(editor) {
-            const textareaId = editor.getAttribute('data-textarea');
-            const textarea = document.getElementById(textareaId);
-            if (textarea) {
-                textarea.value = editor.innerHTML;
-            }
-        });
         
-        // Add loading state to submit button
-        submitButton.classList.add('btn-loading');
-        submitButton.disabled = true;
+        // Initial state
+        toggleProposedFields();
+        toggleActionDescription();
         
-        // Basic client-side validation
-        const requiredFields = form.querySelectorAll('[required]');
-        let isValid = true;
-        
-        requiredFields.forEach(field => {
-            if (!field.value.trim()) {
-                field.classList.add('is-invalid');
-                isValid = false;
-            } else {
-                field.classList.remove('is-invalid');
-                field.classList.add('is-valid');
-            }
-        });
-        
-        if (!isValid) {
-            e.preventDefault();
-            submitButton.classList.remove('btn-loading');
-            submitButton.disabled = false;
-            
-            // Scroll to first invalid field
-            const firstInvalid = form.querySelector('.is-invalid');
-            if (firstInvalid) {
-                firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                firstInvalid.focus();
-            }
+        // Listen for changes
+        if (changeTypeSelect) {
+            changeTypeSelect.addEventListener('change', toggleProposedFields);
         }
-    });
-    
-    // Real-time validation
-    const inputs = form.querySelectorAll('input, select, textarea');
-    inputs.forEach(input => {
-        input.addEventListener('blur', function() {
-            if (this.hasAttribute('required') && !this.value.trim()) {
-                this.classList.add('is-invalid');
-                this.classList.remove('is-valid');
-            } else if (this.value.trim()) {
-                this.classList.remove('is-invalid');
-                this.classList.add('is-valid');
-            }
-        });
-        
-        input.addEventListener('input', function() {
-            if (this.classList.contains('is-invalid') && this.value.trim()) {
-                this.classList.remove('is-invalid');
-                this.classList.add('is-valid');
-            }
-        });
-    });
-    
-    // Dynamic location filtering based on jurisdiction level
-    const jurisdictionSelect = document.getElementById('jurisdictionSelect');
-    const locationSelect = document.getElementById('locationSelect');
-    
-    if (jurisdictionSelect && locationSelect) {
-        jurisdictionSelect.addEventListener('change', function() {
-            const jurisdiction = this.value;
-            
-            // Clear current options
-            locationSelect.innerHTML = '<option value="">Loading...</option>';
-            
-            if (jurisdiction) {
-                // Fetch location options from API
-                fetch(`/api/locations/${jurisdiction}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        locationSelect.innerHTML = '<option value="">Select Location</option>';
-                        if (data.success && data.locations) {
-                            data.locations.forEach(location => {
-                                const option = document.createElement('option');
-                                option.value = location;
-                                option.textContent = location;
-                                locationSelect.appendChild(option);
-                            });
+        if (actionRequiredSelect) {
+            actionRequiredSelect.addEventListener('change', toggleActionDescription);
+        }
+
+        // Form validation with proper error handling
+        const submitButton = form.querySelector('button[type="submit"]');
+        if (submitButton) {
+            form.addEventListener('submit', function(e) {
+                try {
+                    // Save all rich text content before form submission
+                    const editors = document.querySelectorAll('.rich-text-editor[contenteditable="true"]');
+                    if (editors) {
+                        editors.forEach(function(editor) {
+                            try {
+                                const textareaId = editor.getAttribute('data-textarea');
+                                const textarea = document.getElementById(textareaId);
+                                if (textarea) {
+                                    textarea.value = editor.innerHTML;
+                                }
+                            } catch (error) {
+                                console.warn('Error saving rich text content:', error);
+                            }
+                        });
+                    }
+                    
+                    // Add loading state to submit button
+                    submitButton.classList.add('btn-loading');
+                    submitButton.disabled = true;
+                    
+                    // Basic client-side validation
+                    const requiredFields = form.querySelectorAll('[required]');
+                    let isValid = true;
+                    
+                    if (requiredFields) {
+                        requiredFields.forEach(field => {
+                            if (!field.value.trim()) {
+                                field.classList.add('is-invalid');
+                                isValid = false;
+                            } else {
+                                field.classList.remove('is-invalid');
+                                field.classList.add('is-valid');
+                            }
+                        });
+                    }
+                    
+                    if (!isValid) {
+                        e.preventDefault();
+                        submitButton.classList.remove('btn-loading');
+                        submitButton.disabled = false;
+                        
+                        // Scroll to first invalid field
+                        const firstInvalid = form.querySelector('.is-invalid');
+                        if (firstInvalid) {
+                            firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            firstInvalid.focus();
                         }
-                    })
-                    .catch(error => {
-                        console.error('Error fetching locations:', error);
-                        locationSelect.innerHTML = '<option value="">Error loading locations</option>';
-                    });
-            } else {
-                locationSelect.innerHTML = '<option value="">Select Jurisdiction First</option>';
-            }
-        });
-        
-        // Initialize location options if jurisdiction is already selected
-        if (jurisdictionSelect.value) {
-            jurisdictionSelect.dispatchEvent(new Event('change'));
+                    }
+                } catch (error) {
+                    console.error('Error in form submission handler:', error);
+                    submitButton.classList.remove('btn-loading');
+                    submitButton.disabled = false;
+                }
+            });
         }
+
+        // Real-time validation with error handling
+        const inputs = form.querySelectorAll('input, select, textarea');
+        if (inputs && inputs.length > 0) {
+            inputs.forEach(input => {
+                try {
+                    input.addEventListener('blur', function() {
+                        if (this.hasAttribute('required') && !this.value.trim()) {
+                            this.classList.add('is-invalid');
+                            this.classList.remove('is-valid');
+                        } else if (this.value.trim()) {
+                            this.classList.remove('is-invalid');
+                            this.classList.add('is-valid');
+                        }
+                    });
+                    
+                    input.addEventListener('input', function() {
+                        if (this.classList.contains('is-invalid') && this.value.trim()) {
+                            this.classList.remove('is-invalid');
+                            this.classList.add('is-valid');
+                        }
+                    });
+                } catch (error) {
+                    console.warn('Error setting up input validation:', error);
+                }
+            });
+        }
+
+        // Dynamic location filtering with error handling
+        const jurisdictionSelect = document.getElementById('jurisdictionSelect');
+        const locationSelect = document.getElementById('locationSelect');
+        
+        if (jurisdictionSelect && locationSelect) {
+            jurisdictionSelect.addEventListener('change', function() {
+                try {
+                    const jurisdiction = this.value;
+                    
+                    // Clear current options
+                    locationSelect.innerHTML = '<option value="">Loading...</option>';
+                    
+                    if (jurisdiction) {
+                        // Fetch location options from API
+                        fetch(`/api/locations/${jurisdiction}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                locationSelect.innerHTML = '<option value="">Select Location</option>';
+                                if (data.success && data.locations) {
+                                    data.locations.forEach(location => {
+                                        const option = document.createElement('option');
+                                        option.value = location;
+                                        option.textContent = location;
+                                        locationSelect.appendChild(option);
+                                    });
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error fetching locations:', error);
+                                locationSelect.innerHTML = '<option value="">Error loading locations</option>';
+                            });
+                    } else {
+                        locationSelect.innerHTML = '<option value="">Select Jurisdiction First</option>';
+                    }
+                } catch (error) {
+                    console.error('Error in jurisdiction change handler:', error);
+                }
+            });
+            
+            // Initialize location options if jurisdiction is already selected
+            if (jurisdictionSelect.value) {
+                jurisdictionSelect.dispatchEvent(new Event('change'));
+            }
+        }
+        
+    } catch (error) {
+        console.error('Error initializing edit_update.html JavaScript:', error);
     }
 });
 
 {% if update %}
 function deleteUpdate(id, title) {
-    document.getElementById('deleteUpdateTitle').textContent = title;
-    document.getElementById('deleteForm').action = `/admin/updates/${id}/delete`;
-    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    try {
+        const deleteTitle = document.getElementById('deleteUpdateTitle');
+        const deleteForm = document.getElementById('deleteForm');
+        const deleteModal = document.getElementById('deleteModal');
+        
+        if (deleteTitle && deleteForm && deleteModal) {
+            deleteTitle.textContent = title;
+            deleteForm.action = `/admin/updates/${id}/delete`;
+            new bootstrap.Modal(deleteModal).show();
+        } else {
+            console.error('Delete modal elements not found');
+        }
+    } catch (error) {
+        console.error('Error in deleteUpdate function:', error);
+    }
 }
 {% endif %}
 </script>
