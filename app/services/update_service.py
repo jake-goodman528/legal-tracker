@@ -165,15 +165,27 @@ class UpdateService:
             if not update:
                 return False, None, "Update not found"
             
+            # Helper function to safely handle dates
+            def safe_parse_date(date_value):
+                if not date_value:
+                    return None
+                # If it's already a date object, return it as-is
+                if hasattr(date_value, 'year') and hasattr(date_value, 'month'):
+                    return date_value
+                # If it's a string, try to parse it
+                if isinstance(date_value, str):
+                    try:
+                        return datetime.strptime(date_value, '%Y-%m-%d').date()
+                    except ValueError:
+                        return None
+                return None
+
             # Update all fields
             for key, value in update_data.items():
                 if hasattr(update, key):
                     # Handle date fields
-                    if key in ['update_date', 'effective_date', 'deadline_date', 'compliance_deadline', 'expected_decision_date'] and value:
-                        try:
-                            setattr(update, key, datetime.strptime(value, '%Y-%m-%d').date())
-                        except ValueError:
-                            pass  # Skip invalid dates
+                    if key in ['update_date', 'effective_date', 'deadline_date', 'compliance_deadline', 'expected_decision_date']:
+                        setattr(update, key, safe_parse_date(value))
                     else:
                         setattr(update, key, value)
             

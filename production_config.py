@@ -112,7 +112,7 @@ class ProductionConfig:
     # API Rate Limits (requests per minute)
     RATE_LIMIT_API = os.environ.get('RATE_LIMIT_API', '100')
     RATE_LIMIT_LOGIN = os.environ.get('RATE_LIMIT_LOGIN', '10')
-    RATE_LIMIT_SEARCH = os.environ.get('RATE_LIMIT_SEARCH', '50')
+
     
     # ============= CACHE SETTINGS =============
     
@@ -153,19 +153,6 @@ class ProductionConfig:
     # Error Reporting
     ERROR_404_HELP = False  # Don't show debug info for 404s
     PROPAGATE_EXCEPTIONS = False  # Handle exceptions internally
-    
-    # Error Logging
-    MAIL_ON_ERROR = os.environ.get('MAIL_ON_ERROR', 'false').lower() == 'true'
-    ERROR_EMAIL_SUBJECT = 'STR Tracker Application Error'
-    ERROR_EMAIL_SENDER = os.environ.get('ERROR_EMAIL_SENDER')
-    ERROR_EMAIL_RECIPIENTS = os.environ.get('ERROR_EMAIL_RECIPIENTS', '').split(',')
-    
-    # SMTP Configuration for Error Emails
-    MAIL_SERVER = os.environ.get('MAIL_SERVER')
-    MAIL_PORT = int(os.environ.get('MAIL_PORT', '587'))
-    MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'true').lower() == 'true'
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
 
 
 class DevelopmentConfig:

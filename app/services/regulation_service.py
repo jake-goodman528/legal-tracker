@@ -8,7 +8,7 @@ Handles all regulation-related business logic:
 """
 
 from typing import Dict, List, Optional, Tuple, Any, Union
-from models import db, Regulation, SavedSearch, get_location_options_by_jurisdiction
+from models import db, Regulation, get_location_options_by_jurisdiction
 import logging
 
 
@@ -314,25 +314,7 @@ class RegulationService:
             db.session.rollback()
             return False, str(e)
     
-    @staticmethod
-    def get_public_saved_searches() -> List[SavedSearch]:
-        """
-        Retrieve all public saved searches for quick access filtering.
-        
-        Returns saved searches that are marked as public, allowing users
-        to quickly apply common search configurations.
-        
-        Returns:
-            List of SavedSearch objects that are marked as public.
-            
-        Note:
-            Returns empty list if database query fails. Logs errors automatically.
-        """
-        try:
-            return SavedSearch.query.filter_by(is_public=True).all()
-        except Exception as e:
-            logging.error(f"Error getting public saved searches: {str(e)}")
-            return []
+
 
     @staticmethod
     def get_admin_statistics() -> Dict[str, Any]:

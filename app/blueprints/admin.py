@@ -15,6 +15,7 @@ from forms import LoginForm, RegulationForm, UpdateForm
 from werkzeug.security import check_password_hash
 from app.services import RegulationService, UpdateService
 from app.utils.admin_helpers import admin_flash
+from functools import wraps
 import logging
 import traceback
 import time
@@ -179,6 +180,10 @@ def new_regulation():
     """Create new regulation"""
     form = RegulationForm()
     
+    # CRITICAL: Populate location choices IMMEDIATELY after form creation
+    if request.method == 'POST':
+        form.populate_location_choices()
+    
     if form.validate_on_submit():
         try:
             # Prepare regulation data with new template fields
@@ -228,6 +233,14 @@ def edit_regulation(regulation_id):
         form = RegulationForm(obj=regulation)
         
         logger.info(f"Editing regulation - ID: {regulation_id} | Title: {regulation.title}")
+        
+        # CRITICAL: Populate location choices IMMEDIATELY after form creation
+        if request.method == 'POST':
+            form.populate_location_choices()
+        # Also populate for initial GET request to show current location
+        elif request.method == 'GET' and regulation.jurisdiction_level:
+            form.jurisdiction_level.data = regulation.jurisdiction_level
+            form.populate_location_choices()
         
         if form.validate_on_submit():
             # Update regulation data with new template fields
@@ -327,33 +340,17 @@ def new_update():
     """Create new update with all fields"""
     form = UpdateForm()
     
-    # STEP 1: COMPREHENSIVE LOGGING FOR DEBUG
+    # CRITICAL: Populate location choices IMMEDIATELY after form creation
+    if request.method == 'POST':
+        # Set jurisdiction_level to match jurisdiction since they're the same
+        form.jurisdiction_level.data = form.jurisdiction.data
+        form.populate_location_choices()
+    
+    # Log basic form submission info
     if request.method == 'POST':
         logger.info("=== NEW UPDATE FORM SUBMISSION ===")
         logger.info(f"Request method: {request.method}")
-        logger.info(f"Request data length: {len(request.form)}")
-        
-        # Log each field individually with detailed information
-        for field_name, field_value in request.form.items():
-            logger.info(f"Field '{field_name}': '{field_value}' (length: {len(str(field_value))})")
-        
-        # Log form validation status
-        logger.info(f"Form validation status: {form.validate_on_submit()}")
-        
-        # Log all form fields and their values
-        logger.info("=== FORM FIELD VALUES ===")
-        for field in form:
-            if hasattr(field, 'data'):
-                logger.info(f"Form field '{field.name}': '{field.data}' (type: {type(field.data)})")
-        
-        # Log form errors in detail
-        if form.errors:
-            logger.error("=== FORM VALIDATION ERRORS ===")
-            for field, errors in form.errors.items():
-                for error in errors:
-                    logger.error(f"Field '{field}' validation error: {error}")
-        else:
-            logger.info("No form validation errors detected")
+        logger.info(f"Form submission received")
     
     if form.validate_on_submit():
         try:
@@ -440,6 +437,17 @@ def edit_update(update_id):
         form = UpdateForm(obj=update)
         
         logger.info(f"Editing update - ID: {update_id} | Title: {update.title}")
+        
+        # CRITICAL: Populate location choices IMMEDIATELY after form creation
+        if request.method == 'POST':
+            # Set jurisdiction_level to match jurisdiction since they're the same
+            form.jurisdiction_level.data = form.jurisdiction.data
+            form.populate_location_choices()
+        # Also populate for initial GET request to show current location
+        elif request.method == 'GET' and update.jurisdiction_level:
+            form.jurisdiction.data = update.jurisdiction_level
+            form.jurisdiction_level.data = update.jurisdiction_level
+            form.populate_location_choices()
         
         if form.validate_on_submit():
             # Update data with all new fields

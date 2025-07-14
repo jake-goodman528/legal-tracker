@@ -7,11 +7,10 @@ The STR Compliance Toolkit includes a comprehensive testing suite built with pyt
 ## 📋 Test Categories
 
 ### Unit Tests
-- **SearchService**: Advanced search functionality, suggestions, saved searches
+
 - **RegulationService**: CRUD operations, filtering, content generation
 - **UpdateService**: Update management and filtering
-- **UserInteractionService**: Bookmarks, reminders, session management
-- **NotificationService**: Alert generation and preferences
+- **UserInteractionService**: Bookmarks and session management
 
 ### Integration Tests
 - **API Endpoints**: REST API functionality and error handling
@@ -60,8 +59,8 @@ python3 -m pytest -m integration
 
 #### Run Specific Test Files
 ```bash
-# Search service tests
-python3 -m pytest tests/test_search_service.py
+# Regulation service tests  
+python3 -m pytest tests/test_regulation_service.py
 
 # API endpoint tests
 python3 -m pytest tests/test_api_endpoints.py
@@ -69,7 +68,7 @@ python3 -m pytest tests/test_api_endpoints.py
 
 #### Run Single Test
 ```bash
-python3 -m pytest tests/test_search_service.py::TestSearchService::test_advanced_search_text_query -v
+python3 -m pytest tests/test_regulation_service.py::TestRegulationService::test_get_regulation_by_id -v
 ```
 
 ### Using pytest with Markers
@@ -148,7 +147,7 @@ def test_advanced_search_text_query(self, app, multiple_regulations):
     """Test advanced search with text query."""
     with app.app_context():
         # Test search for "tax" - should find Federal STR Tax Reporting
-        results = SearchService.advanced_search({'query': 'tax'})
+        regulations = RegulationService.get_all_regulations()
         
         assert len(results) == 1
         assert results[0].title == 'Federal STR Tax Reporting'
@@ -190,7 +189,7 @@ def test_bookmark_workflow(self, client, sample_update):
 ```
 tests/
 ├── conftest.py              # Test configuration and fixtures
-├── test_search_service.py   # SearchService unit tests
+├── test_regulation_service.py   # RegulationService unit tests
 ├── test_regulation_service.py # RegulationService unit tests
 ├── test_api_endpoints.py    # API endpoint tests
 ├── test_admin_routes.py     # Admin interface tests
@@ -199,7 +198,7 @@ tests/
 
 ### Test Naming Conventions
 - **Test Files**: `test_*.py`
-- **Test Classes**: `Test*` (e.g., `TestSearchService`)
+- **Test Classes**: `Test*` (e.g., `TestRegulationService`)
 - **Test Methods**: `test_*` (e.g., `test_advanced_search_filters`)
 
 ### Test Structure Best Practices
@@ -217,7 +216,7 @@ def test_save_search_success(self, app):
         }
         
         # Act
-        success, message, search_id = SearchService.save_search(
+        success, regulation, error = RegulationService.create_regulation(
             'Test Search', 
             'Test search description', 
             criteria,
@@ -241,7 +240,7 @@ def test_search_error_handling(self, app):
     """Test that search methods handle errors gracefully."""
     with app.app_context():
         # Test with invalid data types
-        results = SearchService.advanced_search({'query': None})
+        regulation = RegulationService.get_regulation_by_id(None)
         assert isinstance(results, list)  # Should return empty list, not crash
 ```
 
@@ -448,7 +447,7 @@ def test_search_performance(self, app, large_dataset):
     """Test search performance with large dataset."""
     with app.app_context():
         start_time = time.time()
-        results = SearchService.advanced_search({'query': 'test'})
+        regulations = RegulationService.get_all_regulations()
         duration = time.time() - start_time
         
         assert duration < 1.0  # Should complete within 1 second

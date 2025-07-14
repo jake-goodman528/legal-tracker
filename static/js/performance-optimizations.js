@@ -104,10 +104,10 @@ class PerformanceOptimizer {
     }
     
     addDebouncing() {
-        // Debounce search inputs
-        const searchInputs = document.querySelectorAll('input[type="search"], input[placeholder*="Search"]');
-        
-        searchInputs.forEach(input => {
+            // Debounce inputs
+    const textInputs = document.querySelectorAll('input[type="text"]');
+    
+    textInputs.forEach(input => {
             let timeout;
             const originalHandler = input.oninput;
             

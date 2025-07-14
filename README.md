@@ -9,7 +9,7 @@ This application was developed for Kaystreet Management, a leading property mana
 ## ✨ Features
 
 ### 🔍 **Regulation Management**
-- **Advanced Search**: Multi-criteria search across regulations with filters for jurisdiction, category, compliance level, and more
+- **Comprehensive Database**: Access to detailed regulations across multiple jurisdictions and compliance areas
 - **Detailed Requirements**: Comprehensive regulation details with compliance information, effective dates, and keywords
 - **Related Regulations**: Automatic discovery of related regulations by location and category
 - **Export Capabilities**: CSV export functionality for compliance reporting
@@ -17,15 +17,9 @@ This application was developed for Kaystreet Management, a leading property mana
 ### 📈 **Update Tracking**
 - **Real-time Updates**: Track regulatory changes, court decisions, and industry news
 - **Priority Management**: High, medium, and low priority classification system
-- **Deadline Alerts**: Automated notifications for upcoming compliance deadlines
 - **Bookmark System**: Save important updates for easy reference
-- **Reminder System**: Set custom reminders for critical deadlines
 
-### 🔔 **Notification System**
-- **Personalized Alerts**: Customizable notification preferences by location, category, and impact level
-- **Weekly Digest**: Automated weekly summaries of regulatory activity
-- **Deadline Notifications**: Proactive alerts for approaching compliance deadlines
-- **Email Integration**: Email notification support for critical updates
+
 
 ### 👥 **Administrative Interface**
 - **Secure Admin Panel**: Role-based access control for content management
@@ -107,15 +101,15 @@ The application will be available at `http://localhost:5000`
 
 #### **Browsing Regulations**
 1. Navigate to `/regulations` to view all regulations
-2. Use filters to narrow results by:
+2. Browse regulations by:
    - Jurisdiction level (National, State, Local)
    - Location (specific cities/states)
    - Category (Legal, Licensing, Taxes, etc.)
-   - Text search across titles and requirements
+   - Detailed requirements and compliance information
 
 #### **Tracking Updates**
 1. Visit `/updates` to see regulatory changes
-2. Filter by status (Recent, Upcoming, Proposed)
+2. View by status (Recent, Upcoming, Proposed)
 3. Bookmark important updates for quick access
 
 
@@ -160,20 +154,16 @@ ShortTermRentalTracker/
 ### Service Layer Pattern
 The application uses a service layer architecture to separate business logic from route handlers:
 
-- **SearchService**: Advanced search functionality and suggestions
-- **RegulationService**: Regulation CRUD and content management
-- **UpdateService**: Update management and filtering
-- **UserInteractionService**: Bookmarks, reminders, and user sessions
-- **NotificationService**: Alert generation and preference management
+- **RegulationService**: Regulation management and content organization
+- **UpdateService**: Update management and categorization
+- **UserInteractionService**: Bookmarks and user sessions
 
 ### Database Models
 - **Regulation**: Core regulation data with compliance information
 - **Update**: Regulatory updates and announcements
 - **AdminUser**: Administrative user accounts
-- **SavedSearch**: User-saved search configurations
+
 - **UserUpdateInteraction**: User bookmarks and interactions
-- **UpdateReminder**: Custom reminder system
-- **NotificationPreference**: User notification settings
 
 ## 🔧 Development
 
@@ -206,14 +196,7 @@ The project follows Python best practices:
 
 ## 🔌 API Documentation
 
-### Search Endpoints
-- `GET /api/search/advanced` - Advanced regulation search
-- `GET /api/search/suggestions` - Get search suggestions
-- `GET /api/search/saved` - List saved searches
-- `POST /api/search/save` - Save a search configuration
-
 ### Update Endpoints
-- `GET /api/updates/search` - Search updates
 - `GET /api/updates/bookmarked` - Get user bookmarks
 - `POST /api/updates/{id}/bookmark` - Toggle bookmark
 
@@ -221,7 +204,7 @@ The project follows Python best practices:
 
 
 ### Export Endpoints
-- `GET /api/export/csv` - Export search results to CSV
+- `GET /api/export/csv` - Export regulations to CSV
 
 ## 🚀 Deployment
 
@@ -276,8 +259,8 @@ For support and questions:
 - ✅ Modular blueprint architecture implementation
 - ✅ Service layer pattern for business logic separation
 - ✅ Comprehensive documentation and type hints
-- ✅ Enhanced notification system with personalization
-- ✅ Advanced search capabilities with filtering
+
+- ✅ Comprehensive regulation database access
 - ✅ Responsive UI with Bootstrap 5
 
 ### Version 1.0.0 (Legacy)

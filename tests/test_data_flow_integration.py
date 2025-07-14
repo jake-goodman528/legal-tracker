@@ -118,18 +118,9 @@ class TestDataFlowIntegration:
             assert 'Significant impact on all operators' in data
             assert 'Under Review' in data
             
-            # Test filtering by new fields
-            response = client.get('/updates?decision_status=Under Review')
-            assert response.status_code == 200
-            assert 'Public View Test Update' in response.get_data(as_text=True)
-            
-            # Test category filtering
-            response = client.get('/updates/category/Regulatory Changes')
-            assert response.status_code == 302  # Should redirect to main updates page
-            
-            # Test status filtering
-            response = client.get('/updates/status/Recent')
-            assert response.status_code == 302  # Should redirect to main updates page
+            # Test viewing new fields
+            assert 'Under Review' in response.get_data(as_text=True)
+            assert 'Regulatory Changes' in response.get_data(as_text=True)
 
     def test_api_endpoints_with_new_fields(self, app, client):
         """Test that API endpoints return new fields correctly"""
@@ -261,12 +252,8 @@ class TestDataFlowIntegration:
             response = client.get('/regulations/99999')
             assert response.status_code == 404
             
-            # Test invalid category filter
-            response = client.get('/updates/category/InvalidCategory')
-            assert response.status_code == 404
-            
-            # Test invalid status filter
-            response = client.get('/updates/status/InvalidStatus')
+            # Test invalid routes
+            response = client.get('/updates/invalid-route')
             assert response.status_code == 404
             
             # Test API error handling
@@ -276,8 +263,8 @@ class TestDataFlowIntegration:
             assert data['success'] is False
             assert 'not found' in data['error'].lower()
 
-    def test_filtering_and_search(self, app, client):
-        """Test filtering and search functionality with new fields"""
+    def test_update_management(self, app, client):
+        """Test update management functionality with new fields"""
         with app.app_context():
             # Create test updates with different field values
             updates_data = [
@@ -314,25 +301,12 @@ class TestDataFlowIntegration:
                 success, update, error = UpdateService.create_update(update_data)
                 assert success, f"Setup failed: {error}"
             
-            # Test filtering by priority
-            response = client.get('/updates?priority=1')
+            # Test basic update access
+            response = client.get('/updates')
             assert response.status_code == 200
             data = response.get_data(as_text=True)
             assert 'High Priority Update' in data
-            assert 'Medium Priority Update' not in data
-            
-            # Test filtering by decision status
-            response = client.get('/updates?decision_status=Proposed')
-            assert response.status_code == 200
-            data = response.get_data(as_text=True)
             assert 'Medium Priority Update' in data
-            assert 'High Priority Update' not in data
-            
-            # Test search in new fields
-            response = client.get('/updates?search=High impact')
-            assert response.status_code == 200
-            data = response.get_data(as_text=True)
-            assert 'High Priority Update' in data
 
     def test_responsive_design_elements(self, app, client):
         """Test that responsive design elements are present"""

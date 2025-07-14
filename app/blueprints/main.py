@@ -8,7 +8,7 @@ Contains all public-facing routes for the STR Compliance Toolkit:
 """
 
 from flask import Blueprint, render_template, request, session, abort, flash, redirect, url_for
-from models import db, Regulation, Update, SavedSearch, UserUpdateInteraction
+from models import db, Regulation, Update, UserUpdateInteraction
 from app.services import RegulationService, UpdateService, UserInteractionService
 from app.utils.admin_helpers import public_flash
 import logging

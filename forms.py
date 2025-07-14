@@ -118,6 +118,16 @@ class RegulationForm(FlaskForm):
     )
     
     submit = SubmitField('Save Regulation')
+    
+    def populate_location_choices(self):
+        """Populate location choices based on the selected jurisdiction_level"""
+        from models import get_location_options_by_jurisdiction
+        
+        if self.jurisdiction_level.data:
+            locations = get_location_options_by_jurisdiction(self.jurisdiction_level.data)
+            self.location.choices = [('', 'Select Location')] + [(loc, loc) for loc in locations]
+        else:
+            self.location.choices = [('', 'Select Jurisdiction Level First')]
 
 
 class UpdateForm(FlaskForm):
@@ -341,4 +351,17 @@ class UpdateForm(FlaskForm):
         description="Kaystreet Management's commitment statement regarding client support and guidance"
     )
     
-    submit = SubmitField('Save Update') 
+    submit = SubmitField('Save Update')
+    
+    def populate_location_choices(self):
+        """Populate location choices based on the selected jurisdiction"""
+        from models import get_location_options_by_jurisdiction
+        
+        # Use jurisdiction field for Updates (it's called jurisdiction, not jurisdiction_level)
+        jurisdiction_level = self.jurisdiction.data
+        
+        if jurisdiction_level:
+            locations = get_location_options_by_jurisdiction(jurisdiction_level)
+            self.jurisdiction_affected.choices = [('', 'Select Location')] + [(loc, loc) for loc in locations]
+        else:
+            self.jurisdiction_affected.choices = [('', 'Select Jurisdiction First')] 

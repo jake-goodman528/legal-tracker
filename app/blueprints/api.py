@@ -9,8 +9,7 @@ Contains all API endpoints for the STR Compliance Toolkit:
 
 from flask import Blueprint, request, jsonify, make_response, session, g
 from models import (
-    db, Regulation, Update, SavedSearch, SearchSuggestion, 
-    UserUpdateInteraction
+    db, Regulation, Update, UserUpdateInteraction
 )
 from app.services import (
     RegulationService, UpdateService, UserInteractionService

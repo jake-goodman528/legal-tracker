@@ -185,7 +185,7 @@ class UserInteractionService:
         
         Args:
             update_id (int): ID of the update to share
-            share_type (str): Type of sharing ('link', 'email', 'export')
+            share_type (str): Type of sharing ('link', 'export')
             
         Returns:
             tuple: (success: bool, content: dict, error: str or None)
@@ -202,27 +202,7 @@ class UserInteractionService:
                     'message': 'Share link generated'
                 }, None
             
-            elif share_type == 'email':
-                subject = f"STR Compliance Update: {update.title}"
-                body = f"""
-                {update.title}
-                
-                Jurisdiction: {update.jurisdiction_affected}
-                Status: {update.status}
-                Impact Level: {update.impact_level}
-                
-                {update.description}
-                
-                {'Action Required: ' + update.action_description if update.action_required and update.action_description else ''}
-                
-                View full details at: {url_for('main.updates', _external=True)}
-                """
-                
-                return True, {
-                    'email_subject': subject,
-                    'email_body': body,
-                    'message': 'Email content generated'
-                }, None
+
             
             elif share_type == 'export':
                 export_data = {

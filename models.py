@@ -6,8 +6,7 @@ Defines all SQLAlchemy models for the STR Compliance Toolkit including:
 - Update: Regulatory updates and announcements  
 - UserUpdateInteraction: User interaction tracking (bookmarks, read status)
 - AdminUser: Administrative user accounts
-- SavedSearch: Saved search configurations
-- SearchSuggestion: Search suggestion tracking
+
 """
 
 from typing import Dict, List, Optional, Any
@@ -204,40 +203,7 @@ class AdminUser(db.Model):
     def __repr__(self):
         return f'<AdminUser {self.username}>'
 
-class SavedSearch(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False, index=True)  # Often searched
-    description = db.Column(db.String(200), nullable=True)
-    search_criteria = db.Column(db.Text, nullable=False)  # JSON string of search parameters
-    is_public = db.Column(db.Boolean, default=False, index=True)  # Often filtered
-    use_count = db.Column(db.Integer, default=0, index=True)  # Often sorted for popular searches
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
-    last_used = db.Column(db.DateTime, default=datetime.utcnow, index=True)  # Often sorted
 
-    def __repr__(self):
-        return f'<SavedSearch {self.name}>'
-    
-    def get_search_criteria(self):
-        """Parse the JSON search criteria"""
-        try:
-            return json.loads(self.search_criteria)
-        except (json.JSONDecodeError, TypeError):
-            return {}
-    
-    def set_search_criteria(self, criteria_dict):
-        """Set search criteria from dictionary"""
-        self.search_criteria = json.dumps(criteria_dict)
-
-class SearchSuggestion(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    suggestion_text = db.Column(db.String(200), nullable=False, unique=True, index=True)  # Often searched
-    suggestion_type = db.Column(db.String(50), nullable=False, index=True)  # Often filtered - title, location, category, keyword
-    frequency = db.Column(db.Integer, default=1, index=True)  # Often sorted for popular suggestions
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
-    last_used = db.Column(db.DateTime, default=datetime.utcnow, index=True)  # Often sorted
-
-    def __repr__(self):
-        return f'<SearchSuggestion {self.suggestion_text}>'
 
 def get_location_options_by_jurisdiction(jurisdiction_level):
     """

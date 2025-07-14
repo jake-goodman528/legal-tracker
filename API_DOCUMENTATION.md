@@ -2,7 +2,7 @@
 
 ## Overview
 
-The STR Compliance Toolkit provides a comprehensive REST API for managing short-term rental compliance data. This API enables programmatic access to regulations, updates, search functionality, and user interactions.
+The STR Compliance Toolkit provides a comprehensive REST API for managing short-term rental compliance data. This API enables programmatic access to regulations, updates, and user interactions.
 
 **Base URL**: `http://localhost:5000`  
 **API Version**: 2.0  
@@ -22,206 +22,11 @@ username=admin&password=your-admin-password
 
 ## API Endpoints
 
-### 🔍 Search & Regulations
 
-#### Advanced Search
-```http
-GET /api/search/advanced
-```
-
-Perform advanced search across regulations with multiple criteria.
-
-**Query Parameters:**
-- `query` (string, optional): Text search query
-- `categories` (array, optional): Filter by categories
-- `compliance_levels` (array, optional): Filter by compliance levels  
-- `property_types` (array, optional): Filter by property types
-- `locations` (array, optional): Filter by locations
-- `jurisdictions` (array, optional): Filter by jurisdiction levels
-- `date_from` (string, optional): Start date (YYYY-MM-DD)
-- `date_to` (string, optional): End date (YYYY-MM-DD)
-- `date_range_days` (integer, optional): Days from current date
-
-**Example Request:**
-```http
-GET /api/search/advanced?query=licensing&categories=Legal,Licensing&jurisdictions=State&locations=California
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "results": [
-    {
-      "id": 1,
-      "title": "California Short-Term Rental Licensing Requirements",
-      "jurisdiction_level": "State",
-      "location": "California",
-      "category": "Licensing",
-      "compliance_level": "Mandatory",
-      "property_type": "Both",
-      "key_requirements": "All STR properties must obtain state license...",
-      "last_updated": "2024-01-15",
-      "effective_date": "2024-03-01",
-      "keywords": "licensing, permit, registration"
-    }
-  ],
-  "total": 1
-}
-```
-
-#### Search Suggestions
-```http
-GET /api/search/suggestions
-```
-
-Get intelligent search suggestions based on user input.
-
-**Query Parameters:**
-- `q` (string, required): Search query (minimum 2 characters)
-
-**Example Request:**
-```http
-GET /api/search/suggestions?q=califor
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "suggestions": [
-    {
-      "text": "California",
-      "type": "location",
-      "category": "Locations"
-    },
-    {
-      "text": "California Coastal Commission",
-      "type": "title",
-      "category": "Regulation Titles"
-    }
-  ]
-}
-```
-
-#### Save Search Configuration
-```http
-POST /api/search/save
-```
-
-Save a search configuration for later reuse.
-
-**Request Body:**
-```json
-{
-  "name": "California Licensing Updates",
-  "description": "Track licensing changes in California",
-  "criteria": {
-    "query": "licensing",
-    "locations": ["California"],
-    "categories": ["Legal", "Licensing"]
-  },
-  "is_public": false
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "message": "Search saved successfully",
-  "search_id": 123
-}
-```
-
-#### Get Saved Searches
-```http
-GET /api/search/saved
-```
-
-Retrieve all public saved searches.
-
-**Response:**
-```json
-{
-  "success": true,
-  "searches": [
-    {
-      "id": 123,
-      "name": "California Licensing Updates",
-      "description": "Track licensing changes in California",
-      "criteria": { "query": "licensing", "locations": ["California"] },
-      "use_count": 5,
-      "last_used": "2024-01-15T10:30:00Z"
-    }
-  ]
-}
-```
-
-#### Use Saved Search
-```http
-GET /api/search/saved/{search_id}
-```
-
-Execute a saved search and get its criteria.
-
-**Response:**
-```json
-{
-  "success": true,
-  "criteria": {
-    "query": "licensing",
-    "locations": ["California"],
-    "categories": ["Legal", "Licensing"]
-  }
-}
-```
 
 ### 📈 Updates & Tracking
 
-#### Search Updates
-```http
-GET /api/updates/search
-```
 
-Search and filter regulatory updates.
-
-**Query Parameters:**
-- `query_text` (string, optional): Text search
-- `category` (string, optional): Category filter
-- `impact` (string, optional): Impact level filter
-- `status` (string, optional): Status filter
-- `jurisdiction` (string, optional): Jurisdiction filter
-- `has_deadline` (boolean, optional): Filter by deadline presence
-- `action_required` (boolean, optional): Filter by action requirement
-
-**Example Request:**
-```http
-GET /api/updates/search?category=Tax Updates&impact=High&has_deadline=true
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "updates": [
-    {
-      "id": 456,
-      "title": "New Tourism Tax Requirements",
-      "description": "Updated tax collection requirements for STR properties",
-      "jurisdiction_affected": "San Francisco, CA",
-      "status": "Recent",
-      "category": "Tax Updates",
-      "impact_level": "High",
-      "deadline_date": "2024-03-15",
-      "action_required": true,
-      "action_description": "Update tax collection procedures",
-      "priority": 1,
-      "tags": ["tourism tax", "collection", "compliance"]
-    }
-  ]
-}
-```
 
 #### Get User Bookmarks
 ```http
@@ -275,15 +80,12 @@ Add or remove an update from user's bookmarks.
 
 ### 📊 Data Export
 
-#### Export Search Results to CSV
+#### Export Regulations to CSV
 ```http
 GET /api/export/csv
 ```
 
-Export search results in CSV format.
-
-**Query Parameters:**
-- Same as `/api/search/advanced` parameters
+Export regulations database in CSV format.
 - `format` (string): "csv" (default)
 
 **Response:**
@@ -451,35 +253,15 @@ Boolean parameters accept: `true`, `false`, `1`, `0`
 
 ## Examples
 
-### Complete Search Workflow
-```bash
-# 1. Get search suggestions
-curl "http://localhost:5000/api/search/suggestions?q=tax"
-
-# 2. Perform advanced search
-curl "http://localhost:5000/api/search/advanced?query=tax&categories=Tax%20Updates&jurisdictions=State"
-
-# 3. Save search for later
-curl -X POST "http://localhost:5000/api/search/save" \
-  -H "Content-Type: application/json" \
-  -d '{"name": "Tax Updates", "criteria": {"query": "tax", "categories": ["Tax Updates"]}}'
-
-# 4. Export results to CSV
-curl "http://localhost:5000/api/export/csv?query=tax&categories=Tax%20Updates" \
-  -H "Accept: text/csv"
-```
-
 ### Update Tracking Workflow
 ```bash
-# 1. Search for updates
-curl "http://localhost:5000/api/updates/search?category=Tax%20Updates&impact=High"
+# 1. Get all updates
+curl "http://localhost:5000/api/updates"
 
 # 2. Bookmark important update
 curl -X POST "http://localhost:5000/api/updates/456/bookmark" \
   -H "Content-Type: application/json" \
   -d '{"is_bookmarked": true}'
-
-
 
 # 3. Get bookmarked updates
 curl "http://localhost:5000/api/updates/bookmarked"
@@ -489,10 +271,9 @@ curl "http://localhost:5000/api/updates/bookmarked"
 
 ### JavaScript/Node.js Example
 ```javascript
-// Search for regulations
-const searchRegulations = async (query, filters = {}) => {
-  const params = new URLSearchParams({ query, ...filters });
-  const response = await fetch(`/api/search/advanced?${params}`);
+// Get all updates
+const getUpdates = async () => {
+  const response = await fetch('/api/updates');
   return response.json();
 };
 
@@ -516,9 +297,8 @@ class STRComplianceAPI:
         self.base_url = base_url
         self.session = requests.Session()
     
-    def search_regulations(self, query, **filters):
-        params = {"query": query, **filters}
-        response = self.session.get(f"{self.base_url}/api/search/advanced", params=params)
+    def get_updates(self):
+        response = self.session.get(f"{self.base_url}/api/updates")
         return response.json()
     
     def bookmark_update(self, update_id, is_bookmarked):
@@ -531,7 +311,7 @@ class STRComplianceAPI:
 
 ### Version 2.0.0 (Current)
 - Complete API redesign with RESTful endpoints
-- Enhanced search capabilities with advanced filtering
+- Comprehensive regulation and update management
 - User interaction tracking (bookmarks, reminders)
 - Comprehensive notification system
 - CSV export functionality
@@ -539,7 +319,7 @@ class STRComplianceAPI:
 
 ### Version 1.0.0 (Legacy)
 - Basic regulation retrieval endpoints
-- Simple search functionality
+- Basic regulation browsing
 - Limited admin interface
 
 ---

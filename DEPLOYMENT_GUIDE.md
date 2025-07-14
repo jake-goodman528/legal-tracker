@@ -98,7 +98,7 @@ LOG_FILE_PATH=/var/log/str_tracker/app.log
 # Optional: Rate Limiting
 RATE_LIMIT_API=100
 RATE_LIMIT_LOGIN=10
-RATE_LIMIT_SEARCH=50
+
 
 # Optional: Backup Configuration
 BACKUP_ENABLED=true
@@ -108,15 +108,7 @@ BACKUP_RETENTION_DAYS=30
 # Optional: SSL Configuration
 SSL_REDIRECT=true
 
-# Optional: Error Email Notifications
-MAIL_ON_ERROR=false
-ERROR_EMAIL_SENDER=alerts@yourdomain.com
-ERROR_EMAIL_RECIPIENTS=admin@yourdomain.com
-MAIL_SERVER=smtp.yourdomain.com
-MAIL_PORT=587
-MAIL_USE_TLS=true
-MAIL_USERNAME=alerts@yourdomain.com
-MAIL_PASSWORD=your-email-password
+
 ```
 
 **🔒 Security Note**: Generate strong, unique passwords and secrets:

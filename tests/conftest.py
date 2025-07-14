@@ -9,7 +9,7 @@ import tempfile
 import pytest
 from datetime import datetime, date
 from app.application import create_app
-from models import db, Regulation, Update, AdminUser, SavedSearch
+from models import db, Regulation, Update, AdminUser
 
 
 @pytest.fixture
@@ -128,23 +128,7 @@ def admin_user(app):
         return SimpleAdmin(admin.id, admin.username)
 
 
-@pytest.fixture
-def saved_search(app):
-    """Create a saved search for testing."""
-    with app.app_context():
-        search = SavedSearch(
-            name='California Licensing',
-            description='Track licensing changes in California',
-            is_public=True
-        )
-        search.set_search_criteria({
-            'query': 'licensing',
-            'locations': ['California'],
-            'categories': ['Licensing']
-        })
-        db.session.add(search)
-        db.session.commit()
-        return search
+
 
 
 
@@ -161,7 +145,7 @@ def authenticated_admin(client, admin_user):
 
 @pytest.fixture
 def multiple_regulations(app):
-    """Create multiple regulations for testing search and filtering."""
+    """Create multiple regulations for testing."""
     with app.app_context():
         regulations = [
             Regulation(
@@ -213,7 +197,7 @@ def multiple_regulations(app):
 
 @pytest.fixture
 def multiple_updates(app):
-    """Create multiple updates for testing search and filtering."""
+    """Create multiple updates for testing."""
     with app.app_context():
         updates = [
             Update(
