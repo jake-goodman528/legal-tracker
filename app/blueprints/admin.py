@@ -551,7 +551,7 @@ def bulk_status_change():
         
         for update_id in update_ids:
             try:
-                update = Update.query.get(update_id)
+                update = db.session.get(Update, update_id)
                 if update:
                     # Update both status and change_type for consistency
                     update.status = new_status
@@ -631,7 +631,7 @@ def quick_status_change():
         
         logger.info(f"Quick status change - ID: {update_id} | New Status: {new_status}")
         
-        update = Update.query.get(update_id)
+        update = db.session.get(Update, update_id)
         if not update:
             return jsonify({'success': False, 'error': 'Update not found'})
         

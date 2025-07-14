@@ -22,6 +22,7 @@ def app():
     os.environ['TESTING'] = 'True'
     os.environ['DATABASE_URL'] = f'sqlite:///{db_path}'
     os.environ['SESSION_SECRET'] = 'test-secret-key'
+    os.environ['ADMIN_USERNAME'] = 'admin'
     os.environ['ADMIN_PASSWORD'] = 'test-admin-password'
     os.environ['WTF_CSRF_ENABLED'] = 'False'
     os.environ['SKIP_SAMPLE_DATA'] = 'True'  # Skip sample data loading in tests
@@ -71,7 +72,11 @@ def sample_regulation(app):
         )
         db.session.add(regulation)
         db.session.commit()
-        return regulation
+        # Return a simple object with just the ID to avoid session issues
+        class SimpleRegulation:
+            def __init__(self, id):
+                self.id = id
+        return SimpleRegulation(regulation.id)
 
 
 @pytest.fixture
@@ -97,7 +102,11 @@ def sample_update(app):
         )
         db.session.add(update)
         db.session.commit()
-        return update
+        # Return a simple object with just the ID to avoid session issues
+        class SimpleUpdate:
+            def __init__(self, id):
+                self.id = id
+        return SimpleUpdate(update.id)
 
 
 @pytest.fixture
@@ -107,11 +116,16 @@ def admin_user(app):
         from werkzeug.security import generate_password_hash
         admin = AdminUser(
             username='testadmin',
-            password_hash=generate_password_hash('testpassword')
+            password_hash=generate_password_hash('testpassword', method='pbkdf2:sha256')
         )
         db.session.add(admin)
         db.session.commit()
-        return admin
+        # Return a simple object with just the ID to avoid session issues
+        class SimpleAdmin:
+            def __init__(self, id, username):
+                self.id = id
+                self.username = username
+        return SimpleAdmin(admin.id, admin.username)
 
 
 @pytest.fixture

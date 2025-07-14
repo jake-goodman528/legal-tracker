@@ -27,7 +27,8 @@ class UpdateService:
             Update: The update object or None if not found
         """
         try:
-            return Update.query.get(update_id)
+            from models import db
+            return db.session.get(Update, update_id)
         except Exception as e:
             logging.error(f"Error getting update by ID {update_id}: {str(e)}")
             return None
@@ -159,7 +160,8 @@ class UpdateService:
             tuple: (success: bool, update: Update or None, error: str or None)
         """
         try:
-            update = Update.query.get(update_id)
+            from models import db
+            update = db.session.get(Update, update_id)
             if not update:
                 return False, None, "Update not found"
             
@@ -197,7 +199,8 @@ class UpdateService:
             tuple: (success: bool, error: str or None)
         """
         try:
-            update = Update.query.get(update_id)
+            from models import db
+            update = db.session.get(Update, update_id)
             if not update:
                 return False, "Update not found"
             

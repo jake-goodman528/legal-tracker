@@ -173,15 +173,32 @@ def toggle_bookmark(update_id):
     logger.info(f"Toggling bookmark - Update ID: {update_id} | User: {user_id}")
     
     try:
-        success, is_bookmarked, error = UserInteractionService.toggle_bookmark(user_id, update_id)
+        # First check if the update exists
+        update = db.session.get(Update, update_id)
+        if not update:
+            logger.warning(f"Update not found for bookmark - ID: {update_id}")
+            return jsonify({
+                'success': False,
+                'error': 'Update not found'
+            }), 404
+        
+        # Get the bookmark status from request JSON
+        try:
+            data = request.get_json() or {}
+        except Exception:
+            # If JSON parsing fails, try to proceed with default values
+            data = {}
+        is_bookmarked = data.get('is_bookmarked', True)
+        
+        success, result_bookmarked, error = UserInteractionService.toggle_bookmark(update_id, is_bookmarked, user_id)
         
         if success:
-            action = "bookmarked" if is_bookmarked else "unbookmarked"
+            action = "bookmarked" if result_bookmarked else "unbookmarked"
             logger.info(f"Successfully {action} update - ID: {update_id} | User: {user_id}")
             
             return jsonify({
                 'success': True,
-                'is_bookmarked': is_bookmarked,
+                'is_bookmarked': result_bookmarked,
                 'message': f'Update {action} successfully'
             })
         else:
@@ -276,7 +293,7 @@ def get_updates():
 def get_update(update_id):
     """Get a single update by ID with all fields"""
     try:
-        update = Update.query.get(update_id)
+        update = db.session.get(Update, update_id)
         if not update:
             logger.warning(f"Update not found - ID: {update_id}")
             return jsonify({

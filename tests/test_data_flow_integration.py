@@ -472,7 +472,7 @@ class TestDataFlowIntegration:
             
             # Verify deletions
             for update in updates:
-                deleted_update = Update.query.get(update.id)
+                deleted_update = db.session.get(Update, update.id)
                 assert deleted_update is None
 
 
