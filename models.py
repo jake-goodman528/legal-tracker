@@ -27,11 +27,11 @@ class Regulation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     
     # Core Information - Required fields
-    jurisdiction = db.Column(db.String(100), nullable=False)  # Jurisdiction (combines level and location)
-    jurisdiction_level = db.Column(db.String(20), nullable=False, default='Local')  # National, State, Local
-    location = db.Column(db.String(100), nullable=False)  # Location
-    title = db.Column(db.String(200), nullable=False)  # Title
-    last_updated = db.Column(db.DateTime, default=datetime.utcnow)  # Last Updated
+    jurisdiction = db.Column(db.String(100), nullable=False, index=True)  # Often queried
+    jurisdiction_level = db.Column(db.String(20), nullable=False, default='Local', index=True)  # Often filtered
+    location = db.Column(db.String(100), nullable=False, index=True)  # Often queried
+    title = db.Column(db.String(200), nullable=False, index=True)  # Often searched
+    last_updated = db.Column(db.DateTime, default=datetime.utcnow, index=True)  # Often sorted
     
     # Rich Text Content Fields - Support formatting (bold, indent, numbering, bullet points, etc.)
     overview = db.Column(db.Text, nullable=True)  # Overview - formatted content
@@ -42,7 +42,7 @@ class Regulation(db.Model):
     recent_changes = db.Column(db.Text, nullable=True)  # Recent Changes - formatted content
     
     # Timestamps
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     def __repr__(self) -> str:
@@ -74,32 +74,32 @@ class Regulation(db.Model):
 
 class Update(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(200), nullable=False)
+    title = db.Column(db.String(200), nullable=False, index=True)  # Often searched
     description = db.Column(db.Text, nullable=False)
-    jurisdiction_affected = db.Column(db.String(100), nullable=False)
-    jurisdiction_level = db.Column(db.String(20), nullable=False, default='Local')  # National, State, Local
-    update_date = db.Column(db.Date, nullable=False)
-    status = db.Column(db.String(20), nullable=False)  # Recent, Upcoming, Proposed
+    jurisdiction_affected = db.Column(db.String(100), nullable=False, index=True)  # Often filtered
+    jurisdiction_level = db.Column(db.String(20), nullable=False, default='Local', index=True)  # Often filtered
+    update_date = db.Column(db.Date, nullable=False, index=True)  # Often sorted
+    status = db.Column(db.String(20), nullable=False, index=True)  # Often filtered - Recent, Upcoming, Proposed
     
     # Enhanced fields
-    category = db.Column(db.String(50), nullable=False, default='Regulatory Changes')  # Regulatory Changes, Tax Updates, Licensing Changes, Court Decisions, Industry News
-    impact_level = db.Column(db.String(10), nullable=False, default='Medium')  # High, Medium, Low
-    effective_date = db.Column(db.Date, nullable=True)  # When the change becomes effective
-    deadline_date = db.Column(db.Date, nullable=True)  # Deadline for compliance/action
+    category = db.Column(db.String(50), nullable=False, default='Regulatory Changes', index=True)  # Often filtered
+    impact_level = db.Column(db.String(10), nullable=False, default='Medium', index=True)  # Often filtered
+    effective_date = db.Column(db.Date, nullable=True, index=True)  # Often sorted
+    deadline_date = db.Column(db.Date, nullable=True, index=True)  # Often sorted
     action_required = db.Column(db.Boolean, default=False)  # Whether action is required
     action_description = db.Column(db.Text, nullable=True)  # Description of required action
     property_types = db.Column(db.String(100), nullable=False, default='Both')  # Residential, Commercial, Both
     related_regulation_ids = db.Column(db.Text, nullable=True)  # Comma-separated IDs of related regulations
     tags = db.Column(db.Text, nullable=True)  # Comma-separated tags for better categorization
     source_url = db.Column(db.String(500), nullable=True)  # Official source URL
-    priority = db.Column(db.Integer, default=3)  # 1=High, 2=Medium, 3=Low (for sorting)
+    priority = db.Column(db.Integer, default=3, index=True)  # Often sorted - 1=High, 2=Medium, 3=Low
     
     # New fields for expanded functionality
-    expected_decision_date = db.Column(db.Date, nullable=True)  # Expected decision date for proposed changes
+    expected_decision_date = db.Column(db.Date, nullable=True, index=True)  # Often sorted
     potential_impact = db.Column(db.Text, nullable=True)  # Impact assessment for proposed changes
-    decision_status = db.Column(db.String(20), nullable=True)  # Under Review, Public Hearings, Proposed, Approved, Rejected
-    change_type = db.Column(db.String(20), nullable=False, default='Recent')  # Recent, Upcoming, Proposed
-    compliance_deadline = db.Column(db.Date, nullable=True)  # Deadline for compliance with new changes
+    decision_status = db.Column(db.String(20), nullable=True, index=True)  # Often filtered
+    change_type = db.Column(db.String(20), nullable=False, default='Recent', index=True)  # Often filtered
+    compliance_deadline = db.Column(db.Date, nullable=True, index=True)  # Often sorted
     affected_operators = db.Column(db.Text, nullable=True)  # Description of which operators are affected
     
     # New template fields for structured public-facing display
@@ -111,7 +111,7 @@ class Update(db.Model):
     expert_analysis = db.Column(db.Text, nullable=True)  # Kaystreet Management's interpretation
     kaystreet_commitment = db.Column(db.Text, nullable=True)  # Kaystreet Management's commitment statement
     
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     def __repr__(self):
@@ -173,19 +173,23 @@ class Update(db.Model):
 class UserUpdateInteraction(db.Model):
     """Track user interactions with updates"""
     id = db.Column(db.Integer, primary_key=True)
-    update_id = db.Column(db.Integer, db.ForeignKey('update.id'), nullable=False)
-    user_session = db.Column(db.String(255), nullable=False)  # Session ID or user identifier
-    is_read = db.Column(db.Boolean, default=False)
-    is_bookmarked = db.Column(db.Boolean, default=False)
+    update_id = db.Column(db.Integer, db.ForeignKey('update.id'), nullable=False, index=True)  # Often queried
+    user_session = db.Column(db.String(255), nullable=False, index=True)  # Often queried
+    is_read = db.Column(db.Boolean, default=False, index=True)  # Often filtered
+    is_bookmarked = db.Column(db.Boolean, default=False, index=True)  # Often filtered
     read_at = db.Column(db.DateTime, nullable=True)
     bookmarked_at = db.Column(db.DateTime, nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationships
     update = db.relationship('Update', backref='user_interactions')
     
-    __table_args__ = (db.UniqueConstraint('update_id', 'user_session', name='unique_user_update'),)
+    __table_args__ = (
+        db.UniqueConstraint('update_id', 'user_session', name='unique_user_update'),
+        db.Index('idx_user_bookmarks', 'user_session', 'is_bookmarked'),  # Composite index for bookmark queries
+        db.Index('idx_user_read_status', 'user_session', 'is_read'),  # Composite index for read status queries
+    )
 
     def __repr__(self):
         return f'<UserUpdateInteraction update_id={self.update_id} user={self.user_session}>'
@@ -194,7 +198,7 @@ class UserUpdateInteraction(db.Model):
 
 class AdminUser(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), unique=True, nullable=False)
+    username = db.Column(db.String(64), unique=True, nullable=False, index=True)  # Often queried for login
     password_hash = db.Column(db.String(256), nullable=False)
 
     def __repr__(self):
@@ -202,13 +206,13 @@ class AdminUser(db.Model):
 
 class SavedSearch(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(100), nullable=False, index=True)  # Often searched
     description = db.Column(db.String(200), nullable=True)
     search_criteria = db.Column(db.Text, nullable=False)  # JSON string of search parameters
-    is_public = db.Column(db.Boolean, default=False)  # Whether this search is available to all users
-    use_count = db.Column(db.Integer, default=0)  # How many times this search has been used
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    last_used = db.Column(db.DateTime, default=datetime.utcnow)
+    is_public = db.Column(db.Boolean, default=False, index=True)  # Often filtered
+    use_count = db.Column(db.Integer, default=0, index=True)  # Often sorted for popular searches
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    last_used = db.Column(db.DateTime, default=datetime.utcnow, index=True)  # Often sorted
 
     def __repr__(self):
         return f'<SavedSearch {self.name}>'
@@ -226,11 +230,11 @@ class SavedSearch(db.Model):
 
 class SearchSuggestion(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    suggestion_text = db.Column(db.String(200), nullable=False, unique=True)
-    suggestion_type = db.Column(db.String(50), nullable=False)  # title, location, category, keyword
-    frequency = db.Column(db.Integer, default=1)  # How often this suggestion appears
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    last_used = db.Column(db.DateTime, default=datetime.utcnow)
+    suggestion_text = db.Column(db.String(200), nullable=False, unique=True, index=True)  # Often searched
+    suggestion_type = db.Column(db.String(50), nullable=False, index=True)  # Often filtered - title, location, category, keyword
+    frequency = db.Column(db.Integer, default=1, index=True)  # Often sorted for popular suggestions
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    last_used = db.Column(db.DateTime, default=datetime.utcnow, index=True)  # Often sorted
 
     def __repr__(self):
         return f'<SearchSuggestion {self.suggestion_text}>'
