@@ -66,7 +66,7 @@ def log_admin_action(action_type):
                 )
                 
                 # Flash error to user
-                admin_admin_flash(f"An error occurred during {action_type}: {str(e)}", 'error')
+                admin_flash(f"An error occurred during {action_type}: {str(e)}", 'error')
                 raise
                 
         return decorated_function
@@ -87,7 +87,7 @@ def require_admin_login(f):
                 f"Unauthorized admin access attempt - URL: {request.url} | "
                 f"Remote: {request.remote_addr} | User-Agent: {request.headers.get('User-Agent', 'Unknown')}"
             )
-            admin_admin_flash('Please log in to access admin panel', 'error')
+            admin_flash('Please log in to access admin panel', 'error')
             return redirect(url_for('admin.login'))
         return f(*args, **kwargs)
     return decorated_function
@@ -99,8 +99,8 @@ def require_admin_login(f):
 def login():
     """Admin login page"""
     if is_admin_logged_in():
-        logger.info(f"Already logged in admin redirected to dashboard - Admin ID: {session.get('admin_id')}")
-        return redirect(url_for('admin.dashboard'))
+        logger.info(f"Already logged in admin redirected to regulations - Admin ID: {session.get('admin_id')}")
+        return redirect(url_for('admin.manage_regulations'))
     
     form = LoginForm()
     if form.validate_on_submit():
@@ -116,14 +116,14 @@ def login():
                 f"Successful admin login - Username: {username} | "
                 f"Admin ID: {user.id} | Remote: {request.remote_addr}"
             )
-            admin_admin_flash('Login successful!', 'success')
-            return redirect(url_for('admin.dashboard'))
+            admin_flash('Login successful!', 'success')
+            return redirect(url_for('admin.manage_regulations'))
         else:
             security_logger.warning(
                 f"Failed admin login attempt - Username: {username} | "
                 f"Remote: {request.remote_addr} | User-Agent: {request.headers.get('User-Agent', 'Unknown')}"
             )
-            admin_admin_flash('Invalid username or password', 'error')
+            admin_flash('Invalid username or password', 'error')
     
     return render_template('admin/login.html', form=form)
 
@@ -136,99 +136,16 @@ def logout():
     admin_id = session.get('admin_id')
     security_logger.info(f"Admin logout - Admin ID: {admin_id}")
     session.clear()
-    admin_admin_flash('Logged out successfully', 'info')
+    admin_flash('Logged out successfully', 'info')
     return redirect(url_for('admin.login'))
 
 
+# Default admin route redirect to manage regulations
 @admin_bp.route('/')
-@admin_bp.route('/dashboard')
 @require_admin_login
-@log_admin_action('dashboard_access')
-def dashboard():
-    """Admin dashboard with statistics"""
-    try:
-        # Get statistics from services
-        reg_stats = RegulationService.get_admin_statistics()
-        update_stats = UpdateService.get_admin_statistics()
-        
-        # Get recent updates for activity feed (last 5)
-        recent_updates = Update.query.order_by(Update.update_date.desc()).limit(5).all()
-        
-        # Calculate upcoming deadlines (next 30 days)
-        thirty_days_from_now = datetime.now().date() + timedelta(days=30)
-        
-        upcoming_deadlines_count = Update.query.filter(
-            db.or_(
-                db.and_(Update.deadline_date.isnot(None), Update.deadline_date <= thirty_days_from_now),
-                db.and_(Update.compliance_deadline.isnot(None), Update.compliance_deadline <= thirty_days_from_now),
-                db.and_(Update.expected_decision_date.isnot(None), Update.expected_decision_date <= thirty_days_from_now)
-            )
-        ).count()
-        
-        # Count updates by type
-        recent_count = Update.query.filter(
-            db.or_(
-                Update.change_type == 'Recent',
-                Update.status == 'Recent'
-            )
-        ).count()
-        
-        upcoming_count = Update.query.filter(
-            db.or_(
-                Update.change_type == 'Upcoming',
-                Update.status == 'Upcoming'
-            )
-        ).count()
-        
-        proposed_count = Update.query.filter(
-            db.or_(
-                Update.change_type == 'Proposed',
-                Update.status == 'Proposed'
-            )
-        ).count()
-        
-        # Combine stats for template compatibility
-        combined_stats = {
-            'total_regulations': reg_stats.get('total', 0),
-            'total_updates': update_stats.get('total', 0),
-            'recent_updates': recent_count,
-            'upcoming_updates': upcoming_count,
-            'proposed_updates': proposed_count,
-            'upcoming_deadlines': upcoming_deadlines_count,
-            'regulation_stats': reg_stats,
-            'update_stats': update_stats
-        }
-        
-        logger.info(
-            f"Dashboard data loaded - Regulations: {reg_stats.get('total', 0)} | "
-            f"Updates: {update_stats.get('total', 0)} | "
-            f"Upcoming Deadlines: {upcoming_deadlines_count} | "
-            f"Recent Activity: {len(recent_updates)}"
-        )
-        
-        return render_template('admin/dashboard.html', 
-                             stats=combined_stats, 
-                             recent_updates=recent_updates)
-                             
-    except Exception as e:
-        logger.error(f"Error loading dashboard data: {str(e)}", exc_info=True)
-        admin_admin_flash('Error loading dashboard data', 'error')
-        
-        # Provide safe defaults
-        default_stats = {
-            'total_regulations': 0,
-            'total_updates': 0,
-            'recent_updates': 0,
-            'upcoming_updates': 0,
-            'proposed_updates': 0,
-            'upcoming_deadlines': 0,
-            'regulation_stats': {},
-            'update_stats': {}
-        }
-        
-        return render_template('admin/dashboard.html', 
-                             stats=default_stats, 
-                             recent_updates=[])
+def index():
+    """Default admin route - redirect to manage regulations"""
+    return redirect(url_for('admin.manage_regulations'))
 
 
 # Regulation Management
@@ -251,8 +168,8 @@ def manage_regulations():
         
     except Exception as e:
         logger.error(f"Error in manage_regulations: {str(e)}", exc_info=True)
-        admin_admin_flash(f"Error loading regulations: {str(e)}", 'error')
-        return redirect(url_for('admin.dashboard'))
+        admin_flash(f"Error loading regulations: {str(e)}", 'error')
+        return redirect(url_for('admin.index'))
 
 
 @admin_bp.route('/regulations/new', methods=['GET', 'POST'])
@@ -288,15 +205,15 @@ def new_regulation():
             
             if success:
                 logger.info(f"Successfully created regulation - ID: {regulation.id} | Title: {regulation.title}")
-                admin_admin_flash(f'Regulation "{regulation.title}" created successfully!', 'success')
+                admin_flash(f'Regulation "{regulation.title}" created successfully!', 'success')
                 return redirect(url_for('admin.manage_regulations'))
             else:
                 logger.error(f"Failed to create regulation - Error: {error}")
-                admin_admin_flash(f'Error creating regulation: {error}', 'error')
+                admin_flash(f'Error creating regulation: {error}', 'error')
                 
         except Exception as e:
             logger.error(f"Exception in new_regulation: {str(e)}", exc_info=True)
-            admin_admin_flash(f'Error creating regulation: {str(e)}', 'error')
+            admin_flash(f'Error creating regulation: {str(e)}', 'error')
         
     return render_template('admin/edit_regulation.html', form=form, title='New Regulation')
 
@@ -397,7 +314,7 @@ def manage_updates():
     except Exception as e:
         logger.error(f"Error in manage_updates: {str(e)}", exc_info=True)
         admin_flash(f"Error loading updates: {str(e)}", 'error')
-        return redirect(url_for('admin.dashboard'))
+        return redirect(url_for('admin.index'))
 
 
 
@@ -990,4 +907,4 @@ def deadline_reminders():
     except Exception as e:
         logger.error(f"Error in deadline_reminders: {str(e)}", exc_info=True)
         admin_flash(f'Error loading deadline reminders: {str(e)}', 'error')
-        return redirect(url_for('admin.dashboard')) 
+        return redirect(url_for('admin.manage_updates')) 
