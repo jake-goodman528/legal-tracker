@@ -7,7 +7,7 @@ Tests all REST API endpoints for the STR Compliance Toolkit.
 import pytest
 import json
 from datetime import date
-from models import db, UserUpdateInteraction, UpdateReminder, NotificationPreference
+from models import db, UserUpdateInteraction
 
 
 class TestSearchAPI:
@@ -185,37 +185,7 @@ class TestUpdatesAPI:
         data = response.get_json()
         assert data['success'] is False
 
-    def test_set_reminder_api(self, client, sample_update):
-        """Test the set reminder API endpoint."""
-        reminder_data = {
-            'reminder_date': '2024-03-01',
-            'reminder_type': 'custom',
-            'email': 'test@example.com',
-            'notes': 'Test reminder'
-        }
-        
-        response = client.post(f'/api/updates/{sample_update.id}/reminder',
-                              data=json.dumps(reminder_data),
-                              content_type='application/json')
-        
-        assert response.status_code == 200
-        data = response.get_json()
-        assert data['success'] is True
 
-    def test_set_reminder_api_invalid_date(self, client, sample_update):
-        """Test set reminder API with invalid date format."""
-        reminder_data = {
-            'reminder_date': 'invalid-date',
-            'reminder_type': 'custom'
-        }
-        
-        response = client.post(f'/api/updates/{sample_update.id}/reminder',
-                              data=json.dumps(reminder_data),
-                              content_type='application/json')
-        
-        assert response.status_code == 400
-        data = response.get_json()
-        assert data['success'] is False
 
     def test_get_bookmarked_updates_api(self, client, sample_update):
         """Test the get bookmarked updates API endpoint."""
@@ -239,65 +209,7 @@ class TestUpdatesAPI:
         assert len(data['bookmarked_updates']) >= 1
 
 
-class TestNotificationsAPI:
-    """Test cases for notifications API endpoints."""
 
-    def test_get_notification_preferences_api(self, client, notification_preferences):
-        """Test the get notification preferences API endpoint."""
-        with client.session_transaction() as sess:
-            sess['user_id'] = notification_preferences.user_session
-        
-        response = client.get('/api/notifications/preferences')
-        
-        assert response.status_code == 200
-        data = response.get_json()
-        assert data['success'] is True
-        assert data['preferences']['email'] == notification_preferences.email
-        assert 'California' in data['preferences']['locations']
-
-    def test_update_notification_preferences_api(self, client):
-        """Test the update notification preferences API endpoint."""
-        preferences_data = {
-            'email': 'newemail@example.com',
-            'locations': ['California', 'Texas'],
-            'categories': ['Legal', 'Tax Updates'],
-            'impact_levels': ['High'],
-            'notify_new_updates': True,
-            'notify_deadlines': True,
-            'notify_weekly_digest': False
-        }
-        
-        response = client.post('/api/notifications/preferences',
-                              data=json.dumps(preferences_data),
-                              content_type='application/json')
-        
-        assert response.status_code == 200
-        data = response.get_json()
-        assert data['success'] is True
-
-    def test_get_notification_alerts_api(self, client, sample_update):
-        """Test the get notification alerts API endpoint."""
-        # Update the sample update to have a near deadline
-        sample_update.deadline_date = date(2024, 1, 20)  # Near future
-        sample_update.impact_level = 'High'
-        db.session.commit()
-        
-        response = client.get('/api/notifications/alerts')
-        
-        assert response.status_code == 200
-        data = response.get_json()
-        assert data['success'] is True
-        assert isinstance(data['alerts'], list)
-
-    def test_generate_weekly_digest_api(self, client, multiple_updates):
-        """Test the generate weekly digest API endpoint."""
-        response = client.get('/api/notifications/weekly-digest')
-        
-        assert response.status_code == 200
-        data = response.get_json()
-        assert data['success'] is True
-        assert 'digest' in data
-        assert 'total_updates' in data['digest']
 
 
 class TestExportAPI:
@@ -370,10 +282,7 @@ class TestMainRoutes:
         response = client.get('/search')
         assert response.status_code == 200
 
-    def test_notifications_route(self, client):
-        """Test the notifications page."""
-        response = client.get('/notifications')
-        assert response.status_code == 200
+
 
 
 class TestAdminRoutes:

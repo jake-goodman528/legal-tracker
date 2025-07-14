@@ -5,8 +5,6 @@ Defines all SQLAlchemy models for the STR Compliance Toolkit including:
 - Regulation: Core regulation and compliance data
 - Update: Regulatory updates and announcements  
 - UserUpdateInteraction: User interaction tracking (bookmarks, read status)
-- UpdateReminder: User-set reminders for deadlines
-- NotificationPreference: User notification settings
 - AdminUser: Administrative user accounts
 - SavedSearch: Saved search configurations
 - SearchSuggestion: Search suggestion tracking
@@ -192,40 +190,7 @@ class UserUpdateInteraction(db.Model):
     def __repr__(self):
         return f'<UserUpdateInteraction update_id={self.update_id} user={self.user_session}>'
 
-class UpdateReminder(db.Model):
-    """Store reminders for updates with deadlines"""
-    id = db.Column(db.Integer, primary_key=True)
-    update_id = db.Column(db.Integer, db.ForeignKey('update.id'), nullable=False)
-    user_session = db.Column(db.String(255), nullable=False)
-    reminder_date = db.Column(db.Date, nullable=False)
-    reminder_type = db.Column(db.String(20), nullable=False)  # 'deadline', 'effective_date', 'custom'
-    is_sent = db.Column(db.Boolean, default=False)
-    email = db.Column(db.String(255), nullable=True)  # Optional email for notifications
-    notes = db.Column(db.Text, nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    # Relationships
-    update = db.relationship('Update', backref='reminders')
 
-    def __repr__(self):
-        return f'<UpdateReminder update_id={self.update_id} date={self.reminder_date}>'
-
-class NotificationPreference(db.Model):
-    """User notification preferences"""
-    id = db.Column(db.Integer, primary_key=True)
-    user_session = db.Column(db.String(255), nullable=False, unique=True)
-    email = db.Column(db.String(255), nullable=True)
-    locations = db.Column(db.Text, nullable=True)  # Comma-separated list of locations to watch
-    categories = db.Column(db.Text, nullable=True)  # Comma-separated list of categories to watch
-    impact_levels = db.Column(db.Text, nullable=True)  # Comma-separated list of impact levels to watch
-    notify_new_updates = db.Column(db.Boolean, default=True)
-    notify_deadlines = db.Column(db.Boolean, default=True)
-    notify_weekly_digest = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-    def __repr__(self):
-        return f'<NotificationPreference user={self.user_session}>'
 
 class AdminUser(db.Model):
     id = db.Column(db.Integer, primary_key=True)

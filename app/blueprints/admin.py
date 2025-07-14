@@ -867,44 +867,4 @@ def import_updates_csv():
         return redirect(request.url)
 
 
-@admin_bp.route('/updates/deadline-reminders')
-@require_admin_login
-@log_admin_action('deadline_reminders')
-def deadline_reminders():
-    """View upcoming deadline reminders"""
-    try:
-        
-        # Get updates with deadlines in the next 30 days
-        thirty_days_from_now = datetime.now().date() + timedelta(days=30)
-        
-        upcoming_deadlines = Update.query.filter(
-            db.or_(
-                db.and_(Update.deadline_date.isnot(None), Update.deadline_date <= thirty_days_from_now),
-                db.and_(Update.compliance_deadline.isnot(None), Update.compliance_deadline <= thirty_days_from_now),
-                db.and_(Update.expected_decision_date.isnot(None), Update.expected_decision_date <= thirty_days_from_now)
-            )
-        ).order_by(
-            db.case(
-                (Update.deadline_date.isnot(None), Update.deadline_date),
-                (Update.compliance_deadline.isnot(None), Update.compliance_deadline),
-                else_=Update.expected_decision_date
-            )
-        ).all()
-        
-        # Calculate days until deadline for each update
-        today = datetime.now().date()
-        for update in upcoming_deadlines:
-            deadline_date = update.deadline_date or update.compliance_deadline or update.expected_decision_date
-            if deadline_date:
-                update.days_until = (deadline_date - today).days
-            else:
-                update.days_until = 999
-        
-        logger.info(f"Retrieved {len(upcoming_deadlines)} updates with upcoming deadlines")
-        
-        return render_template('admin/deadline_reminders.html', updates=upcoming_deadlines)
-        
-    except Exception as e:
-        logger.error(f"Error in deadline_reminders: {str(e)}", exc_info=True)
-        admin_flash(f'Error loading deadline reminders: {str(e)}', 'error')
-        return redirect(url_for('admin.manage_updates')) 
+ 

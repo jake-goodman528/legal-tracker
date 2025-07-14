@@ -18,8 +18,8 @@
 
     <!-- Enhanced Header -->
     <div class="text-center mb-4">
-        <h1 class="updates-title">📰 Industry Updates</h1>
-        <p class="updates-subtitle text-muted">
+        <h1 class="regulations-title">📰 Industry Updates</h1>
+        <p class="regulations-subtitle text-muted">
             Stay informed about regulatory changes and legislation affecting short-term rentals
         </p>
     </div>
@@ -37,11 +37,12 @@
         </div>
     </div>
 
-    <!-- Enhanced Table View -->
-    <div class="updates-container">
+    <!-- Enhanced Updates Container -->
+    <div class="regulations-container">
+        <!-- Enhanced Table View -->
         <div class="table-view">
             <div class="table-responsive">
-                <table class="table table-hover updates-table">
+                <table class="table table-hover regulations-table">
                     <thead class="table-light">
                         <tr>
                             <th>
@@ -75,7 +76,7 @@
                     </thead>
                     <tbody>
                         {% for update in recent_upcoming_updates %}
-                        <tr class="update-row" data-update-id="{{ update.id }}">
+                        <tr class="regulation-row" data-update-id="{{ update.id }}">
                             <td>
                                 <span class="badge bg-{{ 'success' if update.change_type == 'Recent' else 'warning' }}">
                                     {{ update.change_type }}
@@ -145,7 +146,7 @@
                         </tr>
                         {% endfor %}
                         {% for update in proposed_updates %}
-                        <tr class="update-row" data-update-id="{{ update.id }}">
+                        <tr class="regulation-row" data-update-id="{{ update.id }}">
                             <td>
                                 <span class="badge bg-info">Proposed</span>
                                 {% if update.decision_status %}
@@ -225,64 +226,33 @@
 </div>
 
 <style>
-/* Enhanced Updates Styling */
-.updates-title {
+/* Enhanced Updates Styling - Matching Regulations Exactly */
+.regulations-title {
     color: #2c3e50;
     font-weight: 600;
     margin-bottom: 0.5rem;
 }
 
-.updates-subtitle {
+.regulations-subtitle {
     font-size: 1.1rem;
     margin-bottom: 2rem;
 }
 
 /* Enhanced Table Styling */
-.updates-table th {
+.regulations-table th {
     background: #f8f9fa !important;
     border-top: none;
     font-weight: 600;
     color: #495057;
 }
 
-.updates-table .badge {
+.regulations-table .badge {
     font-size: 0.75rem;
-}
-
-/* Title links now use regulation-title-link class for consistency */
-.regulation-title-link {
-    color: #007bff;
-    font-weight: 500;
-}
-
-.regulation-title-link:hover {
-    color: #0056b3;
-    text-decoration: underline !important;
-}
-
-/* Match regulations table specific styling exactly */
-.updates-table .title-cell a {
-    color: #001659 !important;
-    font-weight: 600;
-    text-decoration: none;
-}
-
-.updates-table .title-cell a:hover {
-    color: #12C3E0 !important;
-    text-decoration: underline;
 }
 
 .category-badge {
     font-size: 0.75rem;
 }
-
-/* Category-specific colors */
-.category-regulatory-changes { background-color: #007bff; color: white; }
-.category-tax { background-color: #28a745; color: white; }
-.category-licensing { background-color: #ffc107; color: #212529; }
-.category-zoning { background-color: #dc3545; color: white; }
-.category-safety { background-color: #6f42c1; color: white; }
-.category-general { background-color: #6c757d; color: white; }
 
 /* Results and View Options */
 .results-count {
@@ -294,13 +264,25 @@
     padding: 0.5rem 0.75rem;
 }
 
+/* Category Badge Colors */
+.category-zoning { background-color: #17a2b8; }
+.category-registration { background-color: #28a745; }
+.category-tax { background-color: #ffc107; color: #212529; }
+.category-licensing { background-color: #dc3545; }
+.category-safety { background-color: #fd7e14; }
+.category-environmental { background-color: #20c997; }
+.category-general { background-color: #6c757d; }
+
+/* Category-specific colors matching regulations */
+.category-regulatory-changes { background-color: #007bff; color: white; }
+
 /* Responsive Design */
 @media (max-width: 768px) {
-    .updates-table {
+    .regulations-table {
         font-size: 0.9rem;
     }
     
-    .updates-table .badge {
+    .regulations-table .badge {
         font-size: 0.7rem;
     }
 }

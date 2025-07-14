@@ -5,7 +5,6 @@ Contains all public-facing routes for the STR Compliance Toolkit:
 - Home page
 - Regulations listing and detail pages
 - Updates listing and detail pages with filtering
-- Notifications page
 """
 
 from flask import Blueprint, render_template, request, session, abort, flash, redirect, url_for
@@ -218,44 +217,7 @@ def update_detail(update_id):
         return redirect(url_for('main.updates'))
 
 
-@main_bp.route('/notifications')
-def notifications():
-    """Notifications page"""
-    try:
-        # Get user session for notifications
-        user_session = UserInteractionService.get_user_session()
-        
-        # Get user's bookmarked updates
-        bookmarked_updates = UserInteractionService.get_bookmarked_updates(user_session)
-        
-        # Get recent updates with action required
-        action_required_updates = Update.query.filter(
-            Update.action_required == True
-        ).order_by(Update.update_date.desc()).limit(10).all()
-        
-        # Get upcoming deadlines
-        from datetime import datetime, timedelta
-        thirty_days_from_now = datetime.now().date() + timedelta(days=30)
-        
-        upcoming_deadlines = Update.query.filter(
-            db.or_(
-                db.and_(Update.deadline_date.isnot(None), Update.deadline_date <= thirty_days_from_now),
-                db.and_(Update.compliance_deadline.isnot(None), Update.compliance_deadline <= thirty_days_from_now),
-                db.and_(Update.expected_decision_date.isnot(None), Update.expected_decision_date <= thirty_days_from_now)
-            )
-        ).order_by(Update.deadline_date.asc()).all()
-        
-        return render_template('notifications.html',
-                             bookmarked_updates=bookmarked_updates,
-                             action_required_updates=action_required_updates,
-                             upcoming_deadlines=upcoming_deadlines)
-    except Exception as e:
-        logger.error(f"Error loading notifications: {str(e)}", exc_info=True)
-        public_flash('Error loading notifications.', 'error')
-        return render_template('notifications.html',
-                             bookmarked_updates=[],
-                             action_required_updates=[],
-                             upcoming_deadlines=[])
+
 
 
 # Error handlers

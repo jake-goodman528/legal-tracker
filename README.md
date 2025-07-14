@@ -117,13 +117,8 @@ The application will be available at `http://localhost:5000`
 1. Visit `/updates` to see regulatory changes
 2. Filter by status (Recent, Upcoming, Proposed)
 3. Bookmark important updates for quick access
-4. Set reminders for critical deadlines
 
-#### **Setting Up Notifications**
-1. Go to `/notifications` to configure preferences
-2. Select locations and categories of interest
-3. Choose notification types (new updates, deadlines, weekly digest)
-4. Provide email address for notifications
+
 
 ### Administrative Interface
 
@@ -150,11 +145,9 @@ ShortTermRentalTracker/
 │   │   ├── api.py           # REST API endpoints
 │   │   └── admin.py         # Admin interface
 │   └── services/            # Business logic layer
-│       ├── search_service.py
 │       ├── regulation_service.py
 │       ├── update_service.py
-│       ├── user_interaction_service.py
-│       └── notification_service.py
+│       └── user_interaction_service.py
 ├── templates/               # Jinja2 templates
 ├── static/                  # CSS, JS, images
 ├── instance/               # Database files
@@ -223,13 +216,9 @@ The project follows Python best practices:
 - `GET /api/updates/search` - Search updates
 - `GET /api/updates/bookmarked` - Get user bookmarks
 - `POST /api/updates/{id}/bookmark` - Toggle bookmark
-- `POST /api/updates/{id}/reminder` - Set reminder
 
-### Notification Endpoints
-- `GET /api/notifications/preferences` - Get user preferences
-- `POST /api/notifications/preferences` - Update preferences
-- `GET /api/notifications/alerts` - Get urgent alerts
-- `GET /api/notifications/weekly-digest` - Generate weekly digest
+
+
 
 ### Export Endpoints
 - `GET /api/export/csv` - Export search results to CSV

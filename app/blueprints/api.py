@@ -2,19 +2,18 @@
 API Blueprint - REST API Endpoints
 
 Contains all API endpoints for the STR Compliance Toolkit:
-- Search endpoints (/api/search/*)
+- Location endpoints (/api/locations/*)
 - Export endpoints (/api/export/*)
 - Update interaction endpoints (/api/updates/*)
-- Notification endpoints (/api/notifications/*)
 """
 
 from flask import Blueprint, request, jsonify, make_response, session, g
 from models import (
     db, Regulation, Update, SavedSearch, SearchSuggestion, 
-    UserUpdateInteraction, UpdateReminder, NotificationPreference
+    UserUpdateInteraction
 )
 from app.services import (
-    RegulationService, UpdateService, UserInteractionService, NotificationService
+    RegulationService, UpdateService, UserInteractionService
 )
 from datetime import datetime, timedelta
 from sqlalchemy import or_, and_, func
@@ -200,52 +199,7 @@ def toggle_bookmark(update_id):
         }), 500
 
 
-@api_bp.route('/updates/<int:update_id>/reminder', methods=['POST'])
-@log_api_call('set_reminder')
-def set_reminder(update_id):
-    """Set a reminder for an update"""
-    user_id = session.get('user_id', 'anonymous')
-    
-    try:
-        data = request.get_json()
-        reminder_date = data.get('reminder_date')
-        reminder_message = data.get('message', '')
-        
-        logger.info(f"Setting reminder - Update ID: {update_id} | User: {user_id} | Date: {reminder_date}")
-        
-        if not reminder_date:
-            return jsonify({
-                'success': False,
-                'error': 'Reminder date is required'
-            }), 400
-        
-        success, reminder, error = UserInteractionService.set_reminder(
-            user_id, update_id, reminder_date, reminder_message
-        )
-        
-        if success:
-            logger.info(f"Successfully set reminder - ID: {reminder.id} | Update: {update_id}")
-            return jsonify({
-                'success': True,
-                'reminder': {
-                    'id': reminder.id,
-                    'reminder_date': reminder.reminder_date.isoformat(),
-                    'message': reminder.message
-                }
-            })
-        else:
-            logger.error(f"Failed to set reminder - Update ID: {update_id} | Error: {error}")
-            return jsonify({
-                'success': False,
-                'error': error
-            }), 400
-            
-    except Exception as e:
-        logger.error(f"Set reminder error - Update ID: {update_id}: {str(e)}", exc_info=True)
-        return jsonify({
-            'success': False,
-            'error': 'Failed to set reminder'
-        }), 500
+
 
 
 # Update Search and Management
@@ -417,102 +371,7 @@ def get_bookmarked_updates():
         }), 500
 
 
-# Notification Endpoints
-@api_bp.route('/notifications/preferences', methods=['GET', 'POST'])
-@log_api_call('notification_preferences')
-def manage_notification_preferences():
-    """Get or update notification preferences"""
-    user_id = session.get('user_id', 'anonymous')
-    
-    if request.method == 'GET':
-        logger.info(f"Getting notification preferences for user: {user_id}")
-        
-        try:
-            preferences = NotificationService.get_notification_preferences(user_id)
-            return jsonify({
-                'success': True,
-                'preferences': preferences
-            })
-            
-        except Exception as e:
-            logger.error(f"Get notification preferences error for user {user_id}: {str(e)}", exc_info=True)
-            return jsonify({
-                'success': False,
-                'error': 'Failed to retrieve notification preferences'
-            }), 500
-    
-    else:  # POST
-        try:
-            data = request.get_json()
-            logger.info(f"Updating notification preferences for user {user_id}: {data}")
-            
-            success, error = NotificationService.update_notification_preferences(user_id, data)
-            
-            if success:
-                logger.info(f"Successfully updated notification preferences for user {user_id}")
-                return jsonify({
-                    'success': True,
-                    'message': 'Notification preferences updated successfully'
-                })
-            else:
-                logger.error(f"Failed to update notification preferences for user {user_id}: {error}")
-                return jsonify({
-                    'success': False,
-                    'error': error
-                }), 400
-                
-        except Exception as e:
-            logger.error(f"Update notification preferences error for user {user_id}: {str(e)}", exc_info=True)
-            return jsonify({
-                'success': False,
-                'error': 'Failed to update notification preferences'
-            }), 500
 
-
-@api_bp.route('/notifications/alerts')
-@log_api_call('get_notification_alerts')
-def get_notification_alerts():
-    """Get current notification alerts"""
-    user_id = session.get('user_id', 'anonymous')
-    
-    logger.info(f"Getting notification alerts for user: {user_id}")
-    
-    try:
-        alerts = NotificationService.get_notification_alerts(user_id)
-        return jsonify({
-            'success': True,
-            'alerts': alerts
-        })
-        
-    except Exception as e:
-        logger.error(f"Get notification alerts error for user {user_id}: {str(e)}", exc_info=True)
-        return jsonify({
-            'success': False,
-            'error': 'Failed to retrieve alerts'
-        }), 500
-
-
-@api_bp.route('/notifications/weekly-digest')
-@log_api_call('weekly_digest')
-def generate_weekly_digest():
-    """Generate weekly digest for user"""
-    user_id = session.get('user_id', 'anonymous')
-    
-    logger.info(f"Generating weekly digest for user: {user_id}")
-    
-    try:
-        digest = NotificationService.generate_weekly_digest(user_id)
-        return jsonify({
-            'success': True,
-            'digest': digest
-        })
-        
-    except Exception as e:
-        logger.error(f"Weekly digest error for user {user_id}: {str(e)}", exc_info=True)
-        return jsonify({
-            'success': False,
-            'error': 'Failed to generate weekly digest'
-        }), 500
 
 
 # Client Error Tracking Endpoint

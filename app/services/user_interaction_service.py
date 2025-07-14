@@ -3,7 +3,6 @@ User Interaction Service
 
 Handles all user interaction business logic:
 - Update bookmarking
-- Reminder management
 - User session handling
 - User interaction tracking
 """
@@ -11,7 +10,7 @@ Handles all user interaction business logic:
 from typing import Dict, List, Optional, Tuple, Any, Union
 from datetime import datetime
 from flask import session, request
-from models import db, UserUpdateInteraction, UpdateReminder, Update
+from models import db, UserUpdateInteraction, Update
 import logging
 
 
@@ -116,54 +115,7 @@ class UserInteractionService:
             db.session.rollback()
             return False, False, str(e)
     
-    @staticmethod
-    def set_reminder(update_id, reminder_date, reminder_type='custom', email='', notes='', user_session=None):
-        """
-        Set a reminder for an update
-        
-        Args:
-            update_id (int): ID of the update
-            reminder_date (date): Date for the reminder
-            reminder_type (str): Type of reminder
-            email (str): Email address for notification
-            notes (str): Additional notes
-            user_session (str, optional): User session identifier
-            
-        Returns:
-            tuple: (success: bool, reminder: UpdateReminder or None, error: str or None)
-        """
-        try:
-            if user_session is None:
-                user_session = UserInteractionService.get_user_session()
-            
-            # Check if reminder already exists
-            existing_reminder = UpdateReminder.query.filter_by(
-                update_id=update_id,
-                user_session=user_session,
-                reminder_date=reminder_date
-            ).first()
-            
-            if existing_reminder:
-                return False, None, 'Reminder already exists for this date'
-            
-            reminder = UpdateReminder(
-                update_id=update_id,
-                user_session=user_session,
-                reminder_date=reminder_date,
-                reminder_type=reminder_type,
-                email=email,
-                notes=notes
-            )
-            
-            db.session.add(reminder)
-            db.session.commit()
-            
-            return True, reminder, None
-            
-        except Exception as e:
-            logging.error(f"Error setting reminder: {str(e)}")
-            db.session.rollback()
-            return False, None, str(e)
+
     
     @staticmethod
     def get_user_interactions(update_ids, user_session=None):
@@ -224,31 +176,7 @@ class UserInteractionService:
             logging.error(f"Error getting bookmarked updates: {str(e)}")
             return []
     
-    @staticmethod
-    def get_user_reminders(user_session=None):
-        """
-        Get user's active reminders
-        
-        Args:
-            user_session (str, optional): User session identifier
-            
-        Returns:
-            list: List of UpdateReminder objects
-        """
-        try:
-            if user_session is None:
-                user_session = UserInteractionService.get_user_session()
-            
-            reminders = UpdateReminder.query.filter_by(
-                user_session=user_session,
-                is_sent=False
-            ).order_by(UpdateReminder.reminder_date.asc()).all()
-            
-            return reminders
-            
-        except Exception as e:
-            logging.error(f"Error getting reminders: {str(e)}")
-            return []
+
     
     @staticmethod
     def generate_share_content(update_id, share_type='link'):

@@ -9,7 +9,7 @@ import tempfile
 import pytest
 from datetime import datetime, date
 from app.application import create_app
-from models import db, Regulation, Update, AdminUser, SavedSearch, NotificationPreference
+from models import db, Regulation, Update, AdminUser, SavedSearch
 
 
 @pytest.fixture
@@ -133,23 +133,7 @@ def saved_search(app):
         return search
 
 
-@pytest.fixture
-def notification_preferences(app):
-    """Create notification preferences for testing."""
-    with app.app_context():
-        prefs = NotificationPreference(
-            user_session='test-session-123',
-            email='test@example.com',
-            locations='California,New York',
-            categories='Legal,Tax Updates',
-            impact_levels='High,Medium',
-            notify_new_updates=True,
-            notify_deadlines=True,
-            notify_weekly_digest=False
-        )
-        db.session.add(prefs)
-        db.session.commit()
-        return prefs
+
 
 
 @pytest.fixture

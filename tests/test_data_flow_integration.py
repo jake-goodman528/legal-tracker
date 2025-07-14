@@ -475,38 +475,7 @@ class TestDataFlowIntegration:
                 deleted_update = Update.query.get(update.id)
                 assert deleted_update is None
 
-    def test_deadline_reminders(self, app, client):
-        """Test deadline reminders functionality"""
-        with app.app_context():
-            # Create update with upcoming deadline
-            update_data = {
-                'title': 'Deadline Test Update',
-                'description': 'Testing deadline functionality',
-                'jurisdiction_affected': 'Deadline City',
-                'update_date': date.today(),
-                'status': 'Recent',
-                'category': 'Regulatory Changes',
-                'impact_level': 'High',
-                'priority': 1,
-                'change_type': 'Recent',
-                'deadline_date': date.today() + timedelta(days=7),
-                'compliance_deadline': date.today() + timedelta(days=14),
-                'expected_decision_date': date.today() + timedelta(days=21)
-            }
-            
-            success, update, error = UpdateService.create_update(update_data)
-            assert success, f"Setup failed: {error}"
-            
-            # Login as admin
-            with client.session_transaction() as sess:
-                sess['admin_id'] = 1
-            
-            # Test deadline reminders page
-            response = client.get('/admin/updates/deadline-reminders')
-            assert response.status_code == 200
-            data = response.get_data(as_text=True)
-            assert 'Deadline Test Update' in data
-            assert 'days' in data.lower()  # Should show days until deadline
+
 
     def test_csv_import_export(self, app, client):
         """Test CSV import and export functionality"""

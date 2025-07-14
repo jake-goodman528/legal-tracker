@@ -269,145 +269,9 @@ Add or remove an update from user's bookmarks.
 }
 ```
 
-#### Set Reminder
-```http
-POST /api/updates/{update_id}/reminder
-```
 
-Set a custom reminder for an update.
 
-**Request Body:**
-```json
-{
-  "reminder_date": "2024-02-15",
-  "reminder_type": "custom",
-  "email": "user@example.com",
-  "notes": "Review before implementation"
-}
-```
 
-**Response:**
-```json
-{
-  "success": true,
-  "message": "Reminder set successfully",
-  "reminder_id": 789
-}
-```
-
-### 🔔 Notifications
-
-#### Get Notification Preferences
-```http
-GET /api/notifications/preferences
-```
-
-Retrieve user's notification preferences.
-
-**Response:**
-```json
-{
-  "success": true,
-  "preferences": {
-    "email": "user@example.com",
-    "locations": ["California", "New York"],
-    "categories": ["Legal", "Tax Updates"],
-    "impact_levels": ["High", "Medium"],
-    "notify_new_updates": true,
-    "notify_deadlines": true,
-    "notify_weekly_digest": false
-  }
-}
-```
-
-#### Update Notification Preferences
-```http
-POST /api/notifications/preferences
-```
-
-Update user's notification preferences.
-
-**Request Body:**
-```json
-{
-  "email": "user@example.com",
-  "locations": ["California", "Texas"],
-  "categories": ["Legal", "Licensing"],
-  "impact_levels": ["High"],
-  "notify_new_updates": true,
-  "notify_deadlines": true,
-  "notify_weekly_digest": true
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "message": "Preferences updated successfully"
-}
-```
-
-#### Get Urgent Alerts
-```http
-GET /api/notifications/alerts
-```
-
-Get urgent notifications for deadlines and high-priority updates.
-
-**Response:**
-```json
-{
-  "success": true,
-  "alerts": [
-    {
-      "id": 456,
-      "title": "New Tourism Tax Requirements",
-      "type": "deadline",
-      "urgency": "high",
-      "deadline_date": "2024-02-15",
-      "days_until_deadline": 3,
-      "message": "Deadline approaching in 3 days"
-    }
-  ]
-}
-```
-
-#### Generate Weekly Digest
-```http
-GET /api/notifications/weekly-digest
-```
-
-Generate a weekly digest of regulatory activity.
-
-**Response:**
-```json
-{
-  "success": true,
-  "digest": {
-    "period": "2024-01-08 to 2024-01-14",
-    "total_updates": 12,
-    "high_priority_updates": 3,
-    "upcoming_deadlines": 2,
-    "new_regulations": 1,
-    "summary": "This week saw significant activity in tax regulations...",
-    "updates_by_category": {
-      "Tax Updates": 5,
-      "Licensing Changes": 3,
-      "Legal": 2,
-      "Court Decisions": 2
-    },
-    "featured_updates": [
-      {
-        "id": 456,
-        "title": "New Tourism Tax Requirements",
-        "category": "Tax Updates",
-        "impact_level": "High"
-      }
-    ]
-  }
-}
-```
 
 ### 📊 Data Export
 
@@ -615,30 +479,10 @@ curl -X POST "http://localhost:5000/api/updates/456/bookmark" \
   -H "Content-Type: application/json" \
   -d '{"is_bookmarked": true}'
 
-# 3. Set reminder for deadline
-curl -X POST "http://localhost:5000/api/updates/456/reminder" \
-  -H "Content-Type: application/json" \
-  -d '{"reminder_date": "2024-02-15", "email": "user@example.com"}'
 
-# 4. Get bookmarked updates
+
+# 3. Get bookmarked updates
 curl "http://localhost:5000/api/updates/bookmarked"
-```
-
-### Notification Management
-```bash
-# 1. Get current preferences
-curl "http://localhost:5000/api/notifications/preferences"
-
-# 2. Update preferences
-curl -X POST "http://localhost:5000/api/notifications/preferences" \
-  -H "Content-Type: application/json" \
-  -d '{"email": "user@example.com", "locations": ["California"], "notify_deadlines": true}'
-
-# 3. Check for urgent alerts
-curl "http://localhost:5000/api/notifications/alerts"
-
-# 4. Get weekly digest
-curl "http://localhost:5000/api/notifications/weekly-digest"
 ```
 
 ## SDKs and Integration
